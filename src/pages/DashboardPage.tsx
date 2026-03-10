@@ -17,7 +17,15 @@ export default function DashboardPage() {
   const unreadAlerts = notifications.filter((n) => !n.read).length;
 
   const recentShipments = [...shipments].sort((a, b) => b.shipmentDate.localeCompare(a.shipmentDate)).slice(0, 7);
-  const priorityAlerts = [...notifications].filter((n) => !n.read).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 6);
+  const priorityAlerts = [...notifications].filter((n) => !n.read).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
+
+  const blockedDocs = shipments
+    .flatMap((shipment) =>
+      shipment.documents
+        .filter((d) => d.status === 'Missing' || d.status === 'Rejected')
+        .map((d) => ({ shipmentId: shipment.id, client: shipment.clientName, type: d.type, status: d.status }))
+    )
+    .slice(0, 6);
 
   const verificationRows = recentShipments.map((shipment) => {
     const requiredCount = 7;
@@ -70,7 +78,12 @@ export default function DashboardPage() {
       <PageHeader
         title="Operations Dashboard"
         subtitle="Live command center for shipment health, document compliance, and team execution."
-        action={<Link to="/shipments/create" className="btn-primary">+ Create Shipment</Link>}
+        action={
+          <div className="flex flex-wrap gap-2">
+            <Link to="/shipments/create" className="btn-primary">+ Create Shipment</Link>
+            <Link to="/documents/upload" className="btn-secondary">Upload Documents</Link>
+          </div>
+        }
       />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
@@ -91,13 +104,7 @@ export default function DashboardPage() {
             <table className="data-table w-full min-w-[840px] text-left text-sm">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th>Shipment ID</th>
-                  <th>Client</th>
-                  <th>Destination</th>
-                  <th>Date</th>
-                  <th>Status</th>
-                  <th>Assigned</th>
-                  <th>Actions</th>
+                  <th>Shipment ID</th><th>Client</th><th>Destination</th><th>Date</th><th>Status</th><th>Assigned</th><th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -123,78 +130,75 @@ export default function DashboardPage() {
         </article>
 
         <article className="card-surface p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold tracking-tight text-navy-800">Pending Document Alerts</h3>
-            <Link to="/notifications" className="text-sm font-semibold text-teal-700 hover:text-teal-800">Open alerts</Link>
-          </div>
+          <h3 className="mb-4 text-lg font-bold tracking-tight text-navy-800">Pending Document Alerts</h3>
           <div className="space-y-3">
-            {priorityAlerts.length ? (
-              priorityAlerts.map((alert) => (
-                <div key={alert.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:border-teal-200 hover:bg-teal-50/40">
-                  <div className="mb-1.5 flex items-center justify-between gap-2">
-                    <p className="text-sm font-semibold text-slate-800">{alert.title}</p>
-                    <StatusBadge value={alert.severity} />
-                  </div>
-                  <p className="text-xs text-slate-600">{alert.message}</p>
-                  <div className="mt-2 flex items-center justify-between">
-                    <span className="text-xs text-slate-500">Due: {alert.dueDate}</span>
-                    <Link to={`/shipments/${alert.shipmentId}`} className="text-xs font-semibold text-teal-700 hover:text-teal-800">{alert.shipmentId}</Link>
-                  </div>
+            {priorityAlerts.map((alert) => (
+              <div key={alert.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="mb-1.5 flex items-center justify-between gap-2">
+                  <p className="text-sm font-semibold text-slate-800">{alert.title}</p>
+                  <StatusBadge value={alert.severity} />
                 </div>
-              ))
-            ) : (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">No active pending-document alerts. Great job.</div>
-            )}
+                <p className="text-xs text-slate-600">{alert.message}</p>
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="text-xs text-slate-500">Due: {alert.dueDate}</span>
+                  <Link to={`/shipments/${alert.shipmentId}`} className="text-xs font-semibold text-teal-700">{alert.shipmentId}</Link>
+                </div>
+              </div>
+            ))}
           </div>
         </article>
       </section>
 
       <section className="mt-6 grid gap-6 xl:grid-cols-[1fr_1fr]">
         <article className="card-surface p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold tracking-tight text-navy-800">Verification Progress</h3>
-            <span className="text-xs font-semibold text-slate-500">Shipment-wise compliance score</span>
-          </div>
-          <div className="space-y-3">
-            {verificationRows.map((row) => (
-              <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-                  <div>
-                    <p className="text-sm font-semibold text-navy-800">{row.id}</p>
-                    <p className="text-xs text-slate-500">{row.client}</p>
-                  </div>
-                  <StatusBadge value={row.status} />
+          <h3 className="mb-4 text-lg font-bold tracking-tight text-navy-800">Missing / Rejected Documents</h3>
+          <div className="space-y-2.5">
+            {blockedDocs.map((item, idx) => (
+              <div key={`${item.shipmentId}-${item.type}-${idx}`} className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5">
+                <div>
+                  <p className="text-sm font-semibold text-slate-800">{item.type}</p>
+                  <p className="text-xs text-slate-500">{item.shipmentId} • {item.client}</p>
                 </div>
-                <div className="mb-2 h-2 rounded-full bg-slate-200">
-                  <div className="h-2 rounded-full bg-teal-600" style={{ width: `${row.pct}%` }} />
-                </div>
-                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600">
-                  <span>{row.verifiedCount}/{row.requiredCount} verified • {row.pct}%</span>
-                  <span>Pending: {row.pending} • Blocked: {row.blocked}</span>
-                </div>
+                <StatusBadge value={item.status} />
               </div>
             ))}
           </div>
         </article>
 
         <article className="card-surface p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-bold tracking-tight text-navy-800">Activity Timeline</h3>
-            <span className="text-xs font-semibold text-slate-500">Latest ops updates</span>
-          </div>
+          <h3 className="mb-4 text-lg font-bold tracking-tight text-navy-800">Verification Progress</h3>
           <div className="space-y-3">
-            {activityTimeline.map((item) => (
-              <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <p className="text-sm font-semibold text-slate-800">{item.title}</p>
-                  <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">{item.type}</span>
+            {verificationRows.map((row) => (
+              <div key={row.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                  <div><p className="text-sm font-semibold text-navy-800">{row.id}</p><p className="text-xs text-slate-500">{row.client}</p></div>
+                  <StatusBadge value={row.status} />
                 </div>
-                <p className="text-xs text-slate-600">{item.detail}</p>
-                <p className="mt-1 text-[11px] text-slate-500">{item.time.slice(0, 16).replace('T', ' ')}</p>
+                <div className="mb-2 h-2 rounded-full bg-slate-200"><div className="h-2 rounded-full bg-teal-600" style={{ width: `${row.pct}%` }} /></div>
+                <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-600"><span>{row.verifiedCount}/{row.requiredCount} verified • {row.pct}%</span><span>Pending: {row.pending} • Blocked: {row.blocked}</span></div>
               </div>
             ))}
           </div>
         </article>
+      </section>
+
+      <section className="card-surface mt-6 p-5">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold tracking-tight text-navy-800">Recent Activity Timeline</h3>
+          <div className="flex flex-wrap gap-2">
+            <Link to="/verification" className="btn-secondary px-3 py-1.5 text-xs">Open Verification</Link>
+            <Link to="/notifications" className="btn-secondary px-3 py-1.5 text-xs">Open Notifications</Link>
+          </div>
+        </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          {activityTimeline.map((item) => (
+            <div key={item.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div className="mb-1 flex items-center justify-between gap-2"><p className="text-sm font-semibold text-slate-800">{item.title}</p><span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">{item.type}</span></div>
+              <p className="text-xs text-slate-600">{item.detail}</p>
+              <p className="mt-1 text-[11px] text-slate-500">{item.time.slice(0, 16).replace('T', ' ')}</p>
+            </div>
+          ))}
+        </div>
       </section>
     </div>
   );
