@@ -117,3 +117,4 @@ export interface UploadDocumentInput {
   fileFormat: 'PDF' | 'JPG' | 'PNG';
   uploadedBy: string;
 }
+

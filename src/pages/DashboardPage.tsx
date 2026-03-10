@@ -21,20 +21,10 @@ export default function DashboardPage() {
 
   const recentActivity = [
     ...shipments.flatMap((shipment) =>
-      shipment.comments.slice(0, 1).map((comment) => ({
-        id: `ACT-${comment.id}`,
-        time: comment.createdAt,
-        title: `${shipment.id} • ${comment.author}`,
-        detail: comment.message
-      }))
+      shipment.comments.slice(0, 1).map((comment) => ({ id: `ACT-${comment.id}`, time: comment.createdAt, title: `${shipment.id} • ${comment.author}`, detail: comment.message }))
     ),
     ...shipments.flatMap((shipment) =>
-      shipment.documents.slice(0, 1).map((doc) => ({
-        id: `ACT-${doc.id}`,
-        time: doc.uploadedAt,
-        title: `${shipment.id} • ${doc.type}`,
-        detail: `${doc.status} • ${doc.fileName}`
-      }))
+      shipment.documents.slice(0, 1).map((doc) => ({ id: `ACT-${doc.id}`, time: doc.uploadedAt, title: `${shipment.id} • ${doc.type}`, detail: `${doc.status} • ${doc.fileName}` }))
     )
   ]
     .sort((a, b) => b.time.localeCompare(a.time))
@@ -42,11 +32,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <PageHeader
-        title="Operations Dashboard"
-        subtitle="Enterprise visibility across shipments, document quality, reminders, and team activity."
-        action={<Link to="/shipments/new" className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">+ Create Shipment</Link>}
-      />
+      <PageHeader title="Operations Dashboard" subtitle="Enterprise visibility across shipments, document quality, reminders, and team activity." action={<Link to="/shipments/new" className="btn-primary">+ Create Shipment</Link>} />
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiCard title="Total Shipments" value={totalShipments} subtitle="Across all regions" accent="navy" />
@@ -57,23 +43,32 @@ export default function DashboardPage() {
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <article className="card-surface p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-navy-800">Recent Shipments</h3>
-            <Link to="/search" className="text-sm font-medium text-teal-700 hover:text-teal-800">Open Search</Link>
+            <h3 className="text-lg font-bold tracking-tight text-navy-800">Recent Shipments</h3>
+            <Link to="/search" className="text-sm font-semibold text-teal-700 hover:text-teal-800">Open Search</Link>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[720px] text-left text-sm">
-              <thead><tr className="border-b border-slate-200 text-slate-500"><th className="pb-2 font-medium">Shipment ID</th><th className="pb-2 font-medium">Client</th><th className="pb-2 font-medium">Destination</th><th className="pb-2 font-medium">Date</th><th className="pb-2 font-medium">Status</th><th className="pb-2 font-medium">Actions</th></tr></thead>
+            <table className="data-table w-full min-w-[760px] text-left text-sm">
+              <thead>
+                <tr className="border-b border-slate-200">
+                  <th>Shipment ID</th><th>Client</th><th>Destination</th><th>Date</th><th>Status</th><th>Actions</th>
+                </tr>
+              </thead>
               <tbody>
                 {recentShipments.map((shipment) => (
-                  <tr key={shipment.id} className="border-b border-slate-100 last:border-none">
-                    <td className="py-3 font-semibold text-navy-700">{shipment.id}</td>
-                    <td className="py-3">{shipment.clientName}</td>
-                    <td className="py-3">{shipment.destinationCountry}</td>
-                    <td className="py-3">{shipment.shipmentDate}</td>
-                    <td className="py-3"><StatusBadge value={shipment.status} /></td>
-                    <td className="py-3"><div className="flex flex-wrap gap-2"><Link to={`/shipments/${shipment.id}`} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Details</Link><Link to={`/shipments/${shipment.id}/upload`} className="rounded-lg border border-slate-300 px-2 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Upload</Link></div></td>
+                  <tr key={shipment.id} className="border-b border-slate-100 last:border-none hover:bg-slate-50/70">
+                    <td className="font-semibold text-navy-700">{shipment.id}</td>
+                    <td>{shipment.clientName}</td>
+                    <td>{shipment.destinationCountry}</td>
+                    <td>{shipment.shipmentDate}</td>
+                    <td><StatusBadge value={shipment.status} /></td>
+                    <td>
+                      <div className="flex flex-wrap gap-2">
+                        <Link to={`/shipments/${shipment.id}`} className="btn-secondary px-2.5 py-1.5 text-xs">Details</Link>
+                        <Link to={`/shipments/${shipment.id}/upload`} className="btn-secondary px-2.5 py-1.5 text-xs">Upload</Link>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -81,14 +76,14 @@ export default function DashboardPage() {
           </div>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+        <article className="card-surface p-5">
           <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-lg font-semibold text-navy-800">Alerts & Reminders</h3>
-            <Link to="/notifications" className="text-sm font-medium text-teal-700 hover:text-teal-800">View All</Link>
+            <h3 className="text-lg font-bold tracking-tight text-navy-800">Alerts & Reminders</h3>
+            <Link to="/notifications" className="text-sm font-semibold text-teal-700 hover:text-teal-800">View All</Link>
           </div>
           <div className="space-y-3">
             {latestAlerts.map((alert) => (
-              <div key={alert.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+              <div key={alert.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:border-teal-200 hover:bg-teal-50/40">
                 <div className="mb-2 flex items-center justify-between gap-2"><p className="text-sm font-semibold text-slate-800">{alert.title}</p><StatusBadge value={alert.severity} /></div>
                 <p className="text-xs text-slate-600">{alert.message}</p>
                 <div className="mt-2 flex items-center justify-between"><span className="text-xs text-slate-500">Due: {alert.dueDate}</span><Link to={`/shipments/${alert.shipmentId}`} className="text-xs font-semibold text-teal-700 hover:text-teal-800">{alert.shipmentId}</Link></div>
@@ -98,11 +93,11 @@ export default function DashboardPage() {
         </article>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-        <h3 className="mb-3 text-lg font-semibold text-navy-800">Recent Activity</h3>
+      <section className="card-surface mt-6 p-5">
+        <h3 className="mb-3 text-lg font-bold tracking-tight text-navy-800">Recent Activity</h3>
         <div className="grid gap-3 md:grid-cols-2">
           {recentActivity.map((activity) => (
-            <div key={activity.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div key={activity.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3 transition hover:border-slate-300 hover:bg-white">
               <p className="text-xs text-slate-500">{activity.time.slice(0, 16).replace('T', ' ')}</p>
               <p className="text-sm font-semibold text-slate-800">{activity.title}</p>
               <p className="text-xs text-slate-600">{activity.detail}</p>
@@ -113,3 +108,4 @@ export default function DashboardPage() {
     </div>
   );
 }
+

@@ -51,7 +51,7 @@ export default function VerificationChecklistPage() {
         action={
           <button
             type="button"
-            onClick={() => window.alert(`Verification summary exported for ${shipment.id} (mock).`)}
+            onClick={() => window.alert(`Verification summary exported for ${shipment.id}.`)}
             className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
           >
             Export Checklist
@@ -127,3 +127,4 @@ export default function VerificationChecklistPage() {
     </div>
   );
 }
+

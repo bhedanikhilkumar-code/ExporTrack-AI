@@ -51,10 +51,10 @@ export default function AdminPage() {
           <h3 className="text-lg font-semibold text-navy-800">Approval Queue</h3>
           <button
             type="button"
-            onClick={() => window.alert('Bulk approval workflow triggered (mock).')}
+            onClick={() => window.alert('Bulk approval workflow triggered.')}
             className="rounded-lg bg-navy-700 px-3 py-2 text-xs font-semibold text-white hover:bg-navy-800"
           >
-            Bulk Action (Mock)
+            Bulk Action
           </button>
         </div>
         <div className="space-y-3">
@@ -104,3 +104,4 @@ export default function AdminPage() {
     </div>
   );
 }
+

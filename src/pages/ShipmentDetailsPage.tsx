@@ -81,7 +81,7 @@ export default function ShipmentDetailsPage() {
         title={`Shipment Details: ${shipment.id}`}
         subtitle={`${shipment.clientName} • ${shipment.destinationCountry} • Container ${shipment.containerNumber}`}
         action={
-          <button type="button" onClick={() => window.alert(`Export started for ${shipment.id} (mock).`)} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
+          <button type="button" onClick={() => window.alert(`Export started for ${shipment.id}.`)} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">
             Export Shipment Bundle
           </button>
         }
@@ -114,7 +114,7 @@ export default function ShipmentDetailsPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge value={document.status} />
-                    <button type="button" onClick={() => window.alert(`Downloading ${document.fileName} (mock).`)} className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Download</button>
+                    <button type="button" onClick={() => window.alert(`Downloading ${document.fileName}.`)} className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Download</button>
                   </div>
                 </div>
               </div>
@@ -178,3 +178,4 @@ export default function ShipmentDetailsPage() {
     </div>
   );
 }
+

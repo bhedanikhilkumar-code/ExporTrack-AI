@@ -5,11 +5,19 @@
 @layer base {
   :root {
     color-scheme: light;
-    background: #ffffff;
+    background: #f8fafc;
+  }
+
+  html,
+  body,
+  #root {
+    @apply min-h-screen;
   }
 
   body {
-    @apply m-0 min-h-screen bg-slate-50 font-sans text-slate-900 antialiased;
+    @apply m-0 bg-slate-50 font-sans text-slate-900 antialiased;
+    background-image: radial-gradient(circle at 100% 0%, rgba(20, 184, 166, 0.08), transparent 28%),
+      radial-gradient(circle at 0% 100%, rgba(30, 58, 138, 0.08), transparent 28%);
   }
 
   * {
@@ -19,6 +27,26 @@
 
 @layer components {
   .shadow-soft {
-    box-shadow: 0 10px 30px -18px rgba(15, 41, 66, 0.35);
+    box-shadow: 0 16px 38px -22px rgba(15, 41, 66, 0.35);
+  }
+
+  .card-surface {
+    @apply rounded-2xl border border-slate-200 bg-white shadow-soft;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-xl bg-navy-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-navy-800;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:bg-slate-100;
+  }
+
+  .data-table th {
+    @apply pb-2 text-xs font-semibold uppercase tracking-wide text-slate-500;
+  }
+
+  .data-table td {
+    @apply py-3.5 align-middle;
   }
 }

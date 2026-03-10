@@ -94,7 +94,7 @@ export default function UploadDocumentsPage() {
         <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
           <h3 className="mb-3 text-lg font-semibold text-navy-800">Quick Actions</h3>
           <div className="space-y-3">
-            <button type="button" onClick={() => window.alert(`Downloading all files for ${shipment.id} (mock).`)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Download Shipment Files</button>
+            <button type="button" onClick={() => window.alert(`Downloading all files for ${shipment.id}.`)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Download Shipment Files</button>
             <Link to={`/shipments/${shipment.id}/checklist`} className="block rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100">Open Verification Checklist</Link>
             <Link to={`/shipments/${shipment.id}`} className="block rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100">Back to Shipment Details</Link>
           </div>
@@ -110,7 +110,7 @@ export default function UploadDocumentsPage() {
                 <p className="text-sm font-semibold text-slate-800">{document.type}</p>
                 <p className="text-xs text-slate-500">{document.fileName} • Uploaded by {document.uploadedBy} • {document.uploadedAt.slice(0, 10)}</p>
               </div>
-              <div className="flex items-center gap-2"><StatusBadge value={document.status} /><button type="button" onClick={() => window.alert(`Downloading ${document.fileName} (mock).`)} className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Download</button></div>
+              <div className="flex items-center gap-2"><StatusBadge value={document.status} /><button type="button" onClick={() => window.alert(`Downloading ${document.fileName}.`)} className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Download</button></div>
             </div>
           ))}
         </div>
@@ -118,3 +118,4 @@ export default function UploadDocumentsPage() {
     </div>
   );
 }
+

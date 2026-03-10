@@ -30,10 +30,10 @@ export default function AiScanResultsPage() {
         action={
           <button
             type="button"
-            onClick={() => window.alert(`AI re-scan queued for shipment ${shipment.id} (mock).`)}
+            onClick={() => window.alert(`AI re-scan queued for shipment ${shipment.id}.`)}
             className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
           >
-            Re-run OCR (Mock)
+            Re-run OCR
           </button>
         }
       />
@@ -92,3 +92,4 @@ export default function AiScanResultsPage() {
     </div>
   );
 }
+

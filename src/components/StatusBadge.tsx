@@ -29,3 +29,4 @@ export default function StatusBadge({ value }: StatusBadgeProps) {
     </span>
   );
 }
+

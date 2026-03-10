@@ -25,7 +25,7 @@ export default function ProfileTeamPage() {
         action={
           <div className="flex items-center gap-2">
             <label htmlFor="role-switcher" className="text-xs font-medium text-slate-600">
-              Switch Role (Mock):
+              Switch Role:
             </label>
             <select
               id="role-switcher"
@@ -101,3 +101,4 @@ export default function ProfileTeamPage() {
     </div>
   );
 }
+

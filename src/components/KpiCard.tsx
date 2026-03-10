@@ -13,13 +13,27 @@ const accents: Record<KpiCardProps['accent'], string> = {
   emerald: 'from-emerald-600 to-emerald-500'
 };
 
+const icons: Record<KpiCardProps['accent'], string> = {
+  navy: '📦',
+  teal: '🔔',
+  rose: '⚠️',
+  amber: '🕒',
+  emerald: '✅'
+};
+
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
   return (
-    <article className="rounded-2xl border border-slate-200 bg-white p-4 shadow-soft">
-      <div className={`mb-4 h-1.5 w-full rounded-full bg-gradient-to-r ${accents[accent]}`} />
-      <p className="text-sm text-slate-500">{title}</p>
-      <p className="mt-2 text-3xl font-semibold text-navy-800">{value}</p>
-      <p className="mt-2 text-sm text-slate-500">{subtitle}</p>
+    <article className="card-surface p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+      <div className="mb-3 flex items-center justify-between">
+        <div className={`h-1.5 w-24 rounded-full bg-gradient-to-r ${accents[accent]}`} />
+        <span className="text-lg" aria-hidden>
+          {icons[accent]}
+        </span>
+      </div>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
+      <p className="mt-1.5 text-3xl font-bold tracking-tight text-navy-800">{value}</p>
+      <p className="mt-1.5 text-sm text-slate-600">{subtitle}</p>
     </article>
   );
 }
+
