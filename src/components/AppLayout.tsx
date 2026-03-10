@@ -3,12 +3,13 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 
 const navItems = [
-  { to: '/dashboard', label: 'Dashboard', short: 'DB', icon: '📊' },
-  { to: '/shipments/new', label: 'Create Shipment', short: 'CS', icon: '➕' },
-  { to: '/search', label: 'Search & Filter', short: 'SF', icon: '🔎' },
-  { to: '/notifications', label: 'Notifications', short: 'NT', icon: '🔔' },
-  { to: '/team', label: 'Profile & Team', short: 'TM', icon: '👥' },
-  { to: '/admin', label: 'Admin', short: 'AD', icon: '🛡️' }
+  { to: '/dashboard', label: 'Dashboard', icon: '📊' },
+  { to: '/shipments', label: 'Shipments', icon: '📦' },
+  { to: '/shipments/create', label: 'Create Shipment', icon: '➕' },
+  { to: '/documents/upload', label: 'Upload Docs', icon: '📤' },
+  { to: '/verification', label: 'Verification', icon: '✅' },
+  { to: '/notifications', label: 'Notifications', icon: '🔔' },
+  { to: '/team', label: 'Team', icon: '👥' }
 ] as const;
 
 export default function AppLayout() {
@@ -51,7 +52,7 @@ export default function AppLayout() {
         <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">Active Role</p>
           <p className="mt-1 font-semibold text-navy-700">{user?.role ?? 'Staff'}</p>
-          <p className="mt-2 text-xs text-slate-500 break-all">{user?.email}</p>
+          <p className="mt-2 break-all text-xs text-slate-500">{user?.email}</p>
         </div>
       </aside>
 
@@ -59,11 +60,7 @@ export default function AppLayout() {
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 md:hidden"
-                onClick={() => setMenuOpen((value) => !value)}
-              >
+              <button type="button" className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 md:hidden" onClick={() => setMenuOpen((value) => !value)}>
                 {menuOpen ? '✕' : '☰'}
               </button>
               <div>
@@ -107,4 +104,3 @@ export default function AppLayout() {
     </div>
   );
 }
-

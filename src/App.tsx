@@ -27,6 +27,16 @@ function ProtectedLayout() {
   return <AppLayout />;
 }
 
+function FirstShipmentRedirect({ kind }: { kind: 'upload' | 'verification' }) {
+  const {
+    state: { shipments }
+  } = useAppContext();
+
+  const firstShipmentId = shipments[0]?.id;
+  if (!firstShipmentId) return <Navigate to="/shipments/create" replace />;
+  return <Navigate to={kind === 'upload' ? `/shipments/${firstShipmentId}/upload` : `/shipments/${firstShipmentId}/checklist`} replace />;
+}
+
 export default function App() {
   const {
     state: { isAuthenticated }
@@ -40,19 +50,25 @@ export default function App() {
 
       <Route element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/shipments/new" element={<CreateShipmentPage />} />
+
+        <Route path="/shipments" element={<SearchFilterPage />} />
+        <Route path="/shipments/create" element={<CreateShipmentPage />} />
+        <Route path="/shipments/new" element={<Navigate to="/shipments/create" replace />} />
         <Route path="/shipments/:shipmentId" element={<ShipmentDetailsPage />} />
         <Route path="/shipments/:shipmentId/upload" element={<UploadDocumentsPage />} />
         <Route path="/shipments/:shipmentId/ai-scan" element={<AiScanResultsPage />} />
         <Route path="/shipments/:shipmentId/checklist" element={<VerificationChecklistPage />} />
+
+        <Route path="/documents/upload" element={<FirstShipmentRedirect kind="upload" />} />
+        <Route path="/verification" element={<FirstShipmentRedirect kind="verification" />} />
+
         <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/search" element={<SearchFilterPage />} />
         <Route path="/team" element={<ProfileTeamPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/search" element={<Navigate to="/shipments" replace />} />
       </Route>
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }
-
