@@ -17,7 +17,7 @@ export type ShipmentStatus =
   | 'Under Verification'
   | 'Customs Hold'
   | 'Delivered';
-export type Role = 'Admin' | 'Manager' | 'Coordinator';
+export type Role = 'Admin' | 'Manager' | 'Staff';
 
 export interface ShipmentDocument {
   id: string;
@@ -59,6 +59,7 @@ export interface Shipment {
   delayed: boolean;
   deadline: string;
   priority: 'High' | 'Medium' | 'Low';
+  assignedTo: string;
   documents: ShipmentDocument[];
   aiScan: OCRExtraction[];
   comments: ShipmentComment[];
@@ -107,6 +108,7 @@ export interface CreateShipmentInput {
   shipmentDate: string;
   containerNumber: string;
   status: ShipmentStatus;
+  assignedTo: string;
 }
 
 export interface UploadDocumentInput {

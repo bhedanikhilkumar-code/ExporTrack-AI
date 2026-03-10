@@ -4,11 +4,11 @@ import { useAppContext } from '../context/AppContext';
 import { Role } from '../types';
 
 const permissionMatrix = [
-  { action: 'View shipment records', Admin: true, Manager: true, Coordinator: true },
-  { action: 'Approve/reject documents', Admin: true, Manager: true, Coordinator: false },
-  { action: 'Create internal notes', Admin: true, Manager: true, Coordinator: false },
-  { action: 'Manage team roles', Admin: true, Manager: false, Coordinator: false },
-  { action: 'Export shipment bundles', Admin: true, Manager: true, Coordinator: true }
+  { action: 'View shipment records', Admin: true, Manager: true, Staff: true },
+  { action: 'Approve/reject documents', Admin: true, Manager: true, Staff: false },
+  { action: 'Create internal notes', Admin: true, Manager: true, Staff: false },
+  { action: 'Manage team roles', Admin: true, Manager: false, Staff: false },
+  { action: 'Export shipment bundles', Admin: true, Manager: true, Staff: true }
 ] as const;
 
 export default function ProfileTeamPage() {
@@ -21,7 +21,7 @@ export default function ProfileTeamPage() {
     <div>
       <PageHeader
         title="Profile & Team Management"
-        subtitle="Mock role-based access for Admin, Manager, and Coordinator collaboration."
+        subtitle="Mock role-based access for Admin, Manager, and Staff collaboration."
         action={
           <div className="flex items-center gap-2">
             <label htmlFor="role-switcher" className="text-xs font-medium text-slate-600">
@@ -29,13 +29,13 @@ export default function ProfileTeamPage() {
             </label>
             <select
               id="role-switcher"
-              value={user?.role ?? 'Coordinator'}
+              value={user?.role ?? 'Staff'}
               onChange={(event) => switchRole(event.target.value as Role)}
               className="rounded-lg border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
             >
               <option value="Admin">Admin</option>
               <option value="Manager">Manager</option>
-              <option value="Coordinator">Coordinator</option>
+              <option value="Staff">Staff</option>
             </select>
           </div>
         }
@@ -48,7 +48,7 @@ export default function ProfileTeamPage() {
             <p className="text-sm font-semibold text-slate-800">{user?.name ?? 'Unassigned User'}</p>
             <p className="text-sm text-slate-600">{user?.email ?? 'No email'}</p>
             <div className="mt-3">
-              <StatusBadge value={user?.role ?? 'Coordinator'} />
+              <StatusBadge value={user?.role ?? 'Staff'} />
             </div>
           </div>
         </article>
@@ -82,7 +82,7 @@ export default function ProfileTeamPage() {
                 <th className="pb-2 font-medium">Capability</th>
                 <th className="pb-2 font-medium">Admin</th>
                 <th className="pb-2 font-medium">Manager</th>
-                <th className="pb-2 font-medium">Coordinator</th>
+                <th className="pb-2 font-medium">Staff</th>
               </tr>
             </thead>
             <tbody>
@@ -91,7 +91,7 @@ export default function ProfileTeamPage() {
                   <td className="py-3 font-medium text-slate-700">{row.action}</td>
                   <td className="py-3">{row.Admin ? 'Yes' : 'No'}</td>
                   <td className="py-3">{row.Manager ? 'Yes' : 'No'}</td>
-                  <td className="py-3">{row.Coordinator ? 'Yes' : 'No'}</td>
+                  <td className="py-3">{row.Staff ? 'Yes' : 'No'}</td>
                 </tr>
               ))}
             </tbody>

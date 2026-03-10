@@ -14,7 +14,8 @@ const statusMap: Record<string, string> = {
   Delivered: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   High: 'border-rose-200 bg-rose-50 text-rose-700',
   Medium: 'border-amber-200 bg-amber-50 text-amber-700',
-  Low: 'border-emerald-200 bg-emerald-50 text-emerald-700'
+  Low: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  Staff: 'border-slate-300 bg-slate-100 text-slate-700'
 };
 
 export default function StatusBadge({ value }: StatusBadgeProps) {

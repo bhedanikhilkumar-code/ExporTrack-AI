@@ -64,7 +64,7 @@ export const createSeedState = (): AppState => ({
       id: 'TM-003',
       name: 'Rohan Iyer',
       email: 'rohan.iyer@exportrack.ai',
-      role: 'Coordinator',
+      role: 'Staff',
       region: 'EU',
       activeCases: 9,
       lastActive: '2026-03-10T07:15:00.000Z'
@@ -73,7 +73,7 @@ export const createSeedState = (): AppState => ({
       id: 'TM-004',
       name: 'Sofia Patel',
       email: 'sofia.patel@exportrack.ai',
-      role: 'Coordinator',
+      role: 'Staff',
       region: 'Middle East',
       activeCases: 7,
       lastActive: '2026-03-10T06:55:00.000Z'
@@ -81,15 +81,8 @@ export const createSeedState = (): AppState => ({
   ],
   shipments: [
     {
-      id: 'EXP-2026-001',
-      clientName: 'Apex Retail Imports',
-      destinationCountry: 'Germany',
-      shipmentDate: '2026-03-01',
-      containerNumber: 'MSKU-441209-6',
-      status: 'Under Verification',
-      delayed: false,
-      deadline: '2026-03-12',
-      priority: 'High',
+      
+      assignedTo: 'Emily Chen',
       documents: [
         doc('DOC-101', 'Invoice', 'invoice-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:20:00.000Z', 'Emily Chen'),
         doc('DOC-102', 'Packing List', 'packing-list-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:25:00.000Z', 'Emily Chen'),
@@ -115,7 +108,7 @@ export const createSeedState = (): AppState => ({
         {
           id: 'COM-002',
           author: 'Rohan Iyer',
-          role: 'Coordinator',
+          role: 'Staff',
           message: 'Waiting for broker to share customs files before 14:00 UTC.',
           createdAt: '2026-03-04T10:30:00.000Z',
           internal: false
@@ -123,15 +116,8 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      id: 'EXP-2026-002',
-      clientName: 'BlueWave Foods',
-      destinationCountry: 'UAE',
-      shipmentDate: '2026-02-26',
-      containerNumber: 'TCLU-992183-4',
-      status: 'Customs Hold',
-      delayed: true,
-      deadline: '2026-03-11',
-      priority: 'High',
+      
+      assignedTo: 'Aarav Mehta',
       documents: [
         doc('DOC-201', 'Invoice', 'invoice-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:03:00.000Z', 'Aarav Mehta'),
         doc('DOC-202', 'Packing List', 'packing-list-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:15:00.000Z', 'Aarav Mehta'),
@@ -154,15 +140,8 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      id: 'EXP-2026-003',
-      clientName: 'Nordic Auto Components',
-      destinationCountry: 'Sweden',
-      shipmentDate: '2026-03-05',
-      containerNumber: 'OOLU-123990-1',
-      status: 'In Transit',
-      delayed: false,
-      deadline: '2026-03-16',
-      priority: 'Medium',
+      
+      assignedTo: 'Rohan Iyer',
       documents: [
         doc('DOC-301', 'Invoice', 'invoice-exp-003.pdf', 'PDF', 'Verified', '2026-03-05T07:02:00.000Z', 'Rohan Iyer'),
         doc('DOC-302', 'Packing List', 'packing-list-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T07:40:00.000Z', 'Rohan Iyer'),
@@ -177,7 +156,7 @@ export const createSeedState = (): AppState => ({
         {
           id: 'COM-004',
           author: 'Sofia Patel',
-          role: 'Coordinator',
+          role: 'Staff',
           message: 'Client sent partial docs. Following up for certificate and customs package.',
           createdAt: '2026-03-06T11:14:00.000Z',
           internal: false
@@ -185,15 +164,8 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      id: 'EXP-2026-004',
-      clientName: 'GreenMed Pharma',
-      destinationCountry: 'Brazil',
-      shipmentDate: '2026-02-21',
-      containerNumber: 'HLCU-098321-0',
-      status: 'Delivered',
-      delayed: false,
-      deadline: '2026-03-08',
-      priority: 'Low',
+      
+      assignedTo: 'Aarav Mehta',
       documents: [
         doc('DOC-401', 'Invoice', 'invoice-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:20:00.000Z', 'Emily Chen'),
         doc('DOC-402', 'Packing List', 'packing-list-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:40:00.000Z', 'Emily Chen'),
@@ -219,15 +191,8 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      id: 'EXP-2026-005',
-      clientName: 'TerraBuild Materials',
-      destinationCountry: 'Kenya',
-      shipmentDate: '2026-03-06',
-      containerNumber: 'CMAU-778455-3',
-      status: 'Awaiting Documents',
-      delayed: true,
-      deadline: '2026-03-13',
-      priority: 'High',
+      
+      assignedTo: 'Sofia Patel',
       documents: [
         doc('DOC-501', 'Invoice', 'invoice-exp-005.pdf', 'PDF', 'Pending', '2026-03-06T07:05:00.000Z', 'Sofia Patel'),
         doc('DOC-502', 'Packing List', 'Not uploaded', 'PDF', 'Missing', '2026-03-06T08:00:00.000Z', 'System'),
@@ -308,3 +273,4 @@ export const createSeedState = (): AppState => ({
     }
   ]
 });
+

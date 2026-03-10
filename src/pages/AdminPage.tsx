@@ -13,7 +13,7 @@ export default function AdminPage() {
       <section className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-soft">
         <h2 className="text-2xl font-semibold text-amber-800">Admin Access Required</h2>
         <p className="mt-2 text-sm text-amber-700">
-          Your current role is <span className="font-semibold">{user?.role ?? 'Coordinator'}</span>. Switch to Admin in Profile & Team
+          Your current role is <span className="font-semibold">{user?.role ?? 'Staff'}</span>. Switch to Admin in Profile & Team
           Management to view this panel.
         </p>
         <Link to="/team" className="mt-4 inline-flex rounded-lg bg-amber-700 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-800">
@@ -86,7 +86,7 @@ export default function AdminPage() {
       <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
         <h3 className="mb-3 text-lg font-semibold text-navy-800">Team Role Overview</h3>
         <div className="grid gap-3 md:grid-cols-3">
-          {['Admin', 'Manager', 'Coordinator'].map((role) => {
+          {['Admin', 'Manager', 'Staff'].map((role) => {
             const members = teamMembers.filter((member) => member.role === role);
             return (
               <article key={role} className="rounded-xl border border-slate-200 bg-slate-50 p-4">

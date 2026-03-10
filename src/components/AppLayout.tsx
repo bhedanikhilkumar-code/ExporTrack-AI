@@ -20,6 +20,7 @@ export default function AppLayout() {
   } = useAppContext();
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
+  const currentNav = navItems.find((item) => location.pathname.startsWith(item.to));
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -51,7 +52,7 @@ export default function AppLayout() {
         </nav>
         <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-xs uppercase tracking-wide text-slate-500">Active Role</p>
-          <p className="mt-1 font-semibold text-navy-700">{user?.role ?? 'Coordinator'}</p>
+          <p className="mt-1 font-semibold text-navy-700">{user?.role ?? 'Staff'}</p>
           <p className="mt-2 text-xs text-slate-500">{user?.email}</p>
         </div>
       </aside>
@@ -69,7 +70,7 @@ export default function AppLayout() {
               </button>
               <div>
                 <p className="text-xs uppercase tracking-wide text-slate-500">Current Page</p>
-                <p className="text-sm font-semibold text-navy-800">{location.pathname}</p>
+                <p className="text-sm font-semibold text-navy-800">{currentNav?.label ?? location.pathname}</p>
               </div>
             </div>
             <div className="flex items-center gap-3">

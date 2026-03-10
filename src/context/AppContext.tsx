@@ -103,7 +103,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       user: {
         name: knownMember?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase()),
         email,
-        role: knownMember?.role ?? prev.user?.role ?? 'Coordinator'
+        role: knownMember?.role ?? prev.user?.role ?? 'Staff'
       }
     }));
   };
@@ -115,7 +115,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       user: {
         name,
         email,
-        role: 'Coordinator'
+        role: 'Staff'
       }
     }));
   };
@@ -159,13 +159,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       delayed: false,
       deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       priority: 'Medium',
+      assignedTo: input.assignedTo,
       documents: [],
       aiScan: [],
       comments: [
         {
           id: createId('COM'),
           author: state.user?.name ?? 'System',
-          role: state.user?.role ?? 'Coordinator',
+          role: state.user?.role ?? 'Staff',
           message: 'Shipment record created. Awaiting first document upload.',
           createdAt: now,
           internal: true
@@ -309,7 +310,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
                 {
                   id: createId('COM'),
                   author: prev.user?.name ?? 'Unknown',
-                  role: prev.user?.role ?? 'Coordinator',
+                  role: prev.user?.role ?? 'Staff',
                   message,
                   createdAt: new Date().toISOString(),
                   internal
