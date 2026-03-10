@@ -1,0 +1,26 @@
+{
+  "name": "exportrack-ai",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node ./node_modules/vite/bin/vite.js",
+    "build": "node ./node_modules/typescript/bin/tsc --noEmit",
+    "preview": "node ./node_modules/vite/bin/vite.js preview"
+  },
+  "dependencies": {
+    "react": "file:../Planora/node_modules/react",
+    "react-dom": "file:../Planora/node_modules/react-dom",
+    "react-router-dom": "file:../Planora/node_modules/react-router-dom"
+  },
+  "devDependencies": {
+    "@types/react": "file:../Planora/node_modules/@types/react",
+    "@types/react-dom": "file:../Planora/node_modules/@types/react-dom",
+    "@vitejs/plugin-react": "file:../Planora/node_modules/@vitejs/plugin-react",
+    "autoprefixer": "file:../Planora/node_modules/autoprefixer",
+    "postcss": "file:../Planora/node_modules/postcss",
+    "tailwindcss": "file:../Planora/node_modules/tailwindcss",
+    "typescript": "file:../Planora/node_modules/typescript",
+    "vite": "file:../Planora/node_modules/vite"
+  }
+}

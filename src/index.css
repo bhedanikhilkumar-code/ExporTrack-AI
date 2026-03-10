@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+    background: #ffffff;
+  }
+
+  body {
+    @apply m-0 min-h-screen bg-slate-50 font-sans text-slate-900 antialiased;
+  }
+
+  * {
+    @apply border-slate-200;
+  }
+}
+
+@layer components {
+  .shadow-soft {
+    box-shadow: 0 10px 30px -18px rgba(15, 41, 66, 0.35);
+  }
+}
