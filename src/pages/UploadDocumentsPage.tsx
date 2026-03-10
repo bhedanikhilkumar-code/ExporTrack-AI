@@ -28,9 +28,11 @@ export default function UploadDocumentsPage() {
 
   if (!shipment) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-soft">
+      <div className="card-panel">
         <h2 className="text-xl font-semibold text-navy-800">Shipment not found</h2>
-        <Link to="/dashboard" className="mt-3 inline-flex rounded-lg bg-navy-700 px-4 py-2 text-sm font-semibold text-white">Return to Dashboard</Link>
+        <Link to="/dashboard" className="btn-primary mt-3">
+          Return to Dashboard
+        </Link>
       </div>
     );
   }
@@ -52,16 +54,31 @@ export default function UploadDocumentsPage() {
   };
 
   return (
-    <div>
-      <PageHeader title={`Upload Documents: ${shipment.id}`} subtitle="Drag & drop on web, camera/file upload on mobile. Supports PDF, JPG, PNG." action={<Link to={`/shipments/${shipment.id}/ai-scan`} className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Open AI Scan Results</Link>} />
+    <div className="page-stack">
+      <PageHeader
+        title={`Upload Documents: ${shipment.id}`}
+        subtitle="Drag & drop on web, camera/file upload on mobile. Supports PDF, JPG, PNG."
+        action={
+          <Link to={`/shipments/${shipment.id}/ai-scan`} className="btn-secondary">
+            Open AI Scan Results
+          </Link>
+        }
+      />
 
       <section className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-          <h3 className="text-lg font-semibold text-navy-800">Document Upload</h3>
+        <article className="card-panel">
+          <h3 className="card-title text-base md:text-lg">Document Upload</h3>
+          <p className="card-subtitle">Queue files for AI extraction and verification checks.</p>
           <div className="mt-4">
-            <label htmlFor="doc-type" className="mb-1 block text-sm font-medium text-slate-700">Document Type</label>
-            <select id="doc-type" value={documentType} onChange={(event) => setDocumentType(event.target.value as UploadDocumentInput['type'])} className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring">
-              {REQUIRED_DOCUMENT_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
+            <label htmlFor="doc-type" className="input-label">
+              Document Type
+            </label>
+            <select id="doc-type" value={documentType} onChange={(event) => setDocumentType(event.target.value as UploadDocumentInput['type'])} className="input-field">
+              {REQUIRED_DOCUMENT_TYPES.map((type) => (
+                <option key={type} value={type}>
+                  {type}
+                </option>
+              ))}
               <option value="Delivery Order">Delivery Order</option>
               <option value="Inspection Report">Inspection Report</option>
               <option value="Other">Other</option>
@@ -76,7 +93,9 @@ export default function UploadDocumentsPage() {
             }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
-            className={`mt-4 block cursor-pointer rounded-xl border-2 border-dashed p-5 text-center ${isDragOver ? 'border-teal-500 bg-teal-50' : 'border-slate-300 bg-slate-50'}`}
+            className={`mt-4 block cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition ${
+              isDragOver ? 'border-teal-500 bg-teal-50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'
+            }`}
           >
             <p className="text-sm font-semibold text-slate-800">Drop files here or click to browse</p>
             <p className="mt-1 text-xs text-slate-500">Mobile: camera capture enabled automatically</p>
@@ -88,29 +107,44 @@ export default function UploadDocumentsPage() {
             <ul className="mt-2 space-y-1 text-xs">{files.length ? files.map((file) => <li key={file.name}>{file.name}</li>) : <li>No files selected yet.</li>}</ul>
           </div>
 
-          <button type="button" onClick={handleUpload} className="mt-4 rounded-xl bg-navy-700 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800">Upload & Queue for Verification</button>
+          <button type="button" onClick={handleUpload} className="btn-primary mt-4">
+            Upload & Queue for Verification
+          </button>
         </article>
 
-        <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-          <h3 className="mb-3 text-lg font-semibold text-navy-800">Quick Actions</h3>
+        <article className="card-panel">
+          <h3 className="mb-3 card-title text-base md:text-lg">Quick Actions</h3>
           <div className="space-y-3">
-            <button type="button" onClick={() => window.alert(`Downloading all files for ${shipment.id}.`)} className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Download Shipment Files</button>
-            <Link to={`/shipments/${shipment.id}/checklist`} className="block rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100">Open Verification Checklist</Link>
-            <Link to={`/shipments/${shipment.id}`} className="block rounded-lg border border-slate-300 px-3 py-2 text-center text-sm font-semibold text-slate-700 hover:bg-slate-100">Back to Shipment Details</Link>
+            <button type="button" onClick={() => window.alert(`Downloading all files for ${shipment.id}.`)} className="btn-secondary w-full justify-center">
+              Download Shipment Files
+            </button>
+            <Link to={`/shipments/${shipment.id}/checklist`} className="btn-secondary w-full justify-center">
+              Open Verification Checklist
+            </Link>
+            <Link to={`/shipments/${shipment.id}`} className="btn-secondary w-full justify-center">
+              Back to Shipment Details
+            </Link>
           </div>
         </article>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-        <h3 className="mb-3 text-lg font-semibold text-navy-800">Recent Document Activity</h3>
+      <section className="card-panel">
+        <h3 className="mb-3 card-title text-base md:text-lg">Recent Document Activity</h3>
         <div className="space-y-3">
           {sortedDocs.map((document) => (
-            <div key={document.id} className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3">
+            <div key={document.id} className="card-muted flex flex-wrap items-center justify-between gap-2">
               <div>
                 <p className="text-sm font-semibold text-slate-800">{document.type}</p>
-                <p className="text-xs text-slate-500">{document.fileName} • Uploaded by {document.uploadedBy} • {document.uploadedAt.slice(0, 10)}</p>
+                <p className="text-xs text-slate-500">
+                  {document.fileName} • Uploaded by {document.uploadedBy} • {document.uploadedAt.slice(0, 10)}
+                </p>
               </div>
-              <div className="flex items-center gap-2"><StatusBadge value={document.status} /><button type="button" onClick={() => window.alert(`Downloading ${document.fileName}.`)} className="rounded-lg border border-slate-300 px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-100">Download</button></div>
+              <div className="flex items-center gap-2">
+                <StatusBadge value={document.status} />
+                <button type="button" onClick={() => window.alert(`Downloading ${document.fileName}.`)} className="btn-secondary btn-xs">
+                  Download
+                </button>
+              </div>
             </div>
           ))}
         </div>

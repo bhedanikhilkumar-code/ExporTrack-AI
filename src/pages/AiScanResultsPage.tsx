@@ -13,9 +13,9 @@ export default function AiScanResultsPage() {
 
   if (!shipment) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-soft">
+      <div className="card-panel">
         <h2 className="text-xl font-semibold text-navy-800">Shipment not found</h2>
-        <Link to="/dashboard" className="mt-3 inline-flex rounded-lg bg-navy-700 px-4 py-2 text-sm font-semibold text-white">
+        <Link to="/dashboard" className="btn-primary mt-3">
           Return to Dashboard
         </Link>
       </div>
@@ -23,7 +23,7 @@ export default function AiScanResultsPage() {
   }
 
   return (
-    <div>
+    <div className="page-stack">
       <PageHeader
         title={`AI Scan Results: ${shipment.id}`}
         subtitle="Mock OCR extraction fields generated from uploaded documents."
@@ -31,7 +31,7 @@ export default function AiScanResultsPage() {
           <button
             type="button"
             onClick={() => window.alert(`AI re-scan queued for shipment ${shipment.id}.`)}
-            className="rounded-xl bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700"
+            className="btn-primary bg-teal-600 hover:bg-teal-700"
           >
             Re-run OCR
           </button>
@@ -40,9 +40,9 @@ export default function AiScanResultsPage() {
 
       <section className="grid gap-4 md:grid-cols-2">
         {shipment.aiScan.map((result) => (
-          <article key={result.id} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+          <article key={result.id} className="card-panel">
             <div className="mb-4 flex items-center justify-between gap-2">
-              <h3 className="text-lg font-semibold text-navy-800">{result.documentType}</h3>
+              <h3 className="card-title text-base md:text-lg">{result.documentType}</h3>
               <StatusBadge value={result.confidence >= 95 ? 'Verified' : 'Pending'} />
             </div>
             <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
@@ -75,17 +75,11 @@ export default function AiScanResultsPage() {
         ))}
       </section>
 
-      <section className="mt-6 flex flex-wrap gap-3">
-        <Link
-          to={`/shipments/${shipment.id}/checklist`}
-          className="rounded-xl bg-navy-700 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800"
-        >
+      <section className="flex flex-wrap gap-3">
+        <Link to={`/shipments/${shipment.id}/checklist`} className="btn-primary">
           Continue to Verification Checklist
         </Link>
-        <Link
-          to={`/shipments/${shipment.id}/upload`}
-          className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-        >
+        <Link to={`/shipments/${shipment.id}/upload`} className="btn-secondary">
           Upload More Files
         </Link>
       </section>

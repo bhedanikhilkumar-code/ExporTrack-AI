@@ -48,7 +48,7 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => setMode((prev) => (prev === 'login' ? 'signup' : 'login'))}
-              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
+              className="btn-secondary btn-xs"
             >
               {mode === 'login' ? 'Need Sign up?' : 'Have Login?'}
             </button>
@@ -57,7 +57,7 @@ export default function AuthPage() {
           <form className="space-y-4" onSubmit={handleSubmit}>
             {mode === 'signup' ? (
               <div>
-                <label htmlFor="full-name" className="mb-1 block text-sm font-medium text-slate-700">
+                <label htmlFor="full-name" className="input-label">
                   Full Name
                 </label>
                 <input
@@ -65,13 +65,13 @@ export default function AuthPage() {
                   value={name}
                   onChange={(event) => setName(event.target.value)}
                   required={mode === 'signup'}
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+                  className="input-field"
                   placeholder="Jane Doe"
                 />
               </div>
             ) : null}
             <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="email" className="input-label">
                 Email
               </label>
               <input
@@ -80,12 +80,12 @@ export default function AuthPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+                className="input-field"
                 placeholder="ops@company.com"
               />
             </div>
             <div>
-              <label htmlFor="password" className="mb-1 block text-sm font-medium text-slate-700">
+              <label htmlFor="password" className="input-label">
                 Password
               </label>
               <input
@@ -95,12 +95,12 @@ export default function AuthPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 minLength={6}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+                className="input-field"
                 placeholder="******"
               />
             </div>
 
-            <button type="submit" className="w-full rounded-xl bg-navy-700 px-4 py-2.5 text-sm font-semibold text-white hover:bg-navy-800">
+            <button type="submit" className="btn-primary w-full">
               {mode === 'login' ? 'Login' : 'Create Account'}
             </button>
           </form>
@@ -114,7 +114,7 @@ export default function AuthPage() {
           <button
             type="button"
             onClick={handleGoogleSignIn}
-            className="w-full rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="btn-secondary w-full"
           >
             Continue with Google
           </button>

@@ -1,3 +1,5 @@
+import AppIcon from './AppIcon';
+
 interface KpiCardProps {
   title: string;
   value: string | number;
@@ -13,25 +15,33 @@ const accents: Record<KpiCardProps['accent'], string> = {
   emerald: 'from-emerald-600 to-emerald-500'
 };
 
-const icons: Record<KpiCardProps['accent'], string> = {
-  navy: '📦',
-  teal: '🔔',
-  rose: '⚠️',
-  amber: '🕒',
-  emerald: '✅'
+const iconWrap: Record<KpiCardProps['accent'], string> = {
+  navy: 'bg-navy-50 text-navy-700',
+  teal: 'bg-teal-50 text-teal-700',
+  rose: 'bg-rose-50 text-rose-700',
+  amber: 'bg-amber-50 text-amber-700',
+  emerald: 'bg-emerald-50 text-emerald-700'
+};
+
+const icons: Record<KpiCardProps['accent'], 'shipments' | 'notifications' | 'warning' | 'clock' | 'check'> = {
+  navy: 'shipments',
+  teal: 'notifications',
+  rose: 'warning',
+  amber: 'clock',
+  emerald: 'check'
 };
 
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
   return (
-    <article className="card-surface p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+    <article className="card-surface surface-glow p-4 transition duration-200 hover:-translate-y-0.5">
       <div className="mb-3 flex items-center justify-between">
         <div className={`h-1.5 w-24 rounded-full bg-gradient-to-r ${accents[accent]}`} />
-        <span className="text-lg" aria-hidden>
-          {icons[accent]}
+        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${iconWrap[accent]}`} aria-hidden>
+          <AppIcon name={icons[accent]} className="h-4 w-4" />
         </span>
       </div>
       <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
-      <p className="mt-1.5 text-3xl font-bold tracking-tight text-navy-800">{value}</p>
+      <p className="mt-1.5 text-3xl font-bold tracking-tight text-navy-800 md:text-[32px]">{value}</p>
       <p className="mt-1.5 text-sm text-slate-600">{subtitle}</p>
     </article>
   );

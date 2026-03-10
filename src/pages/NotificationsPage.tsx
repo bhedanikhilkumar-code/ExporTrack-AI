@@ -15,7 +15,7 @@ export default function NotificationsPage() {
   const filtered = showUnreadOnly ? sorted.filter((notification) => !notification.read) : sorted;
 
   return (
-    <div>
+    <div className="page-stack">
       <PageHeader
         title="Notifications & Reminders"
         subtitle="Stay ahead of missing documents, delayed approvals, and approaching compliance deadlines."
@@ -23,7 +23,7 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => setShowUnreadOnly((value) => !value)}
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="btn-secondary"
           >
             {showUnreadOnly ? 'Show All' : 'Unread Only'}
           </button>
@@ -32,7 +32,7 @@ export default function NotificationsPage() {
 
       <section className="space-y-3">
         {filtered.map((notification) => (
-          <article key={notification.id} className={`rounded-2xl border p-4 shadow-soft ${notification.read ? 'border-slate-200 bg-white' : 'border-teal-200 bg-teal-50'}`}>
+          <article key={notification.id} className={`card-surface p-4 md:p-5 ${notification.read ? 'border-slate-200 bg-white' : 'border-teal-200 bg-teal-50'}`}>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
@@ -53,7 +53,7 @@ export default function NotificationsPage() {
                 <button
                   type="button"
                   onClick={() => markNotificationRead(notification.id)}
-                  className="rounded-lg bg-navy-700 px-3 py-2 text-xs font-semibold text-white hover:bg-navy-800"
+                  className="btn-primary btn-sm"
                 >
                   Mark as Read
                 </button>

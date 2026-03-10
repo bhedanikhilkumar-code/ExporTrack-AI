@@ -18,9 +18,9 @@ export default function VerificationChecklistPage() {
 
   if (!shipment) {
     return (
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-soft">
+      <div className="card-panel">
         <h2 className="text-xl font-semibold text-navy-800">Shipment not found</h2>
-        <Link to="/dashboard" className="mt-3 inline-flex rounded-lg bg-navy-700 px-4 py-2 text-sm font-semibold text-white">
+        <Link to="/dashboard" className="btn-primary mt-3">
           Return to Dashboard
         </Link>
       </div>
@@ -44,7 +44,7 @@ export default function VerificationChecklistPage() {
   };
 
   return (
-    <div>
+    <div className="page-stack">
       <PageHeader
         title={`Verification Checklist: ${shipment.id}`}
         subtitle="Validate all mandatory export documents and update status for compliance readiness."
@@ -52,14 +52,14 @@ export default function VerificationChecklistPage() {
           <button
             type="button"
             onClick={() => window.alert(`Verification summary exported for ${shipment.id}.`)}
-            className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+            className="btn-secondary"
           >
             Export Checklist
           </button>
         }
       />
 
-      <section className="mb-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section className="card-panel">
         <div className="mb-2 flex items-center justify-between">
           <p className="text-sm font-medium text-slate-700">Verification Progress</p>
           <p className="text-sm font-semibold text-navy-800">
@@ -71,30 +71,30 @@ export default function VerificationChecklistPage() {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-sm">
+      <section className="card-panel">
+        <div className="table-shell">
+          <table className="data-table min-w-[760px]">
             <thead>
-              <tr className="border-b border-slate-200 text-slate-500">
-                <th className="pb-2 font-medium">Required Document</th>
-                <th className="pb-2 font-medium">Current File</th>
-                <th className="pb-2 font-medium">Status</th>
-                <th className="pb-2 font-medium">Update Status</th>
+              <tr>
+                <th>Required Document</th>
+                <th>Current File</th>
+                <th>Status</th>
+                <th>Update Status</th>
               </tr>
             </thead>
             <tbody>
               {checklist.map((item) => (
-                <tr key={item.type} className="border-b border-slate-100 last:border-none">
-                  <td className="py-3 font-semibold text-navy-700">{item.type}</td>
-                  <td className="py-3 text-slate-700">{item.document?.fileName ?? 'Not uploaded'}</td>
-                  <td className="py-3">
+                <tr key={item.type}>
+                  <td className="font-semibold text-navy-700">{item.type}</td>
+                  <td>{item.document?.fileName ?? 'Not uploaded'}</td>
+                  <td>
                     <StatusBadge value={item.status} />
                   </td>
-                  <td className="py-3">
+                  <td>
                     <select
                       value={item.status}
                       onChange={(event) => handleStatusChange(item.type, event)}
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs outline-none ring-teal-200 focus:ring"
+                      className="input-field py-2 text-xs"
                     >
                       {statusOptions.map((option) => (
                         <option key={option} value={option}>
@@ -110,17 +110,11 @@ export default function VerificationChecklistPage() {
         </div>
       </section>
 
-      <div className="mt-6 flex flex-wrap gap-3">
-        <Link
-          to={`/shipments/${shipment.id}`}
-          className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
-        >
+      <div className="flex flex-wrap gap-3">
+        <Link to={`/shipments/${shipment.id}`} className="btn-secondary">
           Back to Shipment
         </Link>
-        <Link
-          to={`/shipments/${shipment.id}/ai-scan`}
-          className="rounded-xl bg-navy-700 px-4 py-2 text-sm font-semibold text-white hover:bg-navy-800"
-        >
+        <Link to={`/shipments/${shipment.id}/ai-scan`} className="btn-primary">
           View AI Extraction
         </Link>
       </div>

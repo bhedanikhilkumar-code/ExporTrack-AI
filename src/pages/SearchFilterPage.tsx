@@ -29,49 +29,49 @@ export default function SearchFilterPage() {
   }, [shipments, shipmentId, clientName, destination, shipmentDate, docType]);
 
   return (
-    <div>
+    <div className="page-stack">
       <PageHeader title="Smart Search & Filter" subtitle="Find shipments quickly by ID, client, destination, date, and document type." />
 
-      <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section className="card-panel">
         <div className="grid gap-4 md:grid-cols-3">
           <div>
-            <label htmlFor="shipment-id-filter" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="shipment-id-filter" className="input-label">
               Shipment ID
             </label>
             <input
               id="shipment-id-filter"
               value={shipmentId}
               onChange={(event) => setShipmentId(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+              className="input-field"
               placeholder="EXP-2026-001"
             />
           </div>
           <div>
-            <label htmlFor="client-filter" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="client-filter" className="input-label">
               Client Name
             </label>
             <input
               id="client-filter"
               value={clientName}
               onChange={(event) => setClientName(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+              className="input-field"
               placeholder="Apex Retail Imports"
             />
           </div>
           <div>
-            <label htmlFor="destination-filter" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="destination-filter" className="input-label">
               Destination Country
             </label>
             <input
               id="destination-filter"
               value={destination}
               onChange={(event) => setDestination(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+              className="input-field"
               placeholder="Germany"
             />
           </div>
           <div>
-            <label htmlFor="date-filter" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="date-filter" className="input-label">
               Shipment Date
             </label>
             <input
@@ -79,18 +79,18 @@ export default function SearchFilterPage() {
               type="date"
               value={shipmentDate}
               onChange={(event) => setShipmentDate(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+              className="input-field"
             />
           </div>
           <div>
-            <label htmlFor="doc-type-filter" className="mb-1 block text-sm font-medium text-slate-700">
+            <label htmlFor="doc-type-filter" className="input-label">
               Document Type
             </label>
             <select
               id="doc-type-filter"
               value={docType}
               onChange={(event) => setDocType(event.target.value)}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none ring-teal-200 focus:ring"
+              className="input-field"
             >
               <option value="">All document types</option>
               {REQUIRED_DOCUMENT_TYPES.map((type) => (
@@ -110,7 +110,7 @@ export default function SearchFilterPage() {
                 setShipmentDate('');
                 setDocType('');
               }}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+              className="btn-secondary w-full"
             >
               Clear Filters
             </button>
@@ -118,16 +118,16 @@ export default function SearchFilterPage() {
         </div>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-slate-200 bg-white p-5 shadow-soft">
+      <section className="card-panel">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-navy-800">Results ({filteredShipments.length})</h3>
-          <p className="text-sm text-slate-500">Production-like seeded records</p>
+          <h3 className="card-title text-base md:text-lg">Results ({filteredShipments.length})</h3>
+          <p className="text-xs uppercase tracking-wide text-slate-500">Seeded records</p>
         </div>
         <div className="space-y-3">
           {filteredShipments.map((shipment) => {
             const matchingDocCount = docType ? shipment.documents.filter((doc) => doc.type === docType).length : shipment.documents.length;
             return (
-              <article key={shipment.id} className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <article key={shipment.id} className="card-muted p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="text-sm font-semibold text-navy-800">{shipment.id}</p>
@@ -141,10 +141,7 @@ export default function SearchFilterPage() {
                   </div>
                   <div className="flex items-center gap-2">
                     <StatusBadge value={shipment.status} />
-                    <Link
-                      to={`/shipments/${shipment.id}`}
-                      className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100"
-                    >
+                    <Link to={`/shipments/${shipment.id}`} className="btn-secondary btn-xs">
                       Open
                     </Link>
                   </div>
