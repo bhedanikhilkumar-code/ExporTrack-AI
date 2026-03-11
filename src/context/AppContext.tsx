@@ -125,8 +125,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ...prev,
       isAuthenticated: true,
       user: {
-        name: 'Google User',
-        email: 'google.user@exportrack.ai',
+        name: 'Nikhil Bheda',
+        email: 'nikhil@bhedaexports.com',
         role: prev.user?.role ?? 'Manager'
       }
     }));
@@ -305,19 +305,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         shipment.id !== shipmentId
           ? shipment
           : {
-              ...shipment,
-              comments: [
-                {
-                  id: createId('COM'),
-                  author: prev.user?.name ?? 'Unknown',
-                  role: prev.user?.role ?? 'Staff',
-                  message,
-                  createdAt: new Date().toISOString(),
-                  internal
-                },
-                ...shipment.comments
-              ]
-            }
+            ...shipment,
+            comments: [
+              {
+                id: createId('COM'),
+                author: prev.user?.name ?? 'Unknown',
+                role: prev.user?.role ?? 'Staff',
+                message,
+                createdAt: new Date().toISOString(),
+                internal
+              },
+              ...shipment.comments
+            ]
+          }
       )
     }));
   };

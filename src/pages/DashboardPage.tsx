@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
-import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
 
@@ -76,22 +75,78 @@ export default function DashboardPage() {
     .sort((a, b) => b.time.localeCompare(a.time))
     .slice(0, 10);
 
+  const now = new Date();
+  const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
   return (
     <div className="page-stack">
-      <PageHeader
-        title="Operations Dashboard"
-        subtitle="Live command center for shipment health, document compliance, and team execution."
-        action={
-          <div className="flex flex-wrap gap-2">
-            <Link to="/shipments/create" className="btn-primary">
-              Create Shipment
-            </Link>
-            <Link to="/documents/upload" className="btn-secondary">
-              Upload Documents
-            </Link>
+      {/* ── Premium Dashboard Header ── */}
+      <div
+        className="relative mb-6 overflow-hidden rounded-2xl border border-navy-800/10"
+        style={{
+          background:
+            'linear-gradient(135deg, #0f2137 0%, #112c45 40%, #0e3a4a 70%, #0d9488 100%)'
+        }}
+      >
+        {/* Ambient radial blobs */}
+        <div
+          className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-20"
+          style={{ background: 'radial-gradient(circle, #14b8a6 0%, transparent 70%)' }}
+        />
+        <div
+          className="pointer-events-none absolute -bottom-10 left-8 h-48 w-48 rounded-full opacity-10"
+          style={{ background: 'radial-gradient(circle, #38bdf8 0%, transparent 70%)' }}
+        />
+
+        <div className="relative px-6 py-7 md:px-9 md:py-9">
+          {/* Live date chip */}
+          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-teal-300">
+            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
+            {dateLabel}
+          </span>
+
+          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div className="min-w-0">
+              {/* Gradient title */}
+              <h2
+                className="text-3xl font-extrabold tracking-tight md:text-[2.4rem] md:leading-tight"
+                style={{
+                  background: 'linear-gradient(90deg, #ffffff 0%, #99f6e4 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text'
+                }}
+              >
+                Operations Dashboard
+              </h2>
+              {/* Accent rule */}
+              <div className="mt-2.5 h-0.5 w-14 rounded-full bg-teal-400/70" />
+              {/* Subtitle */}
+              <p className="mt-3.5 max-w-2xl text-sm leading-relaxed text-slate-300 md:text-[0.9375rem]">
+                Live command center for shipment health, document compliance, and team execution.
+              </p>
+            </div>
+
+            {/* Action buttons */}
+            <div className="flex shrink-0 flex-wrap gap-2.5">
+              <Link
+                to="/shipments/create"
+                className="inline-flex items-center gap-2 rounded-xl border border-teal-300/40 bg-teal-500/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-teal-500/30 active:translate-y-0"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" /></svg>
+                Create Shipment
+              </Link>
+              <Link
+                to="/documents/upload"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:-translate-y-0.5 hover:bg-white/15 active:translate-y-0"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
+                Upload Documents
+              </Link>
+            </div>
           </div>
-        }
-      />
+        </div>
+      </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <KpiCard title="Total Shipments" value={totalShipments} subtitle="Across active lanes" accent="navy" />
@@ -114,18 +169,18 @@ export default function DashboardPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
             <div className="card-muted bg-navy-50/60">
-              <p className="text-xs uppercase tracking-wide text-navy-600">Active Shipments</p>
-              <p className="mt-1.5 text-2xl font-semibold text-navy-800">{activeShipments}</p>
+              <p className="eyebrow text-navy-600">Active Shipments</p>
+              <p className="metric-value">{activeShipments}</p>
               <p className="mt-1 text-xs text-slate-500">Out of {totalShipments} total lanes</p>
             </div>
             <div className="card-muted bg-teal-50/70">
-              <p className="text-xs uppercase tracking-wide text-teal-700">Compliance Readiness</p>
-              <p className="mt-1.5 text-2xl font-semibold text-navy-800">{complianceRate}%</p>
+              <p className="eyebrow text-teal-700">Compliance Readiness</p>
+              <p className="metric-value">{complianceRate}%</p>
               <p className="mt-1 text-xs text-slate-500">{verifiedDocs} verified documents</p>
             </div>
             <div className="card-muted bg-rose-50/60">
-              <p className="text-xs uppercase tracking-wide text-rose-700">Delayed Shipments</p>
-              <p className="mt-1.5 text-2xl font-semibold text-navy-800">{delayedShipments}</p>
+              <p className="eyebrow text-rose-700">Delayed Shipments</p>
+              <p className="metric-value">{delayedShipments}</p>
               <p className="mt-1 text-xs text-slate-500">Needs escalation and follow-up</p>
             </div>
           </div>
@@ -288,29 +343,29 @@ export default function DashboardPage() {
         </article>
 
         <article className="card-panel">
-        <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between">
             <h3 className="card-title text-base md:text-lg">Recent Activity Timeline</h3>
-          <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2">
               <Link to="/verification" className="btn-secondary btn-xs">
                 Verification
               </Link>
               <Link to="/notifications" className="btn-secondary btn-xs">
                 Notifications
               </Link>
+            </div>
           </div>
-        </div>
           <div className="space-y-3">
-          {activityTimeline.map((item) => (
+            {activityTimeline.map((item) => (
               <div key={item.id} className="timeline-item">
                 <div className="mb-1 flex items-center justify-between gap-2">
                   <p className="text-sm font-semibold text-slate-800">{item.title}</p>
                   <span className="rounded-full bg-slate-200 px-2 py-0.5 text-[11px] font-semibold text-slate-700">{item.type}</span>
                 </div>
-              <p className="text-xs text-slate-600">{item.detail}</p>
+                <p className="text-xs text-slate-600">{item.detail}</p>
                 <p className="mt-1 text-[11px] text-slate-500">{item.time.slice(0, 16).replace('T', ' ')}</p>
-            </div>
-          ))}
-        </div>
+              </div>
+            ))}
+          </div>
         </article>
       </section>
     </div>

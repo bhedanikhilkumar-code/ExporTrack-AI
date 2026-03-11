@@ -71,7 +71,7 @@
   }
 
   .card-panel {
-    @apply card-surface p-5 md:p-6;
+    @apply card-surface p-4 sm:p-5 md:p-6;
   }
 
   .card-muted {
@@ -84,6 +84,14 @@
 
   .card-subtitle {
     @apply mt-1 text-sm text-slate-500;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.14em] text-slate-500;
+  }
+
+  .metric-value {
+    @apply mt-2 text-2xl font-bold tracking-tight text-navy-800 md:text-3xl;
   }
 
   .section-gap {
@@ -178,6 +186,10 @@
     @apply bg-teal-50/40;
   }
 
+  .data-table tbody tr:nth-child(even) {
+    @apply bg-slate-50/60;
+  }
+
   .list-divider > * + * {
     @apply border-t border-slate-100 pt-3;
   }
@@ -198,5 +210,15 @@
 
   .timeline-item:last-child::after {
     @apply hidden;
+  }
+
+  @media (max-width: 640px) {
+    .page-stack {
+      @apply space-y-5;
+    }
+
+    .data-table {
+      min-width: 640px;
+    }
   }
 }

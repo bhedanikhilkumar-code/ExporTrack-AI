@@ -17,7 +17,7 @@ export type ShipmentStatus =
   | 'Under Verification'
   | 'Customs Hold'
   | 'Delivered';
-export type Role = 'Admin' | 'Manager' | 'Staff';
+export type Role = 'Admin' | 'Manager' | 'Staff' | 'Export Operations Manager';
 
 export interface ShipmentDocument {
   id: string;

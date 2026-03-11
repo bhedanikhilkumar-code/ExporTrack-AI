@@ -43,6 +43,15 @@ export const createSeedState = (): AppState => ({
   user: null,
   teamMembers: [
     {
+      id: 'TM-000',
+      name: 'Nikhil Bheda',
+      email: 'nikhil@bhedaexports.com',
+      role: 'Export Operations Manager',
+      region: 'South Asia',
+      activeCases: 14,
+      lastActive: '2026-03-11T08:53:00.000Z'
+    },
+    {
       id: 'TM-001',
       name: 'Aarav Mehta',
       email: 'aarav@exportrack.ai',
@@ -81,7 +90,7 @@ export const createSeedState = (): AppState => ({
   ],
   shipments: [
     {
-      
+
       assignedTo: 'Emily Chen',
       documents: [
         doc('DOC-101', 'Invoice', 'invoice-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:20:00.000Z', 'Emily Chen'),
@@ -116,7 +125,7 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      
+
       assignedTo: 'Aarav Mehta',
       documents: [
         doc('DOC-201', 'Invoice', 'invoice-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:03:00.000Z', 'Aarav Mehta'),
@@ -140,7 +149,7 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      
+
       assignedTo: 'Rohan Iyer',
       documents: [
         doc('DOC-301', 'Invoice', 'invoice-exp-003.pdf', 'PDF', 'Verified', '2026-03-05T07:02:00.000Z', 'Rohan Iyer'),
@@ -164,7 +173,7 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      
+
       assignedTo: 'Aarav Mehta',
       documents: [
         doc('DOC-401', 'Invoice', 'invoice-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:20:00.000Z', 'Emily Chen'),
@@ -191,7 +200,7 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-      
+
       assignedTo: 'Sofia Patel',
       documents: [
         doc('DOC-501', 'Invoice', 'invoice-exp-005.pdf', 'PDF', 'Pending', '2026-03-06T07:05:00.000Z', 'Sofia Patel'),
