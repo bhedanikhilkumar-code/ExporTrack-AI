@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 
 const features = [
@@ -15,9 +15,16 @@ const howItWorks = [
 ];
 
 export default function SplashPage() {
+  const navigate = useNavigate();
   const {
-    state: { shipments, notifications }
+    state: { shipments, notifications },
+    loginWithGoogle
   } = useAppContext();
+
+  const handleDemo = () => {
+    loginWithGoogle();
+    navigate('/dashboard');
+  };
 
   const totalDocs = shipments.reduce((sum, shipment) => sum + shipment.documents.length, 0);
   const liveAlerts = notifications.filter((item) => !item.read).length;
@@ -34,7 +41,7 @@ export default function SplashPage() {
             <a href="#features" className="hover:text-navy-800">Features</a>
             <a href="#how" className="hover:text-navy-800">How it works</a>
             <Link to="/auth" className="hover:text-navy-800">Login</Link>
-            <Link to="/dashboard" className="btn-primary px-4 py-2">Demo</Link>
+            <button type="button" onClick={handleDemo} className="btn-primary px-4 py-2">Demo</button>
           </nav>
         </div>
       </header>
@@ -55,7 +62,7 @@ export default function SplashPage() {
             </p>
             <div className="mt-7 flex flex-wrap gap-3">
               <Link to="/auth" className="btn-primary">Login / Sign up</Link>
-              <Link to="/dashboard" className="btn-secondary">Start Free Demo</Link>
+              <button type="button" onClick={handleDemo} className="btn-secondary">Start Free Demo</button>
             </div>
           </div>
 
@@ -113,7 +120,7 @@ export default function SplashPage() {
           <p>© 2026 ExporTrack-AI. Built for modern export operations.</p>
           <div className="flex items-center gap-4">
             <Link to="/auth" className="hover:text-navy-800">Login</Link>
-            <Link to="/dashboard" className="hover:text-navy-800">Open Demo</Link>
+            <button type="button" onClick={handleDemo} className="hover:text-navy-800">Open Demo</button>
           </div>
         </div>
       </footer>
