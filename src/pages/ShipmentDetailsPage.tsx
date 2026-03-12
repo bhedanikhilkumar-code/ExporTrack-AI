@@ -81,184 +81,199 @@ export default function ShipmentDetailsPage() {
   };
 
   return (
-    <div className="page-stack">
-      <PageHeader
-        title={`Shipment Details: ${shipment.id}`}
-        subtitle={`${shipment.clientName} • ${shipment.destinationCountry} • Container ${shipment.containerNumber}`}
-        action={
-          <button type="button" onClick={() => window.alert(`Export started for ${shipment.id}.`)} className="btn-secondary">
-            Export Shipment Bundle
-          </button>
+    <>
+      <style>{`
+        @keyframes slideInUp {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-      />
+        @keyframes progressSweep {
+          0% { background-position: 200% center; }
+          100% { background-position: -200% center; }
+        }
+        .animate-slide-up { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .hover-lift { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
+        .hover-lift:hover { transform: translateY(-4px); box-shadow: 0 20px 40px -15px rgba(13, 148, 136, 0.15); }
+      `}</style>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <article className="card-panel surface-glow bg-gradient-to-br from-white to-slate-50">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Compliance Score</p>
-          <p className="mt-2 text-3xl font-bold text-navy-800">{completion}%</p>
-          <p className="mt-1 text-xs text-slate-500">
-            {verifiedDocs}/{REQUIRED_DOCUMENT_TYPES.length} required documents verified
-          </p>
-          <div className="mt-3 h-2 rounded-full bg-slate-200">
-            <div className="h-2 rounded-full bg-teal-600" style={{ width: `${completion}%` }} />
-          </div>
-        </article>
-        <article className="card-panel">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Shipment Status</p>
-          <div className="mt-2">
-            <StatusBadge value={shipment.status} />
-          </div>
-          <p className="mt-3 text-xs text-slate-500">Shipment date: {shipment.shipmentDate}</p>
-          <p className="mt-1 text-xs text-slate-500">Deadline: {shipment.deadline}</p>
-        </article>
-        <article className="card-panel">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Priority / Owner</p>
-          <div className="mt-2">
-            <StatusBadge value={shipment.priority} />
-          </div>
-          <p className="mt-3 text-sm font-semibold text-navy-800">{shipment.assignedTo}</p>
-          <p className="mt-1 text-xs text-slate-500">Container {shipment.containerNumber}</p>
-        </article>
-        <article className="card-panel">
-          <p className="text-xs uppercase tracking-wide text-slate-500">Document Pulse</p>
-          <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-lg border border-emerald-100 bg-emerald-50 px-2 py-2">
-              <p className="text-[11px] uppercase text-emerald-700">Verified</p>
-              <p className="text-base font-semibold text-emerald-700">{verifiedDocs}</p>
+      <div className="page-stack pb-12">
+        <PageHeader
+          title={`Shipment Details: ${shipment.id}`}
+          subtitle={`${shipment.clientName} • ${shipment.destinationCountry} • Container ${shipment.containerNumber}`}
+          action={
+            <div className="flex gap-3">
+              <Link to={`/shipments/${shipment.id}/ai-scan`} className="btn-secondary bg-white/80 border-teal-200 text-teal-700 hover:bg-teal-50">
+                AI Scan Results
+              </Link>
+              <button type="button" onClick={() => window.alert('Exporting...')} className="btn-primary shadow-soft bg-gradient-to-r from-teal-600 to-navy-700 border-none">
+                Export Bundle
+              </button>
             </div>
-            <div className="rounded-lg border border-amber-100 bg-amber-50 px-2 py-2">
-              <p className="text-[11px] uppercase text-amber-700">Pending</p>
-              <p className="text-base font-semibold text-amber-700">{pendingDocs}</p>
-            </div>
-            <div className="rounded-lg border border-rose-100 bg-rose-50 px-2 py-2">
-              <p className="text-[11px] uppercase text-rose-700">Blocked</p>
-              <p className="text-base font-semibold text-rose-700">{blockedDocs}</p>
-            </div>
-          </div>
-        </article>
-      </section>
+          }
+        />
 
-      <section className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
-        <article className="card-panel">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        {/* ── Shipment Summary ── */}
+        <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+          <article className="card-panel relative overflow-hidden bg-gradient-to-br from-navy-800 to-navy-900 border-none text-white hover-lift">
+            <p className="text-xs uppercase tracking-wider text-navy-200 font-semibold mb-3">Overall Progress</p>
+            <div className="flex items-end gap-2 mb-2">
+              <span className="text-4xl font-bold">{completion}%</span>
+              <span className="text-sm text-navy-200 mb-1">Complete</span>
+            </div>
+            <div className="mt-4 bg-navy-900/50 rounded-full h-2.5 overflow-hidden border border-navy-700">
+              <div 
+                className="h-full rounded-full bg-gradient-to-r from-teal-400 to-teal-300 transition-all duration-1000"
+                style={{ width: `${completion}%` }}
+              />
+            </div>
+          </article>
+
+          <article className="card-panel bg-white/70 backdrop-blur-md hover-lift flex flex-col justify-between">
             <div>
-              <h3 className="card-title text-base md:text-lg">Uploaded Documents</h3>
-              <p className="card-subtitle">Latest file versions, validation state, and download actions.</p>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-3">Shipment Status</p>
+              <StatusBadge value={shipment.status} />
             </div>
-            <div className="flex gap-2">
-              <Link to={`/shipments/${shipment.id}/upload`} className="btn-primary btn-sm">
-                Upload Document
-              </Link>
-              <Link to={`/shipments/${shipment.id}/checklist`} className="btn-secondary btn-sm">
-                Open Checklist
-              </Link>
+            <div className="space-y-1 mt-4 text-sm font-medium">
+              <p className="flex justify-between"><span className="text-slate-500">Departure:</span> <span>{shipment.shipmentDate}</span></p>
+              <p className="flex justify-between"><span className="text-slate-500">Deadline:</span> <span className="text-rose-600">{shipment.deadline}</span></p>
             </div>
-          </div>
-          <div className="table-shell">
-            <table className="data-table min-w-[760px]">
-              <thead>
-                <tr>
-                  <th>Document Type</th>
-                  <th>File Name</th>
-                  <th>Format</th>
-                  <th>Status</th>
-                  <th>Uploaded By</th>
-                  <th>Date</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {shipment.documents.map((document) => (
-                  <tr key={document.id}>
-                    <td className="font-semibold text-slate-800">{document.type}</td>
-                    <td>{document.fileName}</td>
-                    <td>{document.fileFormat}</td>
-                    <td>
-                      <StatusBadge value={document.status} />
-                    </td>
-                    <td>{document.uploadedBy}</td>
-                    <td>{document.uploadedAt.slice(0, 10)}</td>
-                    <td>
-                      <button type="button" onClick={() => window.alert(`Downloading ${document.fileName}.`)} className="btn-secondary btn-xs">
-                        Download
-                      </button>
-                    </td>
+          </article>
+
+          <article className="card-panel bg-white/70 backdrop-blur-md hover-lift flex flex-col justify-between">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-3">Priority / Owner</p>
+              <StatusBadge value={shipment.priority} />
+            </div>
+            <div className="mt-4 flex items-center gap-3 bg-slate-50 p-2 rounded-lg border border-slate-100">
+               <div className="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center font-bold text-xs">
+                 {shipment.assignedTo.charAt(0)}
+               </div>
+               <span className="text-sm font-bold text-navy-800">{shipment.assignedTo}</span>
+            </div>
+          </article>
+
+          <article className="card-panel bg-white/70 backdrop-blur-md hover-lift">
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-3">Document Pulse</p>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-2 text-center">
+                <span className="block text-xl font-bold text-emerald-600">{verifiedDocs}</span>
+                <span className="text-[10px] uppercase font-bold text-emerald-700">Verified</span>
+              </div>
+              <div className="bg-amber-50 border border-amber-100 rounded-lg p-2 text-center">
+                <span className="block text-xl font-bold text-amber-600">{pendingDocs}</span>
+                <span className="text-[10px] uppercase font-bold text-amber-700">Pending</span>
+              </div>
+            </div>
+          </article>
+        </section>
+
+        {/* ── Documents & Checklist ── */}
+        <section className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr] animate-slide-up delay-100">
+          <article className="card-panel">
+            <div className="mb-4 flex items-center justify-between border-b border-slate-50 pb-4">
+              <h3 className="text-lg font-bold text-navy-800">Uploaded Documents</h3>
+              <div className="flex gap-2">
+                <Link to={`/shipments/${shipment.id}/upload`} className="btn-primary btn-sm">Upload</Link>
+                <Link to={`/shipments/${shipment.id}/checklist`} className="btn-secondary btn-sm">Checklist</Link>
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="text-slate-400 text-xs uppercase border-b border-slate-100">
+                    <th className="px-2 py-3">Type</th>
+                    <th className="px-2 py-3">Status</th>
+                    <th className="px-2 py-3 text-right">Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </article>
-
-        <article className="card-panel">
-          <h3 className="card-title text-base md:text-lg">Document Checklist</h3>
-          <p className="card-subtitle">Mandatory export files with real-time status visibility.</p>
-          <div className="mt-3 rounded-xl border border-slate-200 bg-slate-50 px-3 py-3">
-            <div className="mb-2 flex items-center justify-between text-xs">
-              <span className="font-semibold uppercase tracking-wide text-slate-500">Readiness</span>
-              <span className="font-semibold text-slate-700">{completion}% complete</span>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {shipment.documents.map((doc) => (
+                    <tr key={doc.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="px-2 py-3">
+                        <p className="font-semibold text-navy-800">{doc.type}</p>
+                        <p className="text-[10px] text-slate-400 truncate max-w-[140px]">{doc.fileName}</p>
+                      </td>
+                      <td className="px-2 py-3"><StatusBadge value={doc.status} /></td>
+                      <td className="px-2 py-3 text-right">
+                        <button type="button" className="text-teal-600 font-bold text-xs hover:underline">Download</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="h-2 rounded-full bg-slate-200">
-              <div className="h-2 rounded-full bg-teal-600" style={{ width: `${completion}%` }} />
+          </article>
+
+          <article className="card-panel border-t-4 border-t-teal-500">
+            <h3 className="text-lg font-bold text-navy-800 mb-4">Required Checklist</h3>
+            <div className="space-y-2">
+              {checklist.map((item) => {
+                const isVerified = item.status === 'Verified';
+                return (
+                  <div key={item.type} className={`p-3 rounded-xl border flex items-center justify-between transition-all ${isVerified ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50 border-slate-100'}`}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center ${isVerified ? 'bg-emerald-500 text-white' : 'bg-slate-200'}`}>
+                        {isVerified && <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path d="M5 13l4 4L19 7" /></svg>}
+                      </div>
+                      <span className="text-sm font-medium text-slate-700">{item.type}</span>
+                    </div>
+                    <StatusBadge value={item.status} />
+                  </div>
+                );
+              })}
             </div>
-          </div>
-          <div className="mt-3 space-y-2">
-            {checklist.map((item) => (
-              <div key={item.type} className="card-muted flex items-center justify-between">
-                <span className="text-sm text-slate-700">{item.type}</span>
-                <StatusBadge value={item.status} />
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
+          </article>
+        </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <article className="card-panel">
-          <h3 className="card-title text-base md:text-lg">Status Timeline</h3>
-          <p className="card-subtitle">Chronological activity across files and collaboration notes.</p>
-          <div className="space-y-3">
-            {timeline.slice(0, 8).map((event) => (
-              <div key={event.id} className="timeline-item">
-                <p className="text-xs text-slate-500">{event.time.slice(0, 16).replace('T', ' ')}</p>
-                <p className="text-sm font-semibold text-slate-800">{event.title}</p>
-                <p className="text-xs text-slate-600">{event.note}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-
-        <article className="card-panel">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="card-title text-base md:text-lg">Comments & Notes</h3>
-            <StatusBadge value={user?.role ?? 'Staff'} />
-          </div>
-          <form className="mb-4 space-y-3" onSubmit={handleCommentSubmit}>
-            <textarea value={message} onChange={(event) => setMessage(event.target.value)} rows={3} className="textarea-field" placeholder="Add operational comment or internal note..." />
-            <label className="check-row">
-              <input type="checkbox" checked={internal} disabled={!canViewInternalNotes} onChange={(event) => setInternal(event.target.checked)} /> Internal note (Admin/Manager only)
-            </label>
-            <button type="submit" className="btn-primary btn-sm">
-              Save Note
-            </button>
-          </form>
-          <div className="space-y-3">
-            {visibleComments.map((comment) => (
-              <div key={comment.id} className="card-muted">
-                <div className="mb-1 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-800">{comment.author}</p>
-                  <p className="text-xs text-slate-500">{comment.createdAt.slice(0, 16).replace('T', ' ')}</p>
+        {/* ── Timeline & Comments ── */}
+        <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr] animate-slide-up delay-200">
+          <article className="card-panel">
+            <h3 className="text-lg font-bold text-navy-800 mb-6">Activity Timeline</h3>
+            <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100">
+              {timeline.slice(0, 6).map((event) => (
+                <div key={event.id} className="relative pl-8">
+                  <div className="absolute left-0 top-1.5 w-4 h-4 -ml-2 rounded-full border-4 border-white bg-teal-500" />
+                  <p className="text-[10px] text-slate-400 font-bold uppercase">{event.time.slice(0, 16).replace('T', ' ')}</p>
+                  <p className="text-sm font-bold text-navy-800">{event.title}</p>
+                  <p className="text-xs text-slate-600 mt-1">{event.note}</p>
                 </div>
-                <p className="text-xs text-slate-500">
-                  {comment.role} {comment.internal ? '• Internal' : '• Team'}
-                </p>
-                <p className="mt-2 text-sm text-slate-700">{comment.message}</p>
+              ))}
+            </div>
+          </article>
+
+          <article className="card-panel">
+            <h3 className="text-lg font-bold text-navy-800 mb-4">Comments</h3>
+            <form className="mb-6" onSubmit={handleCommentSubmit}>
+              <textarea 
+                value={message} 
+                onChange={(e) => setMessage(e.target.value)} 
+                rows={2} 
+                className="input-field mb-2" 
+                placeholder="Add a team note..." 
+              />
+              <div className="flex justify-between items-center">
+                <label className="flex items-center gap-2 text-xs text-slate-500">
+                  <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} /> Internal
+                </label>
+                <button type="submit" className="btn-primary btn-sm">Post Note</button>
               </div>
-            ))}
-          </div>
-        </article>
-      </section>
-    </div>
+            </form>
+            <div className="space-y-4">
+              {visibleComments.map((comment) => (
+                <div key={comment.id} className={`p-4 rounded-xl border ${comment.internal ? 'bg-amber-50 border-amber-100' : 'bg-white border-slate-100'}`}>
+                  <div className="flex justify-between items-start mb-2">
+                    <span className="text-sm font-bold text-navy-800">{comment.author}</span>
+                    <span className="text-[10px] text-slate-400">{comment.createdAt.slice(0, 10)}</span>
+                  </div>
+                  <p className="text-sm text-slate-600">{comment.message}</p>
+                </div>
+              ))}
+            </div>
+          </article>
+        </section>
+      </div>
+    </>
   );
 }
-
