@@ -33,16 +33,16 @@ const icons: Record<KpiCardProps['accent'], 'shipments' | 'notifications' | 'war
 
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
   return (
-    <article className="card-surface surface-glow p-4 transition duration-200 hover:-translate-y-0.5">
+    <article className="card-premium card-hover">
       <div className="mb-3 flex items-center justify-between">
         <div className={`h-1.5 w-24 rounded-full bg-gradient-to-r ${accents[accent]}`} />
-        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${iconWrap[accent]}`} aria-hidden>
+        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 hover-lift ${iconWrap[accent]}`} aria-hidden>
           <AppIcon name={icons[accent]} className="h-4 w-4" />
         </span>
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{title}</p>
-      <p className="mt-1.5 text-3xl font-bold tracking-tight text-navy-800 md:text-[32px]">{value}</p>
-      <p className="mt-1.5 text-sm text-slate-600">{subtitle}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{title}</p>
+      <p className="mt-1.5 text-3xl font-bold tracking-tight text-navy-800 dark:text-slate-100 md:text-[32px]">{value}</p>
+      <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
     </article>
   );
 }

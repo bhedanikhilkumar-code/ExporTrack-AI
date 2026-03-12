@@ -353,3 +353,137 @@
 .animate-slide-down {
   animation: slide-down 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* Fade in animation for overlays */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 150ms ease-out forwards;
+}
+
+/* Card hover lift effect */
+@keyframes lift {
+  0% {
+    transform: translateY(0);
+  }
+
+  100% {
+    transform: translateY(-4px);
+  }
+}
+
+.group:hover .group-hover\:lift,
+.hover-lift:hover {
+  animation: lift 200ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Premium card styles with glass UI */
+.card-hover {
+  @apply cursor-pointer transition-all duration-200 ease-out hover:shadow-lg hover:-translate-y-1;
+}
+
+.card-glass {
+  @apply rounded-2xl border border-white/20 bg-white/10 backdrop-blur-xl shadow-lg dark:border-slate-700/20 dark:bg-slate-700/10;
+}
+
+.card-premium {
+  @apply card-surface hover:shadow-xl hover:-translate-y-1 transition-all duration-300;
+}
+
+/* Sidebar nav item animations */
+.nav-item-hover {
+  @apply relative overflow-hidden transition-all duration-200 ease-out;
+}
+
+.nav-item-hover::before {
+  @apply absolute inset-y-0 left-0 w-1 bg-teal-500 opacity-0 transition-opacity duration-200;
+  content: '';
+}
+
+.nav-item-hover.active::before {
+  @apply opacity-100;
+}
+
+.nav-item-hover:hover .nav-icon-scale {
+  @apply scale-110;
+}
+
+.nav-icon-scale {
+  @apply transition-transform duration-200 ease-out;
+}
+
+/* Active nav item indicator */
+.nav-item-active {
+  @apply bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-400 border-l-4 border-l-teal-500;
+}
+
+/* Icon animations */
+@keyframes icon-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.animate-icon-pulse {
+  animation: icon-pulse 2s ease-in-out infinite;
+}
+
+/* Button micro-interactions */
+.btn-hover-scale:hover {
+  @apply scale-105;
+}
+
+.btn-active-press:active {
+  @apply scale-95;
+}
+
+/* Loading pulsе animation for skeletons */
+@keyframes skeleton-pulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+.animate-pulse {
+  animation: skeleton-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Transform animations */
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 200ms ease-out forwards;
+}
+
+/* Smooth color transitions */
+.transition-colors-smooth {
+  @apply transition-colors duration-300 ease-in-out;
+}

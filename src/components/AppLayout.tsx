@@ -4,6 +4,7 @@ import { useAppContext } from '../context/AppContext';
 import AppIcon from './AppIcon';
 import StatusBadge from './StatusBadge';
 import NotificationPanel from './NotificationPanel';
+import CommandPalette from './CommandPalette';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -24,6 +25,7 @@ export default function AppLayout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -89,6 +91,19 @@ export default function AppLayout() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Handle Ctrl + K command palette
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setCommandPaletteOpen(!commandPaletteOpen);
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [commandPaletteOpen]);
+
   const handleResultClick = (path: string) => {
     navigate(path);
     setSearchQuery('');
@@ -138,14 +153,14 @@ export default function AppLayout() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `focus-ring relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${isActive
-                  ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400'
-                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
+                `focus-ring nav-item-hover relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${isActive
+                  ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400 border-l-4 border-l-teal-500 pl-2.5 active'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100 border-l-4 border-l-transparent'
                 }`
               }
               title={!sidebarExpanded ? item.label : ''}
             >
-              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50 transition-colors">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50 transition-colors nav-icon-scale">
                 <AppIcon name={item.icon} className="h-4 w-4" />
               </span>
               {sidebarExpanded && (
@@ -362,6 +377,12 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Command Palette */}
+      <CommandPalette
+        isOpen={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
     </div>
   );
 }
