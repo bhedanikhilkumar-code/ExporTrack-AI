@@ -2,8 +2,10 @@ import { FormEvent, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
+import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import { REQUIRED_DOCUMENT_TYPES } from '../types';
+import AiDelayPrediction from '../components/AiDelayPrediction';
 
 export default function ShipmentDetailsPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
@@ -214,6 +216,45 @@ export default function ShipmentDetailsPage() {
               </div>
             </div>
           </article>
+        </section>
+
+        {/* ── AI Insights Row ── */}
+        <section className="mt-6 grid gap-6 lg:grid-cols-3 animate-slide-up delay-75">
+           <div className="lg:col-span-1">
+             <AiDelayPrediction shipmentId={shipment.id} />
+           </div>
+           
+           <article className="lg:col-span-2 card-panel bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-teal-100 dark:border-teal-900/30">
+              <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 mb-6">
+                <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-900/30">
+                  <AppIcon name="ai-extract" className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-bold uppercase tracking-wider">AI Route Intelligence</h3>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-6">
+                 <div>
+                    <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 mb-3 tracking-widest">Efficiency Benchmark</p>
+                    <div className="flex items-center gap-4">
+                       <div className="h-16 w-16 rounded-full border-4 border-teal-100 dark:border-teal-900/30 flex items-center justify-center">
+                          <span className="text-xl font-black text-navy-800 dark:text-teal-400">92%</span>
+                       </div>
+                       <div>
+                          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Above Average</p>
+                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Performance vs Peer Lanes</p>
+                       </div>
+                    </div>
+                 </div>
+                 <div className="space-y-4">
+                    <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">Dynamic Recommendations</p>
+                    <div className="p-3 rounded-xl bg-teal-50/50 dark:bg-teal-900/20 border border-teal-100/50 dark:border-teal-900/30">
+                       <p className="text-xs font-semibold text-teal-800 dark:text-teal-300">Alternate port suggested for transshipment to save ~14h lead time.</p>
+                    </div>
+                    <button className="text-xs font-black text-teal-600 dark:text-teal-400 hover:underline uppercase tracking-widest">
+                       View Optimal Route Maps →
+                    </button>
+                 </div>
+              </div>
+           </article>
         </section>
 
         {/* ── Documents & Checklist ── */}

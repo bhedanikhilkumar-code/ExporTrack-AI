@@ -2,7 +2,9 @@ import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
 import StatusBadge from '../components/StatusBadge';
+import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
+import AiDelayPrediction from '../components/AiDelayPrediction';
 
 export default function DashboardPage() {
   const {
@@ -243,6 +245,22 @@ export default function DashboardPage() {
             {priorityAlerts.length === 0 && <p className="text-xs text-slate-500 italic">No unread alerts.</p>}
           </div>
         </article>
+      </section>
+
+      {/* ── AI Predictions Spotlight ── */}
+      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+         <div className="lg:col-span-1 flex flex-col justify-center">
+            <div className="flex items-center gap-3 text-navy-800 dark:text-teal-400 mb-2">
+               <div className="p-2 rounded-xl bg-navy-100 dark:bg-teal-900/30">
+                  <AppIcon name="ai-extract" className="h-6 w-6" />
+               </div>
+               <h3 className="text-lg font-bold">AI Risk Watch</h3>
+            </div>
+            <p className="text-sm text-slate-500 dark:text-slate-400">Real-time neural monitoring of global shipping lanes and supply chain anomalies.</p>
+         </div>
+         {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
+            <AiDelayPrediction key={s.id} shipmentId={s.id} />
+         ))}
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.55fr_1fr]">
