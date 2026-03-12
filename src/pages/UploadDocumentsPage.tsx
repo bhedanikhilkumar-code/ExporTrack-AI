@@ -94,9 +94,8 @@ export default function UploadDocumentsPage() {
             }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
-            className={`mt-4 block cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition ${
-              isDragOver ? 'border-teal-500 bg-teal-50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'
-            }`}
+            className={`mt-4 block cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition ${isDragOver ? 'border-teal-500 bg-teal-50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'
+              }`}
           >
             <p className="text-sm font-semibold text-slate-800">Drop files here or click to browse</p>
             <p className="mt-1 text-xs text-slate-500">Mobile: camera capture enabled automatically</p>

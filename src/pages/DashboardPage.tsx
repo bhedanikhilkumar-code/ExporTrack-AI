@@ -244,20 +244,20 @@ export default function DashboardPage() {
           <h3 className="text-sm font-bold text-navy-800 dark:text-teal-400 uppercase tracking-wider mb-2">Monthly Activity</h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Shipments per month (Last 6 months)</p>
           <div className="h-32 w-full">
-             <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
-               <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600 dark:text-teal-400" />
-               <path d={`M 0,40 ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')} L 100,40 Z`} fill="url(#gradient-activity)" />
-               <defs>
-                 <linearGradient id="gradient-activity" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0d9488" stopOpacity="0.15" /><stop offset="100%" stopColor="#0d9488" stopOpacity="0" /></linearGradient>
-               </defs>
-             </svg>
+            <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
+              <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600 dark:text-teal-400" />
+              <path d={`M 0,40 ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')} L 100,40 Z`} fill="url(#gradient-activity)" />
+              <defs>
+                <linearGradient id="gradient-activity" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0d9488" stopOpacity="0.15" /><stop offset="100%" stopColor="#0d9488" stopOpacity="0" /></linearGradient>
+              </defs>
+            </svg>
           </div>
           <div className="mt-3 flex justify-between">
-             {monthlyActivity.map(([month]) => (
-               <span key={month} className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
-                 {new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
-               </span>
-             ))}
+            {monthlyActivity.map(([month]) => (
+              <span key={month} className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
+                {new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
+              </span>
+            ))}
           </div>
         </article>
       </section>
@@ -269,9 +269,9 @@ export default function DashboardPage() {
             <Link to="/shipments" className="btn-secondary btn-sm">View All</Link>
           </div>
           <div className="grid gap-3 sm:grid-cols-3">
-             <div className="card-muted bg-navy-50/60"><p className="eyebrow text-navy-600">Active Shipments</p><p className="metric-value">{activeShipments}</p></div>
-             <div className="card-muted bg-teal-50/70"><p className="eyebrow text-teal-700">Compliance</p><p className="metric-value">{complianceRate}%</p></div>
-             <div className="card-muted bg-rose-50/60"><p className="eyebrow text-rose-700">Delayed</p><p className="metric-value">{delayedShipments}</p></div>
+            <div className="card-muted bg-navy-50/60"><p className="eyebrow text-navy-600">Active Shipments</p><p className="metric-value">{activeShipments}</p></div>
+            <div className="card-muted bg-teal-50/70"><p className="eyebrow text-teal-700">Compliance</p><p className="metric-value">{complianceRate}%</p></div>
+            <div className="card-muted bg-rose-50/60"><p className="eyebrow text-rose-700">Delayed</p><p className="metric-value">{delayedShipments}</p></div>
           </div>
         </article>
         <article className="card-panel">
@@ -290,18 +290,18 @@ export default function DashboardPage() {
 
       {/* ── AI Predictions Spotlight ── */}
       <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-slide-up">
-         <div className="lg:col-span-1 flex flex-col justify-center">
-            <div className="flex items-center gap-3 text-navy-800 dark:text-teal-400 mb-2">
-               <div className="p-2 rounded-xl bg-navy-100 dark:bg-teal-900/30">
-                  <AppIcon name="ai-extract" className="h-6 w-6" />
-               </div>
-               <h3 className="text-lg font-bold">AI Risk Watch</h3>
+        <div className="lg:col-span-1 flex flex-col justify-center">
+          <div className="flex items-center gap-3 text-navy-800 dark:text-teal-400 mb-2">
+            <div className="p-2 rounded-xl bg-navy-100 dark:bg-teal-900/30">
+              <AppIcon name="ai-extract" className="h-6 w-6" />
             </div>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Real-time neural monitoring of global shipping lanes and supply chain anomalies.</p>
-         </div>
-         {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
-            <AiDelayPrediction key={s.id} shipmentId={s.id} />
-         ))}
+            <h3 className="text-lg font-bold">AI Risk Watch</h3>
+          </div>
+          <p className="text-sm text-slate-500 dark:text-slate-400">Real-time neural monitoring of global shipping lanes and supply chain anomalies.</p>
+        </div>
+        {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
+          <AiDelayPrediction key={s.id} shipmentId={s.id} />
+        ))}
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.55fr_1fr]">
@@ -323,58 +323,58 @@ export default function DashboardPage() {
           </table></div>
         </article>
         <article className="card-panel"><h3 className="card-title text-base font-bold mb-4">Operations Timeline</h3>
-           <div className="space-y-3">
-             {activityTimeline.slice(0, 5).map(item => (
-               <div key={item.id} className="timeline-item">
-                 <p className="text-[11px] font-bold text-navy-800">{item.title}</p>
-                 <p className="text-[10px] text-slate-500">{item.detail}</p>
-               </div>
-             ))}
-           </div>
+          <div className="space-y-3">
+            {activityTimeline.slice(0, 5).map(item => (
+              <div key={item.id} className="timeline-item">
+                <p className="text-[11px] font-bold text-navy-800">{item.title}</p>
+                <p className="text-[10px] text-slate-500">{item.detail}</p>
+              </div>
+            ))}
+          </div>
         </article>
       </section>
       {/* ── AI Assistant & Analytics ── */}
       <section className="grid gap-6 lg:grid-cols-[1fr_2fr] animate-slide-up mt-6">
-         <AiLogisticsAssistant />
-         
-         <article className="card-panel bg-navy-900 border-none text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-               <AppIcon name="shipments" className="h-40 w-40" />
-            </div>
-            <div className="relative">
-               <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Network Health Index</h3>
-               <p className="text-sm text-navy-200 mb-8">Aggregated intelligence from global logistics lanes.</p>
-               
-               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                  {[
-                     { label: 'Lane Stability', val: '94%', trend: '+2%' },
-                     { label: 'Doc Accuracy', val: '98%', trend: '+0.5%' },
-                     { label: 'Risk Mitigation', val: '87%', trend: '+4%' },
-                     { label: 'Avg Lead Time', val: '12.4d', trend: '-1.2d' }
-                  ].map(stat => (
-                     <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                        <p className="text-[10px] font-bold uppercase text-navy-300 mb-1">{stat.label}</p>
-                        <p className="text-2xl font-black">{stat.val}</p>
-                        <p className="text-xs font-bold text-teal-400 mt-1">{stat.trend}</p>
-                     </div>
-                  ))}
-               </div>
+        <AiLogisticsAssistant />
 
-               <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
-                  <div className="flex gap-4">
-                     <div className="text-center">
-                        <p className="text-[9px] font-bold uppercase text-navy-400 italic">Processing</p>
-                        <p className="text-xs font-bold">4.2 TB/Day</p>
-                     </div>
-                     <div className="text-center">
-                        <p className="text-[9px] font-bold uppercase text-navy-400 italic">Nodes Active</p>
-                        <p className="text-xs font-bold">12 Active Regions</p>
-                     </div>
-                  </div>
-                  <button className="btn-primary bg-teal-500 hover:bg-teal-600 border-none px-6">Strategic Report</button>
-               </div>
+        <article className="card-panel bg-navy-900 border-none text-white relative overflow-hidden">
+          <div className="absolute top-0 right-0 p-8 opacity-10">
+            <AppIcon name="shipments" className="h-40 w-40" />
+          </div>
+          <div className="relative">
+            <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Network Health Index</h3>
+            <p className="text-sm text-navy-200 mb-8">Aggregated intelligence from global logistics lanes.</p>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { label: 'Lane Stability', val: '94%', trend: '+2%' },
+                { label: 'Doc Accuracy', val: '98%', trend: '+0.5%' },
+                { label: 'Risk Mitigation', val: '87%', trend: '+4%' },
+                { label: 'Avg Lead Time', val: '12.4d', trend: '-1.2d' }
+              ].map(stat => (
+                <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                  <p className="text-[10px] font-bold uppercase text-navy-300 mb-1">{stat.label}</p>
+                  <p className="text-2xl font-black">{stat.val}</p>
+                  <p className="text-xs font-bold text-teal-400 mt-1">{stat.trend}</p>
+                </div>
+              ))}
             </div>
-         </article>
+
+            <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+              <div className="flex gap-4">
+                <div className="text-center">
+                  <p className="text-[9px] font-bold uppercase text-navy-400 italic">Processing</p>
+                  <p className="text-xs font-bold">4.2 TB/Day</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-[9px] font-bold uppercase text-navy-400 italic">Nodes Active</p>
+                  <p className="text-xs font-bold">12 Active Regions</p>
+                </div>
+              </div>
+              <button className="btn-primary bg-teal-500 hover:bg-teal-600 border-none px-6">Strategic Report</button>
+            </div>
+          </div>
+        </article>
       </section>
     </div>
   );

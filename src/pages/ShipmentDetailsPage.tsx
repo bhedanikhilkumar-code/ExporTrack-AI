@@ -102,7 +102,7 @@ export default function ShipmentDetailsPage() {
     let score = 0;
     const missingCount = checklist.filter((item) => item.status === 'Missing').length;
     const rejectedCount = shipment.documents.filter((doc) => doc.status === 'Rejected').length;
-    
+
     score += missingCount * 15;
     score += rejectedCount * 20;
     if (shipment.delayed) score += 10;
@@ -188,8 +188,8 @@ export default function ShipmentDetailsPage() {
               <StatusBadge value={shipment.status} />
             </div>
             <div className="space-y-1 mt-4 text-xs font-bold text-slate-600 dark:text-slate-300">
-               <p className="flex justify-between"><span>Departure:</span> <span>{shipment.shipmentDate}</span></p>
-               <p className="flex justify-between"><span>Deadline:</span> <span className="text-rose-600 dark:text-rose-400">{shipment.deadline}</span></p>
+              <p className="flex justify-between"><span>Departure:</span> <span>{shipment.shipmentDate}</span></p>
+              <p className="flex justify-between"><span>Deadline:</span> <span className="text-rose-600 dark:text-rose-400">{shipment.deadline}</span></p>
             </div>
           </article>
 
@@ -197,10 +197,10 @@ export default function ShipmentDetailsPage() {
             <p className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">Priority / Handler</p>
             <StatusBadge value={shipment.priority} />
             <div className="mt-4 flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
-               <div className="w-7 h-7 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold text-[10px]">
-                 {shipment.assignedTo.charAt(0)}
-               </div>
-               <span className="text-xs font-bold text-navy-800 dark:text-slate-200">{shipment.assignedTo}</span>
+              <div className="w-7 h-7 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold text-[10px]">
+                {shipment.assignedTo.charAt(0)}
+              </div>
+              <span className="text-xs font-bold text-navy-800 dark:text-slate-200">{shipment.assignedTo}</span>
             </div>
           </article>
 
@@ -221,41 +221,41 @@ export default function ShipmentDetailsPage() {
 
         {/* ── AI Insights Row ── */}
         <section className="mt-6 grid gap-6 lg:grid-cols-3 animate-slide-up delay-75">
-           <div className="lg:col-span-1">
-             <AiDelayPrediction shipmentId={shipment.id} />
-           </div>
-           
-           <article className="lg:col-span-2 card-panel bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-teal-100 dark:border-teal-900/30">
-              <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 mb-6">
-                <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-900/30">
-                  <AppIcon name="ai-extract" className="h-4 w-4" />
+          <div className="lg:col-span-1">
+            <AiDelayPrediction shipmentId={shipment.id} />
+          </div>
+
+          <article className="lg:col-span-2 card-panel bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-teal-100 dark:border-teal-900/30">
+            <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 mb-6">
+              <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-900/30">
+                <AppIcon name="ai-extract" className="h-4 w-4" />
+              </div>
+              <h3 className="text-sm font-bold uppercase tracking-wider">AI Route Intelligence</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-6">
+              <div>
+                <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 mb-3 tracking-widest">Efficiency Benchmark</p>
+                <div className="flex items-center gap-4">
+                  <div className="h-16 w-16 rounded-full border-4 border-teal-100 dark:border-teal-900/30 flex items-center justify-center">
+                    <span className="text-xl font-black text-navy-800 dark:text-teal-400">92%</span>
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Above Average</p>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Performance vs Peer Lanes</p>
+                  </div>
                 </div>
-                <h3 className="text-sm font-bold uppercase tracking-wider">AI Route Intelligence</h3>
               </div>
-              <div className="grid sm:grid-cols-2 gap-6">
-                 <div>
-                    <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 mb-3 tracking-widest">Efficiency Benchmark</p>
-                    <div className="flex items-center gap-4">
-                       <div className="h-16 w-16 rounded-full border-4 border-teal-100 dark:border-teal-900/30 flex items-center justify-center">
-                          <span className="text-xl font-black text-navy-800 dark:text-teal-400">92%</span>
-                       </div>
-                       <div>
-                          <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Above Average</p>
-                          <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Performance vs Peer Lanes</p>
-                       </div>
-                    </div>
-                 </div>
-                 <div className="space-y-4">
-                    <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">Dynamic Recommendations</p>
-                    <div className="p-3 rounded-xl bg-teal-50/50 dark:bg-teal-900/20 border border-teal-100/50 dark:border-teal-900/30">
-                       <p className="text-xs font-semibold text-teal-800 dark:text-teal-300">Alternate port suggested for transshipment to save ~14h lead time.</p>
-                    </div>
-                    <button className="text-xs font-black text-teal-600 dark:text-teal-400 hover:underline uppercase tracking-widest">
-                       View Optimal Route Maps →
-                    </button>
-                 </div>
+              <div className="space-y-4">
+                <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">Dynamic Recommendations</p>
+                <div className="p-3 rounded-xl bg-teal-50/50 dark:bg-teal-900/20 border border-teal-100/50 dark:border-teal-900/30">
+                  <p className="text-xs font-semibold text-teal-800 dark:text-teal-300">Alternate port suggested for transshipment to save ~14h lead time.</p>
+                </div>
+                <button className="text-xs font-black text-teal-600 dark:text-teal-400 hover:underline uppercase tracking-widest">
+                  View Optimal Route Maps →
+                </button>
               </div>
-           </article>
+            </div>
+          </article>
         </section>
 
         {/* ── Documents & Checklist ── */}
@@ -320,10 +320,10 @@ export default function ShipmentDetailsPage() {
           <article className="card-panel">
             <h3 className="text-base font-bold text-navy-800 dark:text-slate-100 mb-4 uppercase tracking-wide">Collaboration</h3>
             <form className="mb-6" onSubmit={handleCommentSubmit}>
-              <textarea 
-                value={message} onChange={(e) => setMessage(e.target.value)} 
-                rows={2} className="input-field mb-2 text-xs" 
-                placeholder="Team message..." 
+              <textarea
+                value={message} onChange={(e) => setMessage(e.target.value)}
+                rows={2} className="input-field mb-2 text-xs"
+                placeholder="Team message..."
               />
               <div className="flex justify-between items-center">
                 <label className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase cursor-pointer">

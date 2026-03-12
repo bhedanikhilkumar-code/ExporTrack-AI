@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
@@ -7,13 +7,89 @@ type Mode = 'login' | 'signup';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { login, signup, loginWithGoogle } = useAppContext();
+  const { login, signup, loginWithGoogle, loginWithGoogleToken } = useAppContext();
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const googleButtonRef = useRef<HTMLDivElement>(null);
+
+  // Initialize Google Sign-In
+  useEffect(() => {
+    // Load Google Identity Services script
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      initializeGoogleSignIn();
+    };
+    document.head.appendChild(script);
+
+    return () => {
+      // Cleanup
+      if (document.head.contains(script)) {
+        document.head.removeChild(script);
+      }
+    };
+  }, []);
+
+  const initializeGoogleSignIn = () => {
+    if (!window.google) {
+      console.error('Google SDK not loaded');
+      return;
+    }
+
+    try {
+      // Initialize Google Sign-In with your Client ID
+      // For demo: using a placeholder - replace with your real Client ID
+      window.google.accounts.id.initialize({
+        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com', // Placeholder
+        callback: handleGoogleCallback,
+        auto_select: false
+      });
+
+      // Render the Sign-In button
+      if (googleButtonRef.current && !googleButtonRef.current.innerHTML) {
+        window.google.accounts.id.renderButton(
+          googleButtonRef.current,
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'signin_with'
+          }
+        );
+      }
+    } catch (error) {
+      console.error('Google Sign-In initialization error:', error);
+    }
+  };
+
+  const handleGoogleCallback = (response: any) => {
+    if (response.credential) {
+      try {
+        setError('');
+        setIsLoading(true);
+
+        // Login with the Google JWT token
+        loginWithGoogleToken(response.credential);
+
+        // Redirect to dashboard
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 300);
+      } catch (err: any) {
+        setError(err.message || 'Google sign-in failed. Please try again.');
+        setIsLoading(false);
+      }
+    } else {
+      setError('Google sign-in failed. Please try again.');
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -218,17 +294,7 @@ export default function AuthPage() {
               </div>
 
               {/* Google Sign-In Button */}
-              <button
-                type="button"
-                onClick={handleGoogleSignIn}
-                disabled={isLoading}
-                className="btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-600"
-              >
-                <AppIcon name="google" className="h-4 w-4" />
-                <span>
-                  {isLoading ? 'Connecting...' : 'Continue with Google'}
-                </span>
-              </button>
+              <div ref={googleButtonRef} />
 
               {/* Toggle Mode */}
               <div className="mt-6 text-center">

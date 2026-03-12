@@ -12,6 +12,7 @@ import {
   ShipmentDocument,
   UploadDocumentInput
 } from '../types';
+import { decodeJWT, type GoogleTokenPayload } from '../utils/googleAuth';
 
 const STORAGE_KEY = 'exportrack-ai-state-v1';
 
@@ -20,6 +21,7 @@ interface AppContextValue {
   login: (email: string, password: string) => void;
   signup: (name: string, email: string, password: string) => void;
   loginWithGoogle: () => void;
+  loginWithGoogleToken: (token: string) => void;
   logout: () => void;
   switchRole: (role: Role) => void;
   toggleTheme: () => void;
@@ -160,28 +162,13 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const loginWithGoogle = () => {
-    // Simulate OAuth callback with realistic Google profile
-    // In production, this would be replaced with actual Google OAuth flow
-    const googleUsers = [
-      {
-        name: 'Nikhil Bheda',
-        email: 'nikhil@bhedaexports.com',
-        role: 'Export Operations Manager'
-      },
-      {
-        name: 'Sarah Johnson',
-        email: 'sarah.johnson@company.com',
-        role: 'Compliance Officer'
-      },
-      {
-        name: 'Marco Chen',
-        email: 'marco.chen@logistics.com',
-        role: 'Shipment Coordinator'
-      }
-    ];
-
-    // Use a consistent user based on email hash (for demo consistency)
-    const demoUser = googleUsers[0];
+    // This is kept for backward compatibility and demo purposes
+    // In production, this would trigger the Google OAuth flow
+    const demoUser = {
+      name: 'Nikhil Bheda',
+      email: 'nikhil@bhedaexports.com',
+      role: 'Export Operations Manager' as const
+    };
 
     setState((prev) => ({
       ...prev,
@@ -195,7 +182,51 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
+  const loginWithGoogleToken = (token: string) => {
+    try {
+      // Decode the JWT token from Google
+      const payload = decodeJWT(token);
+      
+      if (!payload || !payload.email) {
+        throw new Error('Invalid token or missing email');
+      }
+
+      // Check if user is in team members (optional - for role assignment)
+      const knownMember = state.teamMembers.find(
+        (member) => member.email.toLowerCase() === payload.email.toLowerCase()
+      );
+
+      // Create user session with Google data
+      setState((prev) => ({
+        ...prev,
+        isAuthenticated: true,
+        user: {
+          name: payload.name || payload.given_name || 'Google User',
+          email: payload.email,
+          role: knownMember?.role ?? prev.user?.role ?? 'Staff',
+          authProvider: 'google',
+          profilePicture: payload.picture
+        }
+      }));
+
+      // Store the token for future API calls (if needed)
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('google_auth_token', token);
+        sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
+      }
+    } catch (error) {
+      console.error('Failed to login with Google token:', error);
+      throw new Error('Google authentication failed. Please try again.');
+    }
+  };
+
   const logout = () => {
+    // Clear Google auth token
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('google_auth_token');
+      sessionStorage.removeItem('google_token_expiry');
+    }
+
     setState((prev) => ({
       ...prev,
       isAuthenticated: false,
@@ -400,6 +431,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       login,
       signup,
       loginWithGoogle,
+      loginWithGoogleToken,
       logout,
       switchRole,
       toggleTheme,
