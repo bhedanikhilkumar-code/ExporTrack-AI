@@ -15,7 +15,13 @@ interface AppIconProps {
     | 'moon'
     | 'search'
     | 'shield'
-    | 'cross';
+    | 'cross'
+    | 'chevron-left'
+    | 'chevron-right'
+    | 'x'
+    | 'menu'
+    | 'bell'
+    | 'logout';
   className?: string;
 }
 
@@ -37,7 +43,13 @@ const iconMap: Record<AppIconProps['name'], string> = {
   moon: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z',
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35',
   shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z',
-  cross: 'M18 6 6 18M6 6l12 12'
+  cross: 'M18 6 6 18M6 6l12 12',
+  'chevron-left': 'M15 19l-7-7 7-7',
+  'chevron-right': 'M9 5l7 7-7 7',
+  x: 'M18 6 6 18M6 6l12 12',
+  menu: 'M3 6h18M3 12h18M3 18h18',
+  bell: 'M6 10a6 6 0 1 1 12 0v4l1.5 3H4.5L6 14v-4Zm3.5 9a2.5 2.5 0 0 0 5 0',
+  logout: 'M17 16l4-4m0 0l-4-4m4 4H9m4-13H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6'
 };
 
 export default function AppIcon({ name, className }: AppIconProps) {

@@ -19,6 +19,7 @@ const navItems = [
 
 export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
   const location = useLocation();
@@ -93,62 +94,123 @@ export default function AppLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
-      <aside className="fixed inset-y-0 left-0 z-20 hidden w-72 border-r border-slate-200 bg-white/95 px-5 py-6 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:block">
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-navy-700 font-bold text-white shadow-soft dark:bg-teal-600">EA</div>
-          <div>
-            <h1 className="text-lg font-bold tracking-tight text-navy-800 dark:text-slate-100">ExporTrack-AI</h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400">Logistics Intelligence</p>
-          </div>
+      {/* Desktop Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:flex md:flex-col transition-all duration-300 ease-in-out ${
+        sidebarExpanded ? 'w-72' : 'w-20'
+      }`}>
+        {/* Sidebar Header with Collapse Button */}
+        <div className="flex items-center justify-between border-b border-slate-200 px-4 py-6 dark:border-slate-800">
+          {sidebarExpanded && (
+            <div className="flex items-center gap-3">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-navy-700 font-bold text-white shadow-soft dark:bg-teal-600 text-sm">
+                EA
+              </div>
+              <div className="min-w-0 flex-1">
+                <h1 className="text-sm font-bold tracking-tight text-navy-800 dark:text-slate-100 truncate">
+                  ExporTrack-AI
+                </h1>
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                  Logistics Intelligence
+                </p>
+              </div>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setSidebarExpanded(!sidebarExpanded)}
+            className="focus-ring inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800/50 transition-colors"
+            title={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+            aria-label={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            <AppIcon 
+              name={sidebarExpanded ? 'chevron-left' : 'chevron-right'} 
+              className="h-4 w-4" 
+            />
+          </button>
         </div>
-        <nav className="space-y-2">
+
+        {/* Sidebar Navigation */}
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent dark:scrollbar-thumb-slate-600">
           {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `focus-ring flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
+                `focus-ring relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
                   isActive
-                    ? 'surface-glow border border-teal-100 bg-teal-50 text-teal-700 dark:border-teal-900/30 dark:bg-teal-900/20 dark:text-teal-400'
-                    : 'border border-transparent text-slate-600 hover:border-slate-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:border-slate-700 dark:hover:bg-slate-800 dark:hover:text-slate-100'
+                    ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
                 }`
               }
+              title={!sidebarExpanded ? item.label : ''}
             >
-              <span className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
+              <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700/50 transition-colors">
                 <AppIcon name={item.icon} className="h-4 w-4" />
               </span>
-              {item.label}
+              {sidebarExpanded && (
+                <span className="min-w-0 flex-1 truncate">
+                  {item.label}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
-        <div className="mt-8 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/30">
-          <p className="text-xs uppercase tracking-wide text-slate-500 dark:text-slate-400">Active Role</p>
-          <p className="mt-1 font-semibold text-navy-700 dark:text-teal-400">{user?.role ?? 'Staff'}</p>
-          <p className="mt-2 break-all text-xs text-slate-500 dark:text-slate-400">{user?.email}</p>
-          <div className="mt-3 rounded-lg border border-teal-100 bg-white px-2.5 py-2 dark:border-teal-900/30 dark:bg-slate-800">
-            <p className="text-[11px] uppercase tracking-wide text-slate-500 dark:text-slate-400">Unread Alerts</p>
-            <p className="mt-0.5 text-sm font-semibold text-teal-700 dark:text-teal-400">{unreadCount}</p>
+
+        {/* Sidebar Footer - User Info */}
+        {sidebarExpanded && (
+          <div className="border-t border-slate-200 px-4 py-4 dark:border-slate-800">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 dark:text-slate-400">
+                Active Role
+              </p>
+              <p className="mt-1 text-sm font-semibold text-navy-700 dark:text-teal-400 truncate">
+                {user?.role ?? 'Staff'}
+              </p>
+              <p className="mt-2 break-all text-[10px] text-slate-500 dark:text-slate-400">
+                {user?.email}
+              </p>
+              <div className="mt-3 rounded-lg border border-teal-100 bg-white px-2 py-1.5 dark:border-teal-900/30 dark:bg-slate-900">
+                <p className="text-[10px] uppercase tracking-widest font-semibold text-slate-500 dark:text-slate-400">
+                  Unread Alerts
+                </p>
+                <p className="mt-0.5 text-xs font-bold text-teal-700 dark:text-teal-400">
+                  {unreadCount}
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+        )}
+
+        {/* Minimized Sidebar Indicator */}
+        {!sidebarExpanded && (
+          <div className="border-t border-slate-200 px-3 py-4 dark:border-slate-800">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800">
+              <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400">
+                {unreadCount}
+              </span>
+            </div>
+          </div>
+        )}
       </aside>
 
-      <div className="md:pl-72">
+      <div className={`transition-all duration-300 ease-in-out ${
+        sidebarExpanded ? 'md:pl-72' : 'md:pl-20'
+      }`}>
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
-            <div className="flex items-center gap-3 flex-1">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
+            {/* Left Section */}
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              {/* Mobile Menu Button */}
               <button
                 type="button"
-                className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400 md:hidden"
+                className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors md:hidden"
                 onClick={() => setMenuOpen((value) => !value)}
+                aria-label={menuOpen ? 'Close menu' : 'Open menu'}
               >
                 {menuOpen ? (
-                  <span className="text-base font-semibold">X</span>
+                  <AppIcon name="x" className="h-5 w-5" />
                 ) : (
-                  <span className="space-y-1">
-                    <span className="block h-0.5 w-4 rounded bg-slate-600 dark:bg-slate-400" />
-                    <span className="block h-0.5 w-4 rounded bg-slate-600 dark:bg-slate-400" />
-                    <span className="block h-0.5 w-4 rounded bg-slate-600 dark:bg-slate-400" />
-                  </span>
+                  <AppIcon name="menu" className="h-5 w-5" />
                 )}
               </button>
               
@@ -159,8 +221,8 @@ export default function AppLayout() {
                 </div>
                 <input
                   type="text"
-                  placeholder="Search shipments, clients, docs..."
-                  className="input-field pl-10 h-10 text-xs font-medium"
+                  placeholder="Search shipments, docs..."
+                  className="input-field pl-10 h-10 text-xs w-full font-medium"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
@@ -171,11 +233,11 @@ export default function AppLayout() {
                 
                 {/* Search Results Dropdown */}
                 {showSearchResults && searchQuery.trim() && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-slide-up z-50">
-                    <div className="p-2.5 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                       <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Top Results</p>
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden z-50 animate-slide-up">
+                    <div className="p-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                       <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Results</p>
                     </div>
-                    <div className="max-h-[320px] overflow-y-auto">
+                    <div className="max-h-80 overflow-y-auto">
                       {filteredResults.length > 0 ? (
                         filteredResults.map((res, i) => (
                           <button
@@ -183,19 +245,27 @@ export default function AppLayout() {
                             onClick={() => handleResultClick(res.path)}
                             className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left group"
                           >
-                            <div className="flex flex-col">
-                              <span className="text-xs font-bold text-navy-800 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400">{res.title}</span>
-                              <span className="text-[10px] text-slate-500 dark:text-slate-400">{res.subtitle}</span>
+                            <div className="flex flex-col min-w-0 flex-1">
+                              <span className="text-xs font-bold text-navy-800 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 truncate">
+                                {res.title}
+                              </span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400 truncate">
+                                {res.subtitle}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2">
-                               <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{res.type}</span>
+                            <div className="flex items-center gap-2 ml-2 flex-shrink-0">
+                               <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded whitespace-nowrap">
+                                 {res.type}
+                               </span>
                                <StatusBadge value={res.status} />
                             </div>
                           </button>
                         ))
                       ) : (
                         <div className="p-8 text-center">
-                           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No matches found for "{searchQuery}"</p>
+                           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                             No results
+                           </p>
                         </div>
                       )}
                     </div>
@@ -203,53 +273,81 @@ export default function AppLayout() {
                 )}
               </div>
 
+              {/* Current Page Title (Hidden on Mobile) */}
               <div className="hidden lg:block ml-4">
                 <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500">ExporTrack</p>
-                <p className="text-sm font-bold text-navy-800 dark:text-slate-100 md:text-base">{currentNav?.label ?? location.pathname}</p>
+                <p className="text-sm font-bold text-navy-800 dark:text-slate-100 truncate">
+                  {currentNav?.label ?? 'Dashboard'}
+                </p>
               </div>
             </div>
+
+            {/* Right Section */}
             <div className="flex items-center gap-2 md:gap-3">
               {/* Theme Toggle Button */}
               <button
                 onClick={toggleTheme}
-                className="focus-ring flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-teal-400 dark:hover:bg-slate-700 transition-all active:scale-95"
-                title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                className="focus-ring flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-teal-400 dark:hover:bg-slate-700 transition-all active:scale-95"
+                title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+                aria-label={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
               >
                 <AppIcon name={theme === 'dark' ? 'sun' : 'moon'} className="h-5 w-5" />
               </button>
               
-              <NavLink to="/notifications" className="btn-secondary btn-sm md:text-sm">
-                Alerts
-                <span className="ml-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">{unreadCount}</span>
+              {/* Notifications Button */}
+              <NavLink 
+                to="/notifications" 
+                className="btn-secondary btn-sm md:text-sm relative group"
+                title="View notifications"
+              >
+                <AppIcon name="bell" className="h-4 w-4" />
+                <span className="hidden sm:inline">Alerts</span>
+                {unreadCount > 0 && (
+                  <span className="ml-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
+                    {unreadCount}
+                  </span>
+                )}
               </NavLink>
-              <button type="button" onClick={logout} className="btn-primary btn-sm md:text-sm px-4">
-                Logout
+
+              {/* Logout Button */}
+              <button 
+                type="button" 
+                onClick={logout} 
+                className="btn-primary btn-sm md:text-sm px-3 md:px-4"
+                title="Logout"
+              >
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">
+                  <AppIcon name="logout" className="h-4 w-4" />
+                </span>
               </button>
             </div>
           </div>
-          {menuOpen ? (
+
+          {/* Mobile Navigation Menu */}
+          {menuOpen && (
             <nav className="border-t border-slate-200 bg-white px-4 pb-4 pt-3 dark:border-slate-800 dark:bg-slate-900 md:hidden">
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 {navItems.map((item) => (
                   <NavLink
                     key={item.to}
                     to={item.to}
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
-                      `focus-ring flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm font-medium ${
+                      `focus-ring flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-center text-xs font-medium transition-all ${
                         isActive 
-                          ? 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-400' 
-                          : 'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                          ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' 
+                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
                       }`
                     }
                   >
-                    <AppIcon name={item.icon} className="h-4 w-4" />
-                    {item.label}
+                    <AppIcon name={item.icon} className="h-5 w-5" />
+                    <span className="line-clamp-2">{item.label}</span>
                   </NavLink>
                 ))}
               </div>
             </nav>
-          ) : null}
+          )}
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">
           <Outlet />

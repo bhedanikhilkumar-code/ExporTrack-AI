@@ -277,3 +277,61 @@
     @apply px-2 py-2;
   }
 }
+
+/* Scrollbar styling for sidebar and other scrollable elements */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgb(148, 163, 184);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgb(100, 116, 139);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgb(71, 85, 105);
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: rgb(51, 65, 85);
+}
+
+.scrollbar-thumb-slate-300 {
+  scrollbar-color: rgb(203, 213, 225) transparent;
+}
+
+.dark .scrollbar-thumb-slate-600 {
+  scrollbar-color: rgb(71, 85, 105) transparent;
+}
+
+.scrollbar-track-transparent {
+  scrollbar-color: auto transparent;
+}
+
+/* Animation for dropdown appearance */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 200ms ease-out forwards;
+}
