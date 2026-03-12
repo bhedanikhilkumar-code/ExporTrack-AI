@@ -43,10 +43,18 @@ export default function AuthPage() {
     }
 
     try {
+      // Get Client ID from environment variables
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+      
+      if (!clientId) {
+        setError('Google Sign-In is not configured. Please contact support.');
+        console.error('VITE_GOOGLE_CLIENT_ID environment variable is not set');
+        return;
+      }
+
       // Initialize Google Sign-In with your Client ID
-      // For demo: using a placeholder - replace with your real Client ID
       window.google.accounts.id.initialize({
-        client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '764086051850-6qr4p6gpi6hn506pt8ejuq83di341hur.apps.googleusercontent.com', // Placeholder
+        client_id: clientId,
         callback: handleGoogleCallback,
         auto_select: false
       });

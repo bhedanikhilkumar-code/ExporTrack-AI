@@ -5,6 +5,7 @@ import AppIcon from './AppIcon';
 import StatusBadge from './StatusBadge';
 import NotificationPanel from './NotificationPanel';
 import CommandPalette from './CommandPalette';
+import UserProfileDropdown from './UserProfileDropdown';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -33,7 +34,6 @@ export default function AppLayout() {
 
   const {
     state: { user, notifications, theme, shipments },
-    logout,
     toggleTheme
   } = useAppContext();
 
@@ -334,18 +334,8 @@ export default function AppLayout() {
                 />
               </div>
 
-              {/* Logout Button */}
-              <button
-                type="button"
-                onClick={logout}
-                className="btn-primary btn-sm md:text-sm px-3 md:px-4"
-                title="Logout"
-              >
-                <span className="hidden sm:inline">Logout</span>
-                <span className="sm:hidden">
-                  <AppIcon name="logout" className="h-4 w-4" />
-                </span>
-              </button>
+              {/* User Profile Dropdown */}
+              <UserProfileDropdown />
             </div>
           </div>
 

@@ -186,7 +186,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     try {
       // Decode the JWT token from Google
       const payload = decodeJWT(token);
-      
+
       if (!payload || !payload.email) {
         throw new Error('Invalid token or missing email');
       }
