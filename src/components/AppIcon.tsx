@@ -14,7 +14,8 @@ interface AppIconProps {
     | 'sun'
     | 'moon'
     | 'search'
-    | 'shield';
+    | 'shield'
+    | 'cross';
   className?: string;
 }
 
@@ -35,7 +36,8 @@ const iconMap: Record<AppIconProps['name'], string> = {
   sun: 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10ZM12 1v2m0 18v2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M1 12h2m18 0h2M4.2 19.8l1.4-1.4m12.8-12.8 1.4-1.4',
   moon: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z',
   search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35',
-  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z'
+  shield: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z',
+  cross: 'M18 6 6 18M6 6l12 12'
 };
 
 export default function AppIcon({ name, className }: AppIconProps) {
