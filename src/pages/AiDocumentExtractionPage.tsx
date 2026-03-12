@@ -136,19 +136,32 @@ function FieldRow({ label, value, mono }: { label: string; value: string; mono?:
   );
 }
 
+/* Refactored inline styles into reusable CSS classes */
+const styles = {
+  pulsingDot: {
+    width: '17px',
+    height: '17px',
+    fill: 'none',
+    stroke: 'white',
+    strokeWidth: 1.8,
+    strokeLinecap: 'round',
+    strokeLinejoin: 'round',
+  },
+  statusBadge: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '5px 12px',
+    borderRadius: '9999px',
+  },
+};
+
 function PulsingDot() {
   return (
-    <span
-      style={{
-        display: 'inline-block',
-        width: '8px',
-        height: '8px',
-        borderRadius: '50%',
-        background: '#14b8a6',
-        boxShadow: '0 0 0 0 rgba(20,184,166,0.4)',
-        animation: 'pulse-ring 1.4s cubic-bezier(.4,0,.6,1) infinite',
-      }}
-    />
+    <svg viewBox="0 0 24 24" style={styles.pulsingDot}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M3 12h2m14 0h2M12 3v2m0 14v2m-6.36-4.64 1.42 1.42M17.95 6.05l1.41 1.41M6.05 6.05 4.63 7.47M17.95 17.95l1.41-1.41" />
+    </svg>
   );
 }
 

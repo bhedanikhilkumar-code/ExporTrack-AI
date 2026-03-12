@@ -78,7 +78,7 @@
   .shadow-soft {
     box-shadow: 0 18px 38px -24px rgba(13, 30, 50, 0.36);
   }
-  
+
   .dark .shadow-soft {
     box-shadow: 0 18px 38px -24px rgba(0, 0, 0, 0.8);
   }
@@ -86,7 +86,7 @@
   .surface-glow {
     box-shadow: 0 0 0 1px rgba(14, 116, 144, 0.04), 0 22px 50px -36px rgba(17, 44, 69, 0.4);
   }
-  
+
   .dark .surface-glow {
     box-shadow: 0 0 0 1px rgba(14, 116, 144, 0.1), 0 22px 50px -36px rgba(0, 0, 0, 0.6);
   }
@@ -215,7 +215,7 @@
     @apply bg-slate-50/60 dark:bg-slate-800/30;
   }
 
-  .list-divider > * + * {
+  .list-divider>*+* {
     @apply border-t border-slate-100 pt-3 dark:border-slate-800;
   }
 
@@ -263,5 +263,17 @@
 
   .data-table {
     min-width: 640px;
+  }
+}
+
+/* Added responsive styles for tables */
+@media (max-width: 768px) {
+  .data-table {
+    @apply min-w-full;
+  }
+
+  .data-table th,
+  .data-table td {
+    @apply px-2 py-2;
   }
 }
