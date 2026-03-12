@@ -22,8 +22,8 @@ export default function DashboardPage() {
   const unreadAlerts = notifications.filter((n) => !n.read).length;
   const complianceRate = allDocuments.length ? Math.round((verifiedDocs / allDocuments.length) * 100) : 0;
 
-  const recentShipments = [...shipments].sort((a, b) => b.shipmentDate.localeCompare(a.shipmentDate)).slice(0, 7);
-  const priorityAlerts = [...notifications].filter((n) => !n.read).sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 5);
+  const recentShipments = [...shipments].sort((a, b) => (b.shipmentDate || '').localeCompare(a.shipmentDate || '')).slice(0, 7);
+  const priorityAlerts = [...notifications].filter((n) => !n.read).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
 
   const blockedDocs = shipments
     .flatMap((shipment) =>
@@ -76,7 +76,7 @@ export default function DashboardPage() {
       type: 'Alert'
     }))
   ]
-    .sort((a, b) => b.time.localeCompare(a.time))
+    .sort((a, b) => (b.time || '').localeCompare(a.time || ''))
     .slice(0, 10);
 
   const now = new Date();
@@ -104,7 +104,7 @@ export default function DashboardPage() {
   const monthlyActivity = useMemo(() => {
     const activity: Record<string, number> = {};
     shipments.forEach((s) => {
-      const month = s.shipmentDate.slice(0, 7); // YYYY-MM
+      const month = (s.shipmentDate || '').slice(0, 7); // YYYY-MM
       activity[month] = (activity[month] || 0) + 1;
     });
     return Object.entries(activity)
@@ -205,8 +205,8 @@ export default function DashboardPage() {
           <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Shipments per month (Last 6 months)</p>
           <div className="h-32 w-full">
              <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
-               <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / (monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600 dark:text-teal-400" />
-               <path d={`M 0,40 ${monthlyActivity.map(([, count], i) => `${(i / (monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')} L 100,40 Z`} fill="url(#gradient-activity)" />
+               <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600 dark:text-teal-400" />
+               <path d={`M 0,40 ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')} L 100,40 Z`} fill="url(#gradient-activity)" />
                <defs>
                  <linearGradient id="gradient-activity" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0d9488" stopOpacity="0.15" /><stop offset="100%" stopColor="#0d9488" stopOpacity="0" /></linearGradient>
                </defs>

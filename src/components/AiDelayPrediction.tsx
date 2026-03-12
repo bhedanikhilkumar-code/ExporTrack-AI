@@ -9,7 +9,8 @@ export default function AiDelayPrediction({ shipmentId }: AiDelayPredictionProps
   // Mock logic to generate data based on shipmentId
   const prediction = useMemo(() => {
     // Deterministic mock data based on ID string
-    const hash = shipmentId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const id = shipmentId || '';
+    const hash = id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
     const probability = (hash % 85) + 5; // 5% to 90%
     
     let risk: 'Low' | 'Medium' | 'High' = 'Low';
