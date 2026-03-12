@@ -14,6 +14,7 @@ import ShipmentDetailsPage from './pages/ShipmentDetailsPage';
 import SplashPage from './pages/SplashPage';
 import UploadDocumentsPage from './pages/UploadDocumentsPage';
 import VerificationChecklistPage from './pages/VerificationChecklistPage';
+import AiDocumentExtractionPage from './pages/AiDocumentExtractionPage';
 
 function ProtectedLayout() {
   const {
@@ -60,6 +61,7 @@ export default function App() {
         <Route path="/shipments/:shipmentId/checklist" element={<VerificationChecklistPage />} />
 
         <Route path="/documents/upload" element={<FirstShipmentRedirect kind="upload" />} />
+        <Route path="/ai-extraction" element={<AiDocumentExtractionPage />} />
         <Route path="/verification" element={<FirstShipmentRedirect kind="verification" />} />
 
         <Route path="/notifications" element={<NotificationsPage />} />

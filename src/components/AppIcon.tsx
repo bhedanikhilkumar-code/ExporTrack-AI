@@ -9,7 +9,8 @@ interface AppIconProps {
     | 'team'
     | 'clock'
     | 'warning'
-    | 'check';
+    | 'check'
+    | 'ai-extract';
   className?: string;
 }
 
@@ -25,7 +26,8 @@ const iconMap: Record<AppIconProps['name'], string> = {
   team: 'M16.5 20v-1.5a4 4 0 0 0-4-4h-6a4 4 0 0 0-4 4V20M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm10 10v-1a3 3 0 0 0-2.5-2.95M15 4.5a3.5 3.5 0 0 1 0 5.5',
   clock: 'M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z',
   warning: 'M12 9.5v4m0 3h.01M10.3 4.1 2.7 18a2 2 0 0 0 1.75 3h15.1A2 2 0 0 0 21.3 18L13.7 4.1a2 2 0 0 0-3.4 0Z',
-  check: 'M5 12.5 10 17l9-10'
+  check: 'M5 12.5 10 17l9-10',
+  'ai-extract': 'M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 11h4m-4 3h4M9 8V3.5L14.5 9H9Zm7 3.5L18 11l-2 1 1-2-1-2 2 1 2-1Z'
 };
 
 export default function AppIcon({ name, className }: AppIconProps) {

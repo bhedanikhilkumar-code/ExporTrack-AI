@@ -8,6 +8,7 @@ const navItems = [
   { to: '/shipments', label: 'Shipments', icon: 'shipments' },
   { to: '/shipments/create', label: 'Create Shipment', icon: 'create' },
   { to: '/documents/upload', label: 'Upload Docs', icon: 'upload' },
+  { to: '/ai-extraction', label: 'AI Extraction', icon: 'ai-extract' },
   { to: '/verification', label: 'Verification', icon: 'verification' },
   { to: '/notifications', label: 'Notifications', icon: 'notifications' },
   { to: '/team', label: 'Team', icon: 'team' }

@@ -90,7 +90,15 @@ export const createSeedState = (): AppState => ({
   ],
   shipments: [
     {
-
+      id: 'EXP-2026-001',
+      clientName: 'Apex Retail Imports',
+      destinationCountry: 'Germany',
+      shipmentDate: '2026-03-01',
+      containerNumber: 'MSCU1234567',
+      status: 'Under Verification',
+      delayed: true,
+      deadline: '2026-03-11',
+      priority: 'High',
       assignedTo: 'Emily Chen',
       documents: [
         doc('DOC-101', 'Invoice', 'invoice-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:20:00.000Z', 'Emily Chen'),
@@ -125,7 +133,15 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-
+      id: 'EXP-2026-002',
+      clientName: 'BlueWave Foods',
+      destinationCountry: 'UAE',
+      shipmentDate: '2026-02-26',
+      containerNumber: 'TCKU3142857-6',
+      status: 'Customs Hold',
+      delayed: true,
+      deadline: '2026-03-12',
+      priority: 'Medium',
       assignedTo: 'Aarav Mehta',
       documents: [
         doc('DOC-201', 'Invoice', 'invoice-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:03:00.000Z', 'Aarav Mehta'),
@@ -149,7 +165,15 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-
+      id: 'EXP-2026-003',
+      clientName: 'Nordic Auto Components',
+      destinationCountry: 'Sweden',
+      shipmentDate: '2026-03-05',
+      containerNumber: 'HLCU7294013-9',
+      status: 'Awaiting Documents',
+      delayed: false,
+      deadline: '2026-03-15',
+      priority: 'Medium',
       assignedTo: 'Rohan Iyer',
       documents: [
         doc('DOC-301', 'Invoice', 'invoice-exp-003.pdf', 'PDF', 'Verified', '2026-03-05T07:02:00.000Z', 'Rohan Iyer'),
@@ -173,7 +197,15 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-
+      id: 'EXP-2026-004',
+      clientName: 'GreenMed Pharma',
+      destinationCountry: 'Brazil',
+      shipmentDate: '2026-02-21',
+      containerNumber: 'MSCU4812960-2',
+      status: 'Delivered',
+      delayed: false,
+      deadline: '2026-02-28',
+      priority: 'Low',
       assignedTo: 'Aarav Mehta',
       documents: [
         doc('DOC-401', 'Invoice', 'invoice-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:20:00.000Z', 'Emily Chen'),
@@ -200,7 +232,15 @@ export const createSeedState = (): AppState => ({
       ]
     },
     {
-
+      id: 'EXP-2026-005',
+      clientName: 'TerraBuild Materials',
+      destinationCountry: 'Kenya',
+      shipmentDate: '2026-03-06',
+      containerNumber: 'MSCU1234568',
+      status: 'In Transit',
+      delayed: false,
+      deadline: '2026-03-13',
+      priority: 'High',
       assignedTo: 'Sofia Patel',
       documents: [
         doc('DOC-501', 'Invoice', 'invoice-exp-005.pdf', 'PDF', 'Pending', '2026-03-06T07:05:00.000Z', 'Sofia Patel'),
