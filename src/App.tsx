@@ -16,6 +16,7 @@ import UploadDocumentsPage from './pages/UploadDocumentsPage';
 import VerificationChecklistPage from './pages/VerificationChecklistPage';
 import AiDocumentExtractionPage from './pages/AiDocumentExtractionPage';
 import AiDocumentValidatorPage from './pages/AiDocumentValidatorPage';
+import AiComplianceCopilotPage from './pages/AiComplianceCopilotPage';
 
 function ProtectedLayout() {
   const {
@@ -64,6 +65,7 @@ export default function App() {
         <Route path="/documents/upload" element={<FirstShipmentRedirect kind="upload" />} />
         <Route path="/ai-extraction" element={<AiDocumentExtractionPage />} />
         <Route path="/ai-validator" element={<AiDocumentValidatorPage />} />
+        <Route path="/ai-compliance" element={<AiComplianceCopilotPage />} />
         <Route path="/verification" element={<FirstShipmentRedirect kind="verification" />} />
 
         <Route path="/notifications" element={<NotificationsPage />} />

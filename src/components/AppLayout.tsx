@@ -11,6 +11,7 @@ const navItems = [
   { to: '/documents/upload', label: 'Upload Docs', icon: 'upload' },
   { to: '/ai-extraction', label: 'AI Extraction', icon: 'ai-extract' },
   { to: '/ai-validator', label: 'AI Validator', icon: 'verification' },
+  { to: '/ai-compliance', label: 'AI Compliance', icon: 'shield' },
   { to: '/verification', label: 'Verification', icon: 'verification' },
   { to: '/notifications', label: 'Notifications', icon: 'notifications' },
   { to: '/team', label: 'Team', icon: 'team' }
