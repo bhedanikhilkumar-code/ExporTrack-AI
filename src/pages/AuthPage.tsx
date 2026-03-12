@@ -45,7 +45,7 @@ export default function AuthPage() {
     try {
       // Get Client ID from environment variables
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-      
+
       if (!clientId) {
         setError('Google Sign-In is not configured. Please contact support.');
         console.error('VITE_GOOGLE_CLIENT_ID environment variable is not set');
