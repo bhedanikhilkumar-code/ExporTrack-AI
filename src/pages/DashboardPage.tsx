@@ -5,6 +5,7 @@ import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
+import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
 
 export default function DashboardPage() {
   const {
@@ -291,6 +292,49 @@ export default function DashboardPage() {
              ))}
            </div>
         </article>
+      </section>
+      {/* ── AI Assistant & Analytics ── */}
+      <section className="grid gap-6 lg:grid-cols-[1fr_2fr] animate-slide-up mt-6">
+         <AiLogisticsAssistant />
+         
+         <article className="card-panel bg-navy-900 border-none text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-10">
+               <AppIcon name="shipments" className="h-40 w-40" />
+            </div>
+            <div className="relative">
+               <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Network Health Index</h3>
+               <p className="text-sm text-navy-200 mb-8">Aggregated intelligence from global logistics lanes.</p>
+               
+               <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                  {[
+                     { label: 'Lane Stability', val: '94%', trend: '+2%' },
+                     { label: 'Doc Accuracy', val: '98%', trend: '+0.5%' },
+                     { label: 'Risk Mitigation', val: '87%', trend: '+4%' },
+                     { label: 'Avg Lead Time', val: '12.4d', trend: '-1.2d' }
+                  ].map(stat => (
+                     <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                        <p className="text-[10px] font-bold uppercase text-navy-300 mb-1">{stat.label}</p>
+                        <p className="text-2xl font-black">{stat.val}</p>
+                        <p className="text-xs font-bold text-teal-400 mt-1">{stat.trend}</p>
+                     </div>
+                  ))}
+               </div>
+
+               <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
+                  <div className="flex gap-4">
+                     <div className="text-center">
+                        <p className="text-[9px] font-bold uppercase text-navy-400 italic">Processing</p>
+                        <p className="text-xs font-bold">4.2 TB/Day</p>
+                     </div>
+                     <div className="text-center">
+                        <p className="text-[9px] font-bold uppercase text-navy-400 italic">Nodes Active</p>
+                        <p className="text-xs font-bold">12 Active Regions</p>
+                     </div>
+                  </div>
+                  <button className="btn-primary bg-teal-500 hover:bg-teal-600 border-none px-6">Strategic Report</button>
+               </div>
+            </div>
+         </article>
       </section>
     </div>
   );
