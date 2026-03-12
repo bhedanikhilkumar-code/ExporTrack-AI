@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from './AppIcon';
 import StatusBadge from './StatusBadge';
+import NotificationPanel from './NotificationPanel';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -22,9 +23,11 @@ export default function AppLayout() {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
+  const notificationRef = useRef<HTMLDivElement>(null);
 
   const {
     state: { user, notifications, theme, shipments },
@@ -292,19 +295,29 @@ export default function AppLayout() {
               </button>
 
               {/* Notifications Button */}
-              <NavLink
-                to="/notifications"
-                className="btn-secondary btn-sm md:text-sm relative group"
-                title="View notifications"
-              >
-                <AppIcon name="bell" className="h-4 w-4" />
-                <span className="hidden sm:inline">Alerts</span>
-                {unreadCount > 0 && (
-                  <span className="ml-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
-                    {unreadCount}
-                  </span>
-                )}
-              </NavLink>
+              <div ref={notificationRef} className="relative">
+                <button
+                  type="button"
+                  onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
+                  className="btn-secondary btn-sm md:text-sm relative group"
+                  title="View notifications"
+                  aria-expanded={notificationPanelOpen}
+                  aria-label="View notifications"
+                >
+                  <AppIcon name="bell" className="h-4 w-4" />
+                  <span className="hidden sm:inline">Alerts</span>
+                  {unreadCount > 0 && (
+                    <span className="ml-1 rounded-full bg-rose-100 px-2 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900/30 dark:text-rose-400">
+                      {unreadCount}
+                    </span>
+                  )}
+                </button>
+                <NotificationPanel
+                  notifications={notifications}
+                  isOpen={notificationPanelOpen}
+                  onClose={() => setNotificationPanelOpen(false)}
+                />
+              </div>
 
               {/* Logout Button */}
               <button

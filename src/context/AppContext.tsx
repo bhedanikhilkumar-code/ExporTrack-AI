@@ -93,7 +93,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    
+
     // Sync theme with document class
     if (state.theme === 'dark') {
       document.documentElement.classList.add('dark');
@@ -120,10 +120,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     const knownMember = state.teamMembers.find(
       (member) => member.email.toLowerCase() === email.toLowerCase()
     );
-    
+
     const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
     const displayName = knownMember?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
-    
+
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,

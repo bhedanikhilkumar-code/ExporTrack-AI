@@ -336,3 +336,20 @@
 .animate-slide-up {
   animation: slide-up 200ms ease-out forwards;
 }
+
+/* Animation for notification panel (slide down) */
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-slide-down {
+  animation: slide-down 220ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}

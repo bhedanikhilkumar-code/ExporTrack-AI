@@ -1,28 +1,31 @@
 interface AppIconProps {
   name:
-    | 'dashboard'
-    | 'shipments'
-    | 'create'
-    | 'upload'
-    | 'verification'
-    | 'notifications'
-    | 'team'
-    | 'clock'
-    | 'warning'
-    | 'check'
-    | 'ai-extract'
-    | 'sun'
-    | 'moon'
-    | 'search'
-    | 'shield'
-    | 'cross'
-    | 'chevron-left'
-    | 'chevron-right'
-    | 'x'
-    | 'menu'
-    | 'bell'
-    | 'logout'
-    | 'google';
+  | 'dashboard'
+  | 'shipments'
+  | 'create'
+  | 'upload'
+  | 'verification'
+  | 'notifications'
+  | 'team'
+  | 'clock'
+  | 'warning'
+  | 'check'
+  | 'ai-extract'
+  | 'sun'
+  | 'moon'
+  | 'search'
+  | 'shield'
+  | 'cross'
+  | 'chevron-left'
+  | 'chevron-right'
+  | 'x'
+  | 'menu'
+  | 'bell'
+  | 'logout'
+  | 'google'
+  | 'file'
+  | 'alert'
+  | 'arrow-right';
   className?: string;
 }
 
@@ -49,7 +52,10 @@ const iconMap: Record<AppIconProps['name'], string> = {
   menu: 'M3 6h18M3 12h18M3 18h18',
   bell: 'M6 10a6 6 0 1 1 12 0v4l1.5 3H4.5L6 14v-4Zm3.5 9a2.5 2.5 0 0 0 5 0',
   logout: 'M17 16l4-4m0 0l-4-4m4 4H9m4-13H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6',
-  google: 'M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 c0-3.331,2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C15.503,2.988,13.953,2,12.545,2 C6.438,2,1.514,6.926,1.514,13s4.924,11,11.031,11c5.148,0,9.59-3.477,11.031-8.563h-6.031V10.239H12.545z'
+  google: 'M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 c0-3.331,2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C15.503,2.988,13.953,2,12.545,2 C6.438,2,1.514,6.926,1.514,13s4.924,11,11.031,11c5.148,0,9.59-3.477,11.031-8.563h-6.031V10.239H12.545z',
+  file: 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z M14 2v6h6M9 15h6M9 19h6',
+  alert: 'M12 9v6M12 21c6.627 0 12-5.373 12-12S18.627-3 12-3 0 2.373 0 9s5.373 12 12 12Zm0-15a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1Z',
+  'arrow-right': 'M5 12h14M12 5l7 7-7 7'
 };
 
 export default function AppIcon({ name, className }: AppIconProps) {

@@ -19,7 +19,7 @@ export default function AuthPage() {
     event.preventDefault();
     setError('');
     setIsLoading(true);
-    
+
     try {
       if (mode === 'login') {
         if (!email || !password) {
@@ -36,7 +36,7 @@ export default function AuthPage() {
         }
         signup(name.trim(), email, password);
       }
-      
+
       // Small delay for UX
       setTimeout(() => {
         navigate('/dashboard');
@@ -50,7 +50,7 @@ export default function AuthPage() {
   const handleGoogleSignIn = async () => {
     setError('');
     setIsLoading(true);
-    
+
     try {
       // Simulate Google OAuth flow delay
       await new Promise(resolve => setTimeout(resolve, 800));
@@ -81,7 +81,7 @@ export default function AuthPage() {
                 Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified in one powerful platform.
               </p>
             </div>
-            
+
             <ul className="space-y-4">
               <li className="flex items-start gap-3 text-sm">
                 <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
@@ -119,8 +119,8 @@ export default function AuthPage() {
                   {mode === 'login' ? 'Welcome back' : 'Create your account'}
                 </h2>
                 <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
-                  {mode === 'login' 
-                    ? 'Sign in to access your shipments and AI tools' 
+                  {mode === 'login'
+                    ? 'Sign in to access your shipments and AI tools'
                     : 'Join ExporTrack-AI to manage your logistics'}
                 </p>
               </div>
@@ -194,8 +194,8 @@ export default function AuthPage() {
                   />
                 </div>
 
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading}
                 >
