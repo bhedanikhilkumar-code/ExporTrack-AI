@@ -1,7 +1,8 @@
-import { useState } from 'react';
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { useState, useMemo, useEffect, useRef } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from './AppIcon';
+import StatusBadge from './StatusBadge';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -16,15 +17,77 @@ const navItems = [
 
 export default function AppLayout() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showSearchResults, setShowSearchResults] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const searchRef = useRef<HTMLDivElement>(null);
+
   const {
-    state: { user, notifications, theme },
+    state: { user, notifications, theme, shipments },
     logout,
     toggleTheme
   } = useAppContext();
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const currentNav = navItems.find((item) => location.pathname.startsWith(item.to));
+
+  // Global Search Logic
+  const filteredResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    const query = searchQuery.toLowerCase();
+    const results: any[] = [];
+
+    shipments.forEach((shipment) => {
+      // Search Shipment ID, Client, Destination, Container
+      if (
+        shipment.id.toLowerCase().includes(query) ||
+        shipment.clientName.toLowerCase().includes(query) ||
+        shipment.destinationCountry.toLowerCase().includes(query) ||
+        shipment.containerNumber.toLowerCase().includes(query)
+      ) {
+        results.push({
+          type: 'Shipment',
+          title: shipment.id,
+          subtitle: `${shipment.clientName} • ${shipment.destinationCountry}`,
+          path: `/shipments/${shipment.id}`,
+          status: shipment.status
+        });
+      }
+
+      // Search Documents names within this shipment
+      shipment.documents.forEach((doc) => {
+        if (doc.fileName.toLowerCase().includes(query) || doc.type.toLowerCase().includes(query)) {
+          results.push({
+            type: 'Document',
+            title: doc.type,
+            subtitle: `In ${shipment.id} • ${doc.fileName}`,
+            path: `/shipments/${shipment.id}`,
+            status: doc.status
+          });
+        }
+      });
+    });
+
+    return results.slice(0, 8); // Limit to top 8 results
+  }, [searchQuery, shipments]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowSearchResults(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleResultClick = (path: string) => {
+    navigate(path);
+    setSearchQuery('');
+    setShowSearchResults(false);
+  };
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
@@ -70,7 +133,7 @@ export default function AppLayout() {
       <div className="md:pl-72">
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
           <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-8">
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 flex-1">
               <button
                 type="button"
                 className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-lg border border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-400 md:hidden"
@@ -86,7 +149,59 @@ export default function AppLayout() {
                   </span>
                 )}
               </button>
-              <div>
+              
+              {/* Global Search Bar */}
+              <div className="relative max-w-md w-full hidden sm:block" ref={searchRef}>
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+                  <AppIcon name="search" className="h-4 w-4 text-slate-400" />
+                </div>
+                <input
+                  type="text"
+                  placeholder="Search shipments, clients, docs..."
+                  className="input-field pl-10 h-10 text-xs font-medium"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setShowSearchResults(true);
+                  }}
+                  onFocus={() => setShowSearchResults(true)}
+                />
+                
+                {/* Search Results Dropdown */}
+                {showSearchResults && searchQuery.trim() && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden animate-slide-up z-50">
+                    <div className="p-2.5 border-b border-slate-50 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
+                       <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Top Results</p>
+                    </div>
+                    <div className="max-h-[320px] overflow-y-auto">
+                      {filteredResults.length > 0 ? (
+                        filteredResults.map((res, i) => (
+                          <button
+                            key={i}
+                            onClick={() => handleResultClick(res.path)}
+                            className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left group"
+                          >
+                            <div className="flex flex-col">
+                              <span className="text-xs font-bold text-navy-800 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400">{res.title}</span>
+                              <span className="text-[10px] text-slate-500 dark:text-slate-400">{res.subtitle}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                               <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded">{res.type}</span>
+                               <StatusBadge value={res.status} />
+                            </div>
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-8 text-center">
+                           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No matches found for "{searchQuery}"</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="hidden lg:block ml-4">
                 <p className="text-[10px] uppercase font-bold tracking-widest text-slate-400 dark:text-slate-500">ExporTrack</p>
                 <p className="text-sm font-bold text-navy-800 dark:text-slate-100 md:text-base">{currentNav?.label ?? location.pathname}</p>
               </div>

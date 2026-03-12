@@ -12,7 +12,8 @@ interface AppIconProps {
     | 'check'
     | 'ai-extract'
     | 'sun'
-    | 'moon';
+    | 'moon'
+    | 'search';
   className?: string;
 }
 
@@ -31,7 +32,8 @@ const iconMap: Record<AppIconProps['name'], string> = {
   check: 'M5 12.5 10 17l9-10',
   'ai-extract': 'M9 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm-1 11h4m-4 3h4M9 8V3.5L14.5 9H9Zm7 3.5L18 11l-2 1 1-2-1-2 2 1 2-1Z',
   sun: 'M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10ZM12 1v2m0 18v2M4.2 4.2l1.4 1.4m12.8 12.8 1.4 1.4M1 12h2m18 0h2M4.2 19.8l1.4-1.4m12.8-12.8 1.4-1.4',
-  moon: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z'
+  moon: 'M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z',
+  search: 'M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm10 2-4.35-4.35'
 };
 
 export default function AppIcon({ name, className }: AppIconProps) {
