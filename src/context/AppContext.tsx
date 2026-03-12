@@ -22,6 +22,7 @@ interface AppContextValue {
   loginWithGoogle: () => void;
   logout: () => void;
   switchRole: (role: Role) => void;
+  toggleTheme: () => void;
   createShipment: (input: CreateShipmentInput) => Shipment;
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
@@ -92,7 +93,21 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    
+    // Sync theme with document class
+    if (state.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
   }, [state]);
+
+  const toggleTheme = () => {
+    setState(prev => ({
+      ...prev,
+      theme: prev.theme === 'dark' ? 'light' : 'dark'
+    }));
+  };
 
   const login = (email: string) => {
     const knownMember = state.teamMembers.find((member) => member.email.toLowerCase() === email.toLowerCase());
@@ -339,6 +354,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       loginWithGoogle,
       logout,
       switchRole,
+      toggleTheme,
       createShipment,
       addDocument,
       updateDocumentStatus,

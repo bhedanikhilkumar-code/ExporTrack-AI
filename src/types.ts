@@ -99,6 +99,7 @@ export interface AppState {
   shipments: Shipment[];
   notifications: NotificationItem[];
   teamMembers: TeamMember[];
+  theme: 'light' | 'dark';
 }
 
 export interface CreateShipmentInput {
