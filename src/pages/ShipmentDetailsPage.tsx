@@ -80,9 +80,53 @@ export default function ShipmentDetailsPage() {
     setInternal(false);
   };
 
+  const riskFactors = useMemo(() => {
+    const factors: string[] = [];
+    if (!shipment) return factors;
+
+    const missingDocs = checklist.filter((item) => item.status === 'Missing').map((item) => item.type);
+    const rejectedDocs = shipment.documents.filter((doc) => doc.status === 'Rejected').map((doc) => doc.type);
+    const delayed = shipment.delayed;
+
+    missingDocs.forEach((doc) => factors.push(`Missing ${doc}`));
+    rejectedDocs.forEach((doc) => factors.push(`Rejected ${doc}`));
+    if (delayed) factors.push('Shipment is marked as delayed');
+
+    return factors;
+  }, [shipment, checklist]);
+
+  const riskScore = useMemo(() => {
+    if (!shipment) return 0;
+    // Base risk calculation: 
+    // 15% for each missing required doc
+    // 20% for each rejected doc
+    // 10% if overall delayed
+    let score = 0;
+    const missingCount = checklist.filter((item) => item.status === 'Missing').length;
+    const rejectedCount = shipment.documents.filter((doc) => doc.status === 'Rejected').length;
+    
+    score += missingCount * 15;
+    score += rejectedCount * 20;
+    if (shipment.delayed) score += 10;
+
+    return Math.min(100, score);
+  }, [shipment, checklist]);
+
+  const getRiskColor = (score: number) => {
+    if (score > 70) return 'text-rose-600';
+    if (score > 30) return 'text-amber-500';
+    return 'text-emerald-500';
+  };
+
   return (
     <>
+      {/* Premium Animations */}
       <style>{`
+        @keyframes float {
+          0% { transform: translateY(0px); }
+          50% { transform: translateY(-4px); }
+          100% { transform: translateY(0px); }
+        }
         @keyframes slideInUp {
           from { opacity: 0; transform: translateY(20px); }
           to { opacity: 1; transform: translateY(0); }
@@ -114,8 +158,8 @@ export default function ShipmentDetailsPage() {
           }
         />
 
-        {/* ── Shipment Summary ── */}
-        <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-4 animate-slide-up">
+        {/* ── Shipment Summary & Risk ── */}
+        <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-5 animate-slide-up">
           <article className="card-panel relative overflow-hidden bg-gradient-to-br from-navy-800 to-navy-900 border-none text-white hover-lift">
             <p className="text-xs uppercase tracking-wider text-navy-200 font-semibold mb-3">Overall Progress</p>
             <div className="flex items-end gap-2 mb-2">
@@ -127,6 +171,30 @@ export default function ShipmentDetailsPage() {
                 className="h-full rounded-full bg-gradient-to-r from-teal-400 to-teal-300 transition-all duration-1000"
                 style={{ width: `${completion}%` }}
               />
+            </div>
+          </article>
+
+          {/* Risk Score Widget */}
+          <article className="card-panel bg-gradient-to-br from-white to-slate-50 border-rose-100 hover-lift lg:col-span-1">
+            <p className="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">Shipment Risk Score</p>
+            <div className="flex items-center justify-between">
+              <span className={`text-3xl font-bold ${getRiskColor(riskScore)}`}>{riskScore}%</span>
+              <svg className={`w-8 h-8 ${riskScore > 50 ? 'text-rose-500' : 'text-emerald-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="mt-3 space-y-1">
+              <p className="text-[10px] font-bold text-slate-400 uppercase">Top Risk Factors</p>
+              {riskFactors.length > 0 ? (
+                riskFactors.slice(0, 3).map((factor, i) => (
+                  <div key={i} className="flex items-center gap-1.5 overflow-hidden">
+                    <span className="w-1 h-1 rounded-full bg-rose-400 shrink-0" />
+                    <span className="text-[11px] font-medium text-slate-600 truncate">{factor}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-[11px] text-emerald-600 font-medium italic">No active risk factors detected.</p>
+              )}
             </div>
           </article>
 
