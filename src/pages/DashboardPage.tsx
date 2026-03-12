@@ -136,10 +136,37 @@ export default function DashboardPage() {
               <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-slate-300">Live command center for shipment health and document compliance.</p>
             </div>
             <div className="flex shrink-0 flex-wrap gap-2.5">
-              <Link to="/shipments/create" className="inline-flex items-center gap-2 rounded-xl border border-teal-300/40 bg-teal-500/20 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-teal-500/30">Create Shipment</Link>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* ── Quick Actions ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <Link to="/shipments/create" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
+          <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
+            <AppIcon name="create" className="h-5 w-5" />
+          </div>
+          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">Create Shipment</span>
+        </Link>
+        <Link to="/documents/upload" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
+          <div className="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform">
+            <AppIcon name="upload" className="h-5 w-5" />
+          </div>
+          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">Upload Document</span>
+        </Link>
+        <Link to="/ai-validator" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
+          <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
+            <AppIcon name="verification" className="h-5 w-5" />
+          </div>
+          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">Run AI Validation</span>
+        </Link>
+        <Link to="/notifications" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
+          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
+            <AppIcon name="notifications" className="h-5 w-5" />
+          </div>
+          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">View Alerts</span>
+        </Link>
       </div>
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
