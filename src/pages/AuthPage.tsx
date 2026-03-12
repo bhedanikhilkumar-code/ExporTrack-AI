@@ -1,6 +1,7 @@
 import { FormEvent, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
+import AppIcon from '../components/AppIcon';
 
 type Mode = 'login' | 'signup';
 
@@ -11,114 +12,251 @@ export default function AuthPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (mode === 'login') {
-      login(email, password);
-    } else {
-      signup(name.trim() || 'New User', email, password);
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      if (mode === 'login') {
+        if (!email || !password) {
+          setError('Please enter email and password');
+          setIsLoading(false);
+          return;
+        }
+        login(email, password);
+      } else {
+        if (!name.trim() || !email || !password) {
+          setError('Please fill in all fields');
+          setIsLoading(false);
+          return;
+        }
+        signup(name.trim(), email, password);
+      }
+      
+      // Small delay for UX
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 300);
+    } catch (err) {
+      setError('An error occurred. Please try again.');
+      setIsLoading(false);
     }
-    navigate('/dashboard');
   };
 
-  const handleGoogleSignIn = () => {
-    loginWithGoogle();
-    navigate('/dashboard');
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setIsLoading(true);
+    
+    try {
+      // Simulate Google OAuth flow delay
+      await new Promise(resolve => setTimeout(resolve, 800));
+      loginWithGoogle();
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 300);
+    } catch (err) {
+      setError('Google sign-in failed. Please try again.');
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-10">
-      <div className="mx-auto grid w-full max-w-5xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft md:grid-cols-[1.2fr_1fr]">
-        <section className="hidden bg-gradient-to-br from-navy-800 via-navy-700 to-teal-600 p-8 text-white md:block">
-          <h1 className="text-3xl font-semibold">ExporTrack-AI</h1>
-          <p className="mt-4 text-sm text-slate-100">
-            Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified.
-          </p>
-          <ul className="mt-6 space-y-3 text-sm">
-            <li>Track pending and rejected files in real time</li>
-            <li>Run OCR scans and validate extracted fields</li>
-            <li>Collaborate securely with role-based workflows</li>
-          </ul>
-        </section>
-
-        <section className="p-6 md:p-8">
-          <div className="mb-6 flex items-center justify-between">
-            <h2 className="text-2xl font-semibold text-navy-800">{mode === 'login' ? 'Welcome back' : 'Create your account'}</h2>
-            <button
-              type="button"
-              onClick={() => setMode((prev) => (prev === 'login' ? 'signup' : 'login'))}
-              className="btn-secondary btn-xs"
-            >
-              {mode === 'login' ? 'Need Sign up?' : 'Have Login?'}
-            </button>
-          </div>
-
-          <form className="space-y-4" onSubmit={handleSubmit}>
-            {mode === 'signup' ? (
-              <div>
-                <label htmlFor="full-name" className="input-label">
-                  Full Name
-                </label>
-                <input
-                  id="full-name"
-                  value={name}
-                  onChange={(event) => setName(event.target.value)}
-                  required={mode === 'signup'}
-                  className="input-field"
-                  placeholder="Jane Doe"
-                />
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-50 items-center justify-center px-4 py-8 md:py-0">
+      <div className="w-full max-w-5xl">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl grid md:grid-cols-[1.2fr_1fr]">
+          {/* Left Section - Info Panel */}
+          <section className="hidden bg-gradient-to-br from-navy-800 via-navy-700 to-teal-600 p-12 text-white md:flex flex-col justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white font-bold text-lg">
+                  EA
+                </div>
+                <h1 className="text-2xl font-bold tracking-tight">ExporTrack-AI</h1>
               </div>
-            ) : null}
-            <div>
-              <label htmlFor="email" className="input-label">
-                Email
-              </label>
-              <input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                required
-                className="input-field"
-                placeholder="ops@company.com"
-              />
+              <p className="text-sm text-slate-100/90 leading-relaxed">
+                Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified in one powerful platform.
+              </p>
             </div>
-            <div>
-              <label htmlFor="password" className="input-label">
-                Password
-              </label>
-              <input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(event) => setPassword(event.target.value)}
-                required
-                minLength={6}
-                className="input-field"
-                placeholder="******"
-              />
+            
+            <ul className="space-y-4">
+              <li className="flex items-start gap-3 text-sm">
+                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
+                  <AppIcon name="check" className="h-3 w-3 text-teal-300" />
+                </span>
+                <span>Track pending and rejected files in real time</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm">
+                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
+                  <AppIcon name="check" className="h-3 w-3 text-teal-300" />
+                </span>
+                <span>Run OCR scans and validate extracted fields</span>
+              </li>
+              <li className="flex items-start gap-3 text-sm">
+                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
+                  <AppIcon name="check" className="h-3 w-3 text-teal-300" />
+                </span>
+                <span>Collaborate securely with role-based workflows</span>
+              </li>
+            </ul>
+
+            <div className="pt-8 border-t border-white/10">
+              <p className="text-xs text-slate-100/70">
+                Enterprise-grade logistics platform trusted by export operations
+              </p>
             </div>
+          </section>
 
-            <button type="submit" className="btn-primary w-full">
-              {mode === 'login' ? 'Login' : 'Create Account'}
-            </button>
-          </form>
+          {/* Right Section - Auth Form */}
+          <section className="flex flex-col justify-center p-8 md:p-10">
+            <div className="w-full max-w-sm mx-auto">
+              {/* Header */}
+              <div className="mb-8">
+                <h2 className="text-2xl md:text-3xl font-bold text-navy-800 dark:text-slate-100">
+                  {mode === 'login' ? 'Welcome back' : 'Create your account'}
+                </h2>
+                <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
+                  {mode === 'login' 
+                    ? 'Sign in to access your shipments and AI tools' 
+                    : 'Join ExporTrack-AI to manage your logistics'}
+                </p>
+              </div>
 
-          <div className="my-5 flex items-center gap-3 text-xs text-slate-400">
-            <div className="h-px flex-1 bg-slate-200" />
-            OR
-            <div className="h-px flex-1 bg-slate-200" />
-          </div>
+              {/* Error Message */}
+              {error && (
+                <div className="mb-6 p-3 rounded-lg bg-rose-50 border border-rose-200 dark:bg-rose-900/20 dark:border-rose-800/50">
+                  <p className="text-sm text-rose-700 dark:text-rose-400">{error}</p>
+                </div>
+              )}
 
-          <button
-            type="button"
-            onClick={handleGoogleSignIn}
-            className="btn-secondary w-full"
-          >
-            Continue with Google
-          </button>
-        </section>
+              {/* Form */}
+              <form className="space-y-4" onSubmit={handleSubmit}>
+                {mode === 'signup' && (
+                  <div>
+                    <label htmlFor="full-name" className="input-label">
+                      Full Name
+                    </label>
+                    <input
+                      id="full-name"
+                      type="text"
+                      value={name}
+                      onChange={(event) => {
+                        setName(event.target.value);
+                        setError('');
+                      }}
+                      required={mode === 'signup'}
+                      className="input-field"
+                      placeholder="Jane Doe"
+                      disabled={isLoading}
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <label htmlFor="email" className="input-label">
+                    Email Address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(event) => {
+                      setEmail(event.target.value);
+                      setError('');
+                    }}
+                    required
+                    className="input-field"
+                    placeholder="ops@company.com"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="password" className="input-label">
+                    Password
+                  </label>
+                  <input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(event) => {
+                      setPassword(event.target.value);
+                      setError('');
+                    }}
+                    required
+                    minLength={6}
+                    className="input-field"
+                    placeholder="Minimum 6 characters"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isLoading}
+                >
+                  {isLoading ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></span>
+                      {mode === 'login' ? 'Signing in...' : 'Creating account...'}
+                    </span>
+                  ) : (
+                    mode === 'login' ? 'Sign In' : 'Create Account'
+                  )}
+                </button>
+              </form>
+
+              {/* Divider */}
+              <div className="my-6 flex items-center gap-3">
+                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+                <span className="text-xs font-medium text-slate-400 dark:text-slate-500">OR</span>
+                <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
+              </div>
+
+              {/* Google Sign-In Button */}
+              <button
+                type="button"
+                onClick={handleGoogleSignIn}
+                disabled={isLoading}
+                className="btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:border-slate-400 dark:hover:border-slate-600"
+              >
+                <AppIcon name="google" className="h-4 w-4" />
+                <span>
+                  {isLoading ? 'Connecting...' : 'Continue with Google'}
+                </span>
+              </button>
+
+              {/* Toggle Mode */}
+              <div className="mt-6 text-center">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
+                  {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
+                      setError('');
+                      setName('');
+                      setEmail('');
+                      setPassword('');
+                    }}
+                    className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
+                  >
+                    {mode === 'login' ? 'Sign up' : 'Sign in'}
+                  </button>
+                </p>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        {/* Footer */}
+        <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+          Protected by enterprise-grade security • Privacy Policy • Terms of Service
+        </p>
       </div>
     </div>
   );

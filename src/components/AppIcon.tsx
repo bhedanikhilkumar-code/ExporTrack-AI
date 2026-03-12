@@ -21,16 +21,15 @@ interface AppIconProps {
     | 'x'
     | 'menu'
     | 'bell'
-    | 'logout';
+    | 'logout'
+    | 'google';
   className?: string;
 }
 
 const iconMap: Record<AppIconProps['name'], string> = {
-  dashboard:
-    'M3 13.5h8.5V3H3v10.5Zm0 7.5h8.5v-5H3v5Zm11.5 0H23V10.5h-8.5V21Zm0-18v4.5H23V3h-8.5Z',
+  dashboard: 'M3 13.5h8.5V3H3v10.5Zm0 7.5h8.5v-5H3v5Zm11.5 0H23V10.5h-8.5V21Zm0-18v4.5H23V3h-8.5Z',
   shipments: 'M2.5 8.5 12 3l9.5 5.5v7L12 21l-9.5-5.5v-7Zm9.5 3.5 9.5-5.5M12 12 2.5 6.5M12 21v-9',
-  create:
-    'M12 4v16M4 12h16M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9Z',
+  create: 'M12 4v16M4 12h16M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9Z',
   upload: 'M12 15.5V4m0 0-4 4m4-4 4 4M4 15.5V19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3.5',
   verification: 'M4 12.5 9.5 18 20 6.5M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9',
   notifications: 'M6 10a6 6 0 1 1 12 0v4l1.5 3H4.5L6 14v-4Zm3.5 9a2.5 2.5 0 0 0 5 0',
@@ -49,7 +48,8 @@ const iconMap: Record<AppIconProps['name'], string> = {
   x: 'M18 6 6 18M6 6l12 12',
   menu: 'M3 6h18M3 12h18M3 18h18',
   bell: 'M6 10a6 6 0 1 1 12 0v4l1.5 3H4.5L6 14v-4Zm3.5 9a2.5 2.5 0 0 0 5 0',
-  logout: 'M17 16l4-4m0 0l-4-4m4 4H9m4-13H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6'
+  logout: 'M17 16l4-4m0 0l-4-4m4 4H9m4-13H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6',
+  google: 'M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 c0-3.331,2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C15.503,2.988,13.953,2,12.545,2 C6.438,2,1.514,6.926,1.514,13s4.924,11,11.031,11c5.148,0,9.59-3.477,11.031-8.563h-6.031V10.239H12.545z'
 };
 
 export default function AppIcon({ name, className }: AppIconProps) {

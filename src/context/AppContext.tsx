@@ -109,40 +109,88 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
-  const login = (email: string) => {
-    const knownMember = state.teamMembers.find((member) => member.email.toLowerCase() === email.toLowerCase());
-    const nameFromEmail = email.split('@')[0].replace('.', ' ');
+  const login = (email: string, password: string) => {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    // Check if known team member
+    const knownMember = state.teamMembers.find(
+      (member) => member.email.toLowerCase() === email.toLowerCase()
+    );
+    
+    const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
+    const displayName = knownMember?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
+    
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
       user: {
-        name: knownMember?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase()),
+        name: displayName,
         email,
-        role: knownMember?.role ?? prev.user?.role ?? 'Staff'
+        role: knownMember?.role ?? prev.user?.role ?? 'Staff',
+        authProvider: 'email'
       }
     }));
   };
 
-  const signup = (name: string, email: string) => {
+  const signup = (name: string, email: string, password: string) => {
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      throw new Error('Invalid email format');
+    }
+
+    if (password.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
       user: {
-        name,
+        name: name.trim() || 'New User',
         email,
-        role: 'Staff'
+        role: 'Staff',
+        authProvider: 'email'
       }
     }));
   };
 
   const loginWithGoogle = () => {
+    // Simulate OAuth callback with realistic Google profile
+    // In production, this would be replaced with actual Google OAuth flow
+    const googleUsers = [
+      {
+        name: 'Nikhil Bheda',
+        email: 'nikhil@bhedaexports.com',
+        role: 'Export Operations Manager'
+      },
+      {
+        name: 'Sarah Johnson',
+        email: 'sarah.johnson@company.com',
+        role: 'Compliance Officer'
+      },
+      {
+        name: 'Marco Chen',
+        email: 'marco.chen@logistics.com',
+        role: 'Shipment Coordinator'
+      }
+    ];
+
+    // Use a consistent user based on email hash (for demo consistency)
+    const demoUser = googleUsers[0];
+
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
       user: {
-        name: 'Nikhil Bheda',
-        email: 'nikhil@bhedaexports.com',
-        role: prev.user?.role ?? 'Manager'
+        name: demoUser.name,
+        email: demoUser.email,
+        role: demoUser.role,
+        authProvider: 'google'
       }
     }));
   };

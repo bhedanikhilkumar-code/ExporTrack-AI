@@ -91,6 +91,7 @@ export interface UserSession {
   name: string;
   email: string;
   role: Role;
+  authProvider?: 'email' | 'google';
 }
 
 export interface AppState {

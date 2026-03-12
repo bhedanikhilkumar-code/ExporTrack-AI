@@ -95,9 +95,8 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {/* Desktop Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:flex md:flex-col transition-all duration-300 ease-in-out ${
-        sidebarExpanded ? 'w-72' : 'w-20'
-      }`}>
+      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200 bg-white/95 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:flex md:flex-col transition-all duration-300 ease-in-out ${sidebarExpanded ? 'w-72' : 'w-20'
+        }`}>
         {/* Sidebar Header with Collapse Button */}
         <div className="flex items-center justify-between border-b border-slate-200 px-4 py-6 dark:border-slate-800">
           {sidebarExpanded && (
@@ -122,9 +121,9 @@ export default function AppLayout() {
             title={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
             aria-label={sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
           >
-            <AppIcon 
-              name={sidebarExpanded ? 'chevron-left' : 'chevron-right'} 
-              className="h-4 w-4" 
+            <AppIcon
+              name={sidebarExpanded ? 'chevron-left' : 'chevron-right'}
+              className="h-4 w-4"
             />
           </button>
         </div>
@@ -136,10 +135,9 @@ export default function AppLayout() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `focus-ring relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${
-                  isActive
-                    ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400'
-                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
+                `focus-ring relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 group ${isActive
+                  ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/20 dark:text-teal-400'
+                  : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
                 }`
               }
               title={!sidebarExpanded ? item.label : ''}
@@ -193,9 +191,8 @@ export default function AppLayout() {
         )}
       </aside>
 
-      <div className={`transition-all duration-300 ease-in-out ${
-        sidebarExpanded ? 'md:pl-72' : 'md:pl-20'
-      }`}>
+      <div className={`transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:pl-72' : 'md:pl-20'
+        }`}>
         <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 backdrop-blur dark:border-slate-800 dark:bg-slate-900/90">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8">
             {/* Left Section */}
@@ -213,7 +210,7 @@ export default function AppLayout() {
                   <AppIcon name="menu" className="h-5 w-5" />
                 )}
               </button>
-              
+
               {/* Global Search Bar */}
               <div className="relative max-w-md w-full hidden sm:block" ref={searchRef}>
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
@@ -230,12 +227,12 @@ export default function AppLayout() {
                   }}
                   onFocus={() => setShowSearchResults(true)}
                 />
-                
+
                 {/* Search Results Dropdown */}
                 {showSearchResults && searchQuery.trim() && (
                   <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 shadow-2xl overflow-hidden z-50 animate-slide-up">
                     <div className="p-2.5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/30">
-                       <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Results</p>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest px-2">Results</p>
                     </div>
                     <div className="max-h-80 overflow-y-auto">
                       {filteredResults.length > 0 ? (
@@ -254,18 +251,18 @@ export default function AppLayout() {
                               </span>
                             </div>
                             <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                               <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded whitespace-nowrap">
-                                 {res.type}
-                               </span>
-                               <StatusBadge value={res.status} />
+                              <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase bg-slate-100 dark:bg-slate-800 px-1.5 py-0.5 rounded whitespace-nowrap">
+                                {res.type}
+                              </span>
+                              <StatusBadge value={res.status} />
                             </div>
                           </button>
                         ))
                       ) : (
                         <div className="p-8 text-center">
-                           <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                             No results
-                           </p>
+                          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            No results
+                          </p>
                         </div>
                       )}
                     </div>
@@ -293,10 +290,10 @@ export default function AppLayout() {
               >
                 <AppIcon name={theme === 'dark' ? 'sun' : 'moon'} className="h-5 w-5" />
               </button>
-              
+
               {/* Notifications Button */}
-              <NavLink 
-                to="/notifications" 
+              <NavLink
+                to="/notifications"
                 className="btn-secondary btn-sm md:text-sm relative group"
                 title="View notifications"
               >
@@ -310,9 +307,9 @@ export default function AppLayout() {
               </NavLink>
 
               {/* Logout Button */}
-              <button 
-                type="button" 
-                onClick={logout} 
+              <button
+                type="button"
+                onClick={logout}
                 className="btn-primary btn-sm md:text-sm px-3 md:px-4"
                 title="Logout"
               >
@@ -334,10 +331,9 @@ export default function AppLayout() {
                     to={item.to}
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
-                      `focus-ring flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-center text-xs font-medium transition-all ${
-                        isActive 
-                          ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400' 
-                          : 'bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
+                      `focus-ring flex flex-col items-center gap-1 rounded-lg px-2 py-3 text-center text-xs font-medium transition-all ${isActive
+                        ? 'bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-400'
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-400 dark:hover:bg-slate-700'
                       }`
                     }
                   >
