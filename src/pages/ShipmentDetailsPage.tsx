@@ -6,6 +6,7 @@ import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import { REQUIRED_DOCUMENT_TYPES } from '../types';
 import AiDelayPrediction from '../components/AiDelayPrediction';
+import ShipmentTimeline from '../components/ShipmentTimeline';
 
 export default function ShipmentDetailsPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
@@ -314,19 +315,7 @@ export default function ShipmentDetailsPage() {
 
         {/* ── Timeline & Comments ── */}
         <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr] animate-slide-up delay-200">
-          <article className="card-panel">
-            <h3 className="text-base font-bold text-navy-800 dark:text-slate-100 mb-6 uppercase tracking-wide">History & Timeline</h3>
-            <div className="space-y-6 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-100 dark:before:bg-slate-800">
-              {timeline.slice(0, 5).map((event) => (
-                <div key={event.id} className="relative pl-8">
-                  <div className="absolute left-0 top-1.5 w-4 h-4 -ml-2 rounded-full border-4 border-white dark:border-slate-900 bg-teal-500" />
-                  <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase">{event.time.slice(0, 16).replace('T', ' ')}</p>
-                  <p className="text-xs font-bold text-navy-800 dark:text-slate-200">{event.title}</p>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 mt-1">{event.note}</p>
-                </div>
-              ))}
-            </div>
-          </article>
+          <ShipmentTimeline events={timeline} />
 
           <article className="card-panel">
             <h3 className="text-base font-bold text-navy-800 dark:text-slate-100 mb-4 uppercase tracking-wide">Collaboration</h3>

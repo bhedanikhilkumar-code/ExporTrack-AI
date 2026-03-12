@@ -427,7 +427,9 @@
 
 /* Icon animations */
 @keyframes icon-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 1;
     transform: scale(1);
   }
@@ -453,7 +455,9 @@
 
 /* Loading pulsе animation for skeletons */
 @keyframes skeleton-pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
   }
 

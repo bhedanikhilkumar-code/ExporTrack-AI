@@ -6,6 +6,7 @@ import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
+import ShipmentAnalytics from '../components/ShipmentAnalytics';
 
 export default function DashboardPage() {
   const {
@@ -176,6 +177,18 @@ export default function DashboardPage() {
         <KpiCard title="Rejected / Missing" value={rejectedOrMissing} subtitle="Blockers" accent="rose" />
         <KpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread reminders" accent="teal" />
       </section>
+
+      {/* ── Analytics Dashboard ── */}
+      <ShipmentAnalytics
+        monthlyData={monthlyActivity.map(([month, count]) => ({
+          month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
+          value: count
+        }))}
+        totalShipments={totalShipments}
+        activeShipments={activeShipments}
+        complianceRate={complianceRate}
+        delayedShipments={delayedShipments}
+      />
 
       {/* ── Visual Analytics Section ── */}
       <section className="grid gap-6 md:grid-cols-3">

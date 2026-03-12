@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
 import { REQUIRED_DOCUMENT_TYPES, UploadDocumentInput } from '../types';
+import AiDocumentSummary from '../components/AiDocumentSummary';
 
 const detectFormat = (fileName: string): UploadDocumentInput['fileFormat'] => {
   const lower = fileName.toLowerCase();
@@ -134,8 +135,8 @@ export default function UploadDocumentsPage() {
           {sortedDocs.map((document) => (
             <div key={document.id} className="card-muted flex flex-wrap items-center justify-between gap-2">
               <div>
-                <p className="text-sm font-semibold text-slate-800">{document.type}</p>
-                <p className="text-xs text-slate-500">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">{document.type}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
                   {document.fileName} • Uploaded by {document.uploadedBy} • {document.uploadedAt.slice(0, 10)}
                 </p>
               </div>
@@ -149,6 +150,24 @@ export default function UploadDocumentsPage() {
           ))}
         </div>
       </section>
+
+      {/* AI Document Summary  */}
+      {sortedDocs.length > 0 && (
+        <AiDocumentSummary
+          fileName={sortedDocs[0].fileName}
+          docType={sortedDocs[0].type}
+          summary={{
+            exporter: 'ABC Export Ltd.',
+            importer: 'XYZ Import Co.',
+            amount: '50,000',
+            currency: 'USD',
+            hsCode: '8704.2290',
+            productDescription: 'Commercial vehicles for cargo transport',
+            shipmentDetails: '2 containers via Singapore Port, ETA 15 days',
+            confidence: 0.92
+          }}
+        />
+      )}
     </div>
   );
 }
