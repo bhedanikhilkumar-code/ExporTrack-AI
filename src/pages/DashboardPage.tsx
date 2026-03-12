@@ -169,10 +169,10 @@ export default function DashboardPage() {
 
         {/* Verification Donut SVG */}
         <article className="card-panel flex flex-col items-center">
-          <h3 className="w-full text-sm font-bold text-navy-800 uppercase tracking-wider mb-4">Verification Health</h3>
+          <h3 className="w-full text-sm font-bold text-navy-800 dark:text-teal-400 uppercase tracking-wider mb-4">Verification Health</h3>
           <div className="relative w-40 h-40">
             <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="16" fill="transparent" stroke="#f1f5f9" strokeWidth="3.5" />
+              <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" strokeWidth="3.5" className="text-slate-100 dark:text-slate-800" />
               {docStats.reduce(({ offset, elements }, stat) => {
                 const element = (
                   <circle key={stat.label} cx="18" cy="18" r="16" fill="transparent" stroke={stat.color} strokeWidth="3.5" strokeDasharray={`${stat.pct} 100`} strokeDashoffset={-offset} className="transition-all duration-1000" />
@@ -181,16 +181,16 @@ export default function DashboardPage() {
               }, { offset: 0, elements: [] as React.ReactNode[] }).elements}
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-navy-800">{complianceRate}%</span>
-              <span className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Ready</span>
+              <span className="text-2xl font-bold text-navy-800 dark:text-white">{complianceRate}%</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-tight">Ready</span>
             </div>
           </div>
           <div className="mt-5 grid grid-cols-3 gap-2 w-full">
             {docStats.map(stat => (
               <div key={stat.label} className="text-center">
                 <div className="w-2 h-2 rounded-full mx-auto mb-1" style={{ backgroundColor: stat.color }} />
-                <p className="text-[9px] font-bold text-slate-500 uppercase">{stat.label}</p>
-                <p className="text-xs font-bold text-navy-800">{stat.value}</p>
+                <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">{stat.label}</p>
+                <p className="text-xs font-bold text-navy-800 dark:text-slate-200">{stat.value}</p>
               </div>
             ))}
           </div>
@@ -198,11 +198,11 @@ export default function DashboardPage() {
 
         {/* Monthly Activity SVG Graph */}
         <article className="card-panel">
-          <h3 className="text-sm font-bold text-navy-800 uppercase tracking-wider mb-2">Monthly Activity</h3>
-          <p className="text-xs text-slate-500 mb-6 font-medium">Shipments per month (Last 6 months)</p>
+          <h3 className="text-sm font-bold text-navy-800 dark:text-teal-400 uppercase tracking-wider mb-2">Monthly Activity</h3>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Shipments per month (Last 6 months)</p>
           <div className="h-32 w-full">
              <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
-               <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / (monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="#0d9488" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+               <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / (monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600 dark:text-teal-400" />
                <path d={`M 0,40 ${monthlyActivity.map(([, count], i) => `${(i / (monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')} L 100,40 Z`} fill="url(#gradient-activity)" />
                <defs>
                  <linearGradient id="gradient-activity" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0d9488" stopOpacity="0.15" /><stop offset="100%" stopColor="#0d9488" stopOpacity="0" /></linearGradient>
@@ -211,7 +211,7 @@ export default function DashboardPage() {
           </div>
           <div className="mt-3 flex justify-between">
              {monthlyActivity.map(([month]) => (
-               <span key={month} className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">
+               <span key={month} className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
                  {new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
                </span>
              ))}
