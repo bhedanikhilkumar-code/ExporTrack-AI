@@ -25,7 +25,7 @@ export default function ShipmentAnalytics({
     const maxValue = Math.max(...monthlyData.map((d) => d.value)) || 1;
 
     return (
-        <div className="space-y-6">
+        <div className="dashboard-chart-container space-y-6">
             {/* Monthly Chart */}
             <article className="card-premium relative overflow-hidden group flex flex-col">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -104,7 +104,7 @@ export default function ShipmentAnalytics({
             </article>
 
             {/* Quick Summary Grid */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="dashboard-grid-secondary">
                 {[
                     { label: 'Total Base', val: totalShipments, icon: 'shipments', color: 'text-blue-600', bg: 'bg-blue-500/10' },
                     { label: 'Active Pipeline', val: activeShipments, icon: 'clock', color: 'text-amber-600', bg: 'bg-amber-500/10' },

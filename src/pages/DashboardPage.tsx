@@ -114,7 +114,7 @@ export default function DashboardPage() {
   }, [shipments]);
 
   return (
-    <div className="page-stack">
+    <main className="page-stack px-4 md:px-6">
       {/* ── Dashboard Header ── */}
       <header className="dashboard-grid-header">
         <div>
@@ -340,6 +340,6 @@ export default function DashboardPage() {
           </table>
         </div>
       </article>
-    </div>
+    </main>
   );
 }
