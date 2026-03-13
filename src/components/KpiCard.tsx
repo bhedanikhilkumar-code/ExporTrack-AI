@@ -7,14 +7,35 @@ interface KpiCardProps {
   accent: 'navy' | 'teal' | 'rose' | 'amber' | 'emerald' | 'slate' | 'indigo';
 }
 
-const colorMap: Record<KpiCardProps['accent'], string> = {
-  navy: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
-  teal: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20 dark:text-teal-400',
-  rose: 'text-rose-600 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400',
-  amber: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
-  emerald: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400',
-  slate: 'text-slate-600 bg-slate-50 dark:bg-slate-800 dark:text-slate-300',
-  indigo: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400'
+const colorMap: Record<KpiCardProps['accent'], { icon: string; gradient: string }> = {
+  navy: {
+    icon: 'text-blue-600 dark:text-blue-400',
+    gradient: 'from-blue-500/10 to-blue-600/5 dark:from-blue-500/15 dark:to-blue-600/5'
+  },
+  teal: {
+    icon: 'text-teal-600 dark:text-teal-400',
+    gradient: 'from-teal-500/10 to-teal-600/5 dark:from-teal-500/15 dark:to-teal-600/5'
+  },
+  rose: {
+    icon: 'text-rose-600 dark:text-rose-400',
+    gradient: 'from-rose-500/10 to-rose-600/5 dark:from-rose-500/15 dark:to-rose-600/5'
+  },
+  amber: {
+    icon: 'text-amber-600 dark:text-amber-400',
+    gradient: 'from-amber-500/10 to-amber-600/5 dark:from-amber-500/15 dark:to-amber-600/5'
+  },
+  emerald: {
+    icon: 'text-emerald-600 dark:text-emerald-400',
+    gradient: 'from-emerald-500/10 to-emerald-600/5 dark:from-emerald-500/15 dark:to-emerald-600/5'
+  },
+  slate: {
+    icon: 'text-slate-600 dark:text-slate-300',
+    gradient: 'from-slate-500/10 to-slate-600/5 dark:from-slate-500/15 dark:to-slate-600/5'
+  },
+  indigo: {
+    icon: 'text-indigo-600 dark:text-indigo-400',
+    gradient: 'from-indigo-500/10 to-indigo-600/5 dark:from-indigo-500/15 dark:to-indigo-600/5'
+  }
 };
 
 const icons: Record<KpiCardProps['accent'], any> = {
@@ -28,24 +49,27 @@ const icons: Record<KpiCardProps['accent'], any> = {
 };
 
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
+  const colors = colorMap[accent];
   return (
     <article className="kpi-card group">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition-all group-hover:scale-110 ${colorMap[accent]}`}>
-            <AppIcon name={icons[accent]} className="h-5 w-5" />
+          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
+            <AppIcon name={icons[accent]} className={`h-5 w-5 ${colors.icon}`} />
           </span>
           <div className="flex flex-col items-end gap-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</span>
-            <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</p>
+            <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>{value}</p>
           </div>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-50 pt-3 dark:border-slate-800/50">
+        <div className="flex items-center justify-between border-t border-slate-100/80 pt-3 dark:border-slate-800/50">
           <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>
-          <div className="flex h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+          <div className="flex items-center gap-1">
+            <div className="h-1 w-1 rounded-full bg-teal-500/50" />
+            <span className="text-[9px] font-bold text-teal-600/50 dark:text-teal-400/50">LIVE</span>
+          </div>
         </div>
       </div>
     </article>
   );
 }
-

@@ -32,8 +32,8 @@ export default function ShipmentAnalytics({
                 <div className="relative flex-1 flex flex-col">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                         <div>
-                            <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">Volume Analytics</h3>
-                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-wide">Throughput (Last 6 Months)</p>
+                            <h3 className="section-title text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">Volume Analytics</h3>
+                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-wide ml-4">Throughput (Last 6 Months)</p>
                         </div>
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-sm transition-transform hover:scale-105">
                             <AppIcon name="shipments" className="h-5 w-5" strokeWidth={2.5} />
@@ -57,8 +57,8 @@ export default function ShipmentAnalytics({
                                         <div className="relative w-full flex items-end justify-center h-full">
                                             <div
                                                 className={`w-full max-w-[32px] md:max-w-[48px] rounded-t-lg transition-all duration-500 ease-out group-hover/bar:bg-teal-400 dark:group-hover/bar:bg-teal-500 ${isPeak
-                                                    ? 'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
-                                                    : 'bg-slate-200 dark:bg-slate-800'
+                                                    ? 'bg-gradient-to-t from-teal-600 to-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
+                                                    : 'bg-slate-200 dark:bg-slate-700/60'
                                                     }`}
                                                 style={{ height: `${Math.max(heightPercent, 12)}%` }}
                                             />
@@ -81,19 +81,19 @@ export default function ShipmentAnalytics({
                         <div className="mt-8 grid grid-cols-3 gap-6 border-t border-slate-200/60 pt-6 dark:border-slate-800/60">
                             <div className="flex flex-col items-center text-center">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Average</span>
-                                <span className="mt-1 text-lg font-black text-slate-900 dark:text-white tracking-tight">
+                                <span className="mt-1 text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
                                     {Math.round(monthlyData.reduce((sum, d) => sum + d.value, 0) / (monthlyData.length || 1))}
                                 </span>
                             </div>
                             <div className="relative flex flex-col items-center text-center">
                                 <div className="absolute -left-3 top-1/2 -translate-y-1/2 h-8 w-px bg-slate-200/60 dark:bg-slate-800/60" />
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Peak Rate</span>
-                                <span className="mt-1 text-lg font-black text-teal-600 dark:text-teal-400 tracking-tight">{maxValue}</span>
+                                <span className="mt-1 text-lg font-extrabold text-teal-600 dark:text-teal-400 tracking-tight">{maxValue}</span>
                                 <div className="absolute -right-3 top-1/2 -translate-y-1/2 h-8 w-px bg-slate-200/60 dark:bg-slate-800/60" />
                             </div>
                             <div className="flex flex-col items-center text-center">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Net Growth</span>
-                                <span className="mt-1 flex items-center gap-1 text-lg font-black text-emerald-600 dark:text-emerald-400 tracking-tight">
+                                <span className="mt-1 flex items-center gap-1 text-lg font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
                                     <AppIcon name="trend-up" className="h-4 w-4" strokeWidth={3} />
                                     +12%
                                 </span>
@@ -111,7 +111,7 @@ export default function ShipmentAnalytics({
                     { label: 'Doc Health', val: `${complianceRate}%`, icon: 'check', color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
                     { label: 'Risk Flags', val: delayedShipments, icon: 'warning', color: 'text-rose-600', bg: 'bg-rose-500/10' }
                 ].map(card => (
-                    <div key={card.label} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-md transition-all hover:shadow-lg relative overflow-hidden">
+                    <div key={card.label} className="bg-white dark:bg-slate-900/80 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                         <div className="relative">
                             <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110 ${card.bg} ${card.color}`}>
@@ -119,7 +119,7 @@ export default function ShipmentAnalytics({
                             </div>
                             <div>
                                 <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{card.label}</p>
-                                <p className="text-2xl font-black text-slate-900 dark:text-white mt-1 tracking-tight">{card.val}</p>
+                                <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1" style={{ letterSpacing: '-0.03em' }}>{card.val}</p>
                             </div>
                         </div>
                     </div>

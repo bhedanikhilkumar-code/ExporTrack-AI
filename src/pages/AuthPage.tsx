@@ -192,17 +192,18 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-50 items-center justify-center px-4 py-8 md:py-0">
+    <div className="flex min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-slate-50 dark:from-slate-950 dark:via-slate-950 dark:to-slate-900 items-center justify-center px-4 py-8 md:py-0">
       <div className="w-full max-w-5xl">
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl grid md:grid-cols-[1.2fr_1fr]">
+        <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl grid md:grid-cols-[1.2fr_1fr]">
           {/* Left Section - Info Panel */}
-          <section className="hidden bg-gradient-to-br from-navy-800 via-navy-700 to-teal-600 p-12 text-white md:flex flex-col justify-between">
-            <div>
+          <section className="hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-700 dark:from-slate-950 dark:via-slate-900 dark:to-teal-900 p-12 text-white md:flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(45,212,191,0.15),transparent_60%)]" />
+            <div className="relative">
               <div className="flex items-center gap-3 mb-8">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white/20 text-white font-bold text-lg">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-lg border border-white/10 shadow-lg">
                   EA
                 </div>
-                <h1 className="text-2xl font-bold tracking-tight">ExporTrack-AI</h1>
+                <h1 className="text-2xl font-extrabold tracking-tight">ExporTrack<span className="text-teal-300">AI</span></h1>
               </div>
               <p className="text-sm text-slate-100/90 leading-relaxed">
                 Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified in one powerful platform.
@@ -242,7 +243,7 @@ export default function AuthPage() {
             <div className="w-full max-w-sm mx-auto">
               {/* Header */}
               <div className="mb-8">
-                <h2 className="text-2xl md:text-3xl font-bold text-navy-800 dark:text-slate-100">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100" style={{ letterSpacing: '-0.02em' }}>
                   {mode === 'login' ? 'Welcome back' : 'Create your account'}
                 </h2>
                 <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">

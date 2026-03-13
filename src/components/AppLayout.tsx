@@ -113,21 +113,21 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {/* Desktop Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200/60 bg-white/80 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/80 md:flex md:flex-col transition-all duration-300 ease-in-out ${sidebarExpanded ? 'w-64' : 'w-20'
+      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200/60 bg-white/90 backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-950/90 md:flex md:flex-col transition-all duration-300 ease-in-out shadow-sm ${sidebarExpanded ? 'w-64' : 'w-20'
         }`}>
         {/* Sidebar Header with Collapse Button */}
         <div className="flex h-16 items-center justify-between px-5 border-b border-slate-200/60 dark:border-slate-800/60">
           {sidebarExpanded ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 font-black text-white dark:bg-teal-500/20 dark:text-teal-400 text-xs shadow-sm">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 font-black text-white dark:from-teal-600 dark:to-teal-500 text-xs shadow-md">
                 EA
               </div>
-              <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-slate-100 truncate uppercase tracking-wider">
-                ExporTrack AI
+              <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100 truncate">
+                ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span>
               </h1>
             </div>
           ) : (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-lg bg-slate-900 font-black text-white dark:bg-teal-500/20 dark:text-teal-400 text-xs">
+            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 font-black text-white dark:from-teal-600 dark:to-teal-500 text-xs shadow-md">
               EA
             </div>
           )}
@@ -135,7 +135,7 @@ export default function AppLayout() {
 
         {/* Sidebar Navigation */}
         <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-6 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent dark:scrollbar-thumb-slate-800">
-          <div className="mb-4 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+          <div className="mb-4 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400/70">
             {sidebarExpanded && "Main Menu"}
           </div>
           {navItems.map((item) => (
@@ -143,9 +143,9 @@ export default function AppLayout() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `focus-ring relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-xs font-semibold transition-all group ${isActive
-                  ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-sm'
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
+                `focus-ring relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-200 group ${isActive
+                  ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-md nav-link-active'
+                  : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
                 }`
               }
               title={!sidebarExpanded ? item.label : ''}
@@ -178,7 +178,7 @@ export default function AppLayout() {
 
       <div className={`transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:pl-64' : 'md:pl-20'
         }`}>
-        <header className="sticky top-0 z-10 bg-white/70 backdrop-blur-xl border-b border-slate-200/60 dark:bg-slate-950/70 dark:border-slate-800/60 shadow-sm transition-colors">
+        <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] transition-colors">
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8 h-16">
             {/* Left Section */}
             <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -192,9 +192,9 @@ export default function AppLayout() {
 
               {/* Breadcrumb / Page Path */}
               <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <span className="uppercase tracking-widest text-[10px] font-bold">Workspace</span>
-                <AppIcon name="chevron-right" className="h-3 w-3 text-slate-300 dark:text-slate-600" strokeWidth={3} />
-                <span className="font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest text-[10px]">{currentNav?.label ?? 'Dashboard'}</span>
+                <span className="uppercase tracking-widest text-[10px] font-bold text-slate-400/70">Workspace</span>
+                <AppIcon name="chevron-right" className="h-3 w-3 text-slate-300/70 dark:text-slate-600" strokeWidth={3} />
+                <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">{currentNav?.label ?? 'Dashboard'}</span>
               </div>
 
               {/* Global Search Bar */}
@@ -275,7 +275,7 @@ export default function AppLayout() {
                 >
                   <AppIcon name="bell" className="h-4 w-4" />
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950 shadow-sm animate-in zoom-in">
+                    <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950 shadow-md animate-in zoom-in">
                       {unreadCount}
                     </span>
                   )}

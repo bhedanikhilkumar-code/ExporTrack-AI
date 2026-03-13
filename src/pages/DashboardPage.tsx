@@ -118,15 +118,15 @@ export default function DashboardPage() {
       {/* ── Dashboard Header ── */}
       <header className="dashboard-grid-header">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Operations Overview</h1>
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>Operations Overview</h1>
           <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             Welcome back. Here's what's happening with your shipments today.
           </p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-800 dark:bg-slate-900">
-            <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500" />
-            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
+          <div className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200/60 bg-white/80 backdrop-blur-sm px-3.5 py-2 dark:border-slate-800/60 dark:bg-slate-900/80 shadow-sm">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500 shadow-[0_0_6px_rgb(13_148_136/0.4)]" />
+            <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
           </div>
           <Link to="/create-shipment" className="btn-primary inline-flex items-center gap-2">
             <AppIcon name="create" className="h-4 w-4" />
@@ -160,7 +160,7 @@ export default function DashboardPage() {
         {/* Verification Status */}
         <article className="card-premium">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Document Health</h3>
+            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Document Health</h3>
             <AppIcon name="shield" className="h-4 w-4 text-slate-400" />
           </div>
           <div className="flex flex-col items-center">
@@ -194,7 +194,7 @@ export default function DashboardPage() {
         {/* Lane Distribution */}
         <article className="card-premium">
           <div className="mb-6 flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Top Lanes</h3>
+            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Top Lanes</h3>
             <AppIcon name="shipments" className="h-4 w-4 text-slate-400" />
           </div>
           <div className="space-y-5">
@@ -224,11 +224,12 @@ export default function DashboardPage() {
         <article className="card-premium xl:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Live Logistics Feed</h3>
-              <p className="text-[11px] text-slate-400">Real-time collaboration and document events</p>
+              <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Live Logistics Feed</h3>
+              <p className="text-[11px] text-slate-400 ml-4">Real-time collaboration and document events</p>
             </div>
-            <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors">
+            <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors group inline-flex items-center gap-1">
               View All Pipeline
+              <AppIcon name="chevron-right" className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
           <div className="space-y-4">
@@ -286,7 +287,7 @@ export default function DashboardPage() {
       {/* ── Recent Shipments Table ── */}
       <article className="dashboard-grid-table card-premium overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
+          <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
           <button
             onClick={() => {
               const csvContent = ['ID,Client,Date,Status'];
@@ -316,7 +317,7 @@ export default function DashboardPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {recentShipments.map(s => (
-                <tr key={s.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                <tr key={s.id} className="group table-row-premium hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
                   <td className="px-4 py-4">
                     <span className="text-xs font-bold text-slate-900 dark:text-white">{s.id}</span>
                   </td>
