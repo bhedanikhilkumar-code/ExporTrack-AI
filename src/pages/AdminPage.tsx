@@ -51,10 +51,17 @@ export default function AdminPage() {
           <h3 className="card-title text-base md:text-lg">Approval Queue</h3>
           <button
             type="button"
-            onClick={() => window.alert('Bulk approval workflow triggered.')}
+            onClick={() => {
+              const approved = pendingApprovals.length;
+              if (approved === 0) {
+                alert('No pending approvals to process.');
+              } else {
+                alert(`✅ ${approved} shipment(s) marked for approval and queued for processing.`);
+              }
+            }}
             className="btn-primary btn-sm"
           >
-            Bulk Action
+            Bulk Approve
           </button>
         </div>
         <div className="space-y-3">

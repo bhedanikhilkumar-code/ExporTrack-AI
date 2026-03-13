@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
@@ -128,10 +128,10 @@ export default function DashboardPage() {
             <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500" />
             <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
           </div>
-          <button className="btn-primary">
-            <AppIcon name="create" className="mr-2 h-4 w-4" />
+          <Link to="/create-shipment" className="btn-primary inline-flex items-center gap-2">
+            <AppIcon name="create" className="h-4 w-4" />
             New Shipment
-          </button>
+          </Link>
         </div>
       </header>
 
@@ -288,7 +288,21 @@ export default function DashboardPage() {
       <article className="card-premium overflow-hidden">
         <div className="mb-6 flex items-center justify-between px-2">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
-          <button className="btn-secondary btn-sm">Export Report</button>
+          <button 
+            onClick={() => {
+              const csvContent = ['ID,Client,Date,Status'];
+              recentShipments.forEach(s => {
+                csvContent.push(`"${s.id}","${s.clientName}","${s.shipmentDate}","${s.status}"`);
+              });
+              const element = document.createElement('a');
+              element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent.join('\n')));
+              element.setAttribute('download', `shipments-${new Date().toISOString().split('T')[0]}.csv`);
+              element.style.display = 'none';
+              document.body.appendChild(element);
+              element.click();
+              document.body.removeChild(element);
+            }}
+            className="btn-secondary btn-sm">Export Report</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">

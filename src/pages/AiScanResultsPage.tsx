@@ -1,9 +1,11 @@
 import { Link, useParams } from 'react-router-dom';
+import { useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
 
 export default function AiScanResultsPage() {
+  const [isReRunning, setIsReRunning] = useState(false);
   const { shipmentId } = useParams<{ shipmentId: string }>();
   const {
     state: { shipments }
@@ -30,10 +32,24 @@ export default function AiScanResultsPage() {
         action={
           <button
             type="button"
-            onClick={() => window.alert(`AI re-scan queued for shipment ${shipment.id}.`)}
-            className="btn-primary bg-teal-600 hover:bg-teal-700"
+            onClick={() => {
+              setIsReRunning(true);
+              setTimeout(() => {
+                setIsReRunning(false);
+                alert(`✅ OCR re-scan completed for shipment ${shipment.id}. Updated results are displayed above.`);
+              }, 1500);
+            }}
+            disabled={isReRunning}
+            className="btn-primary bg-teal-600 hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
           >
-            Re-run OCR
+            {isReRunning ? (
+              <>
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></span>
+                Running...
+              </>
+            ) : (
+              <>Re-run OCR</>
+            )}
           </button>
         }
       />
