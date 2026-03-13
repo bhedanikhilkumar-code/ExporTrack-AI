@@ -110,6 +110,10 @@
     @apply card-surface p-5 sm:p-6;
   }
 
+  .card-premium {
+    @apply rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm transition-all dark:border-slate-800/60 dark:bg-slate-900/50 dark:backdrop-blur-sm hover:shadow-md dark:hover:shadow-slate-900/50;
+  }
+
   .card-muted {
     @apply rounded-xl border border-slate-100 bg-slate-50/50 p-4 dark:border-slate-800/50 dark:bg-slate-800/30;
   }
@@ -316,6 +320,47 @@
 
 .nav-item-active {
   @apply bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400;
+}
+
+.page-stack {
+  @apply space-y-6 sm:space-y-8 md:space-y-10;
+}
+
+/* Dashboard Grid Utilities */
+.dashboard-grid-header {
+  @apply flex flex-col gap-4 md:flex-row md:items-center md:justify-between;
+}
+
+.dashboard-grid-kpi {
+  @apply grid gap-4 sm:grid-cols-2 lg:grid-cols-5 auto-rows-fr;
+}
+
+.dashboard-grid-section {
+  @apply grid gap-6 lg:grid-cols-3 auto-rows-max;
+}
+
+.dashboard-grid-wide {
+  @apply grid gap-6 xl:grid-cols-3 auto-rows-max;
+}
+
+/* KPI Card specific */
+.kpi-card {
+  @apply card-premium h-full flex flex-col justify-between overflow-hidden group relative transition-all hover:shadow-lg dark:hover:shadow-slate-900/40;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .page-stack {
+    @apply space-y-4 sm:space-y-6;
+  }
+
+  .dashboard-grid-section {
+    @apply grid-cols-1;
+  }
+
+  .dashboard-grid-wide {
+    @apply grid-cols-1;
+  }
 }
 
 @media (max-width: 640px) {

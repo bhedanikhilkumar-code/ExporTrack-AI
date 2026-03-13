@@ -27,13 +27,13 @@ export default function ShipmentAnalytics({
     return (
         <div className="space-y-6">
             {/* Monthly Chart */}
-            <article className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden group shadow-md transition-all hover:shadow-lg h-full flex flex-col">
+            <article className="card-premium relative overflow-hidden group flex flex-col">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <div className="relative">
-                    <div className="flex items-center justify-between mb-8">
+                <div className="relative flex-1 flex flex-col">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
                         <div>
                             <h3 className="text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">Volume Analytics</h3>
-                            <p className="text-[11px] font-bold text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Throughput (Last 6 Months)</p>
+                            <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-2 uppercase tracking-wide">Throughput (Last 6 Months)</p>
                         </div>
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-sm transition-transform hover:scale-105">
                             <AppIcon name="shipments" className="h-5 w-5" strokeWidth={2.5} />
@@ -41,8 +41,8 @@ export default function ShipmentAnalytics({
                     </div>
 
                     {/* Chart Area */}
-                    <div className="relative flex-1">
-                        <div className="flex items-end justify-between gap-2 h-36 px-2">
+                    <div className="relative flex-1 flex flex-col justify-end">
+                        <div className="flex items-end justify-between gap-1 md:gap-2 h-40 md:h-48 px-1 md:px-2 pb-4">
                             {monthlyData.map((data, idx) => {
                                 const heightPercent = (data.value / maxValue) * 100;
                                 const isPeak = data.value === maxValue;
@@ -56,9 +56,9 @@ export default function ShipmentAnalytics({
 
                                         <div className="relative w-full flex items-end justify-center h-full">
                                             <div
-                                                className={`w-full max-w-[40px] rounded-t-lg transition-all duration-500 ease-out group-hover/bar:bg-teal-400 dark:group-hover/bar:bg-teal-500 ${isPeak
-                                                        ? 'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
-                                                        : 'bg-slate-200 dark:bg-slate-800'
+                                                className={`w-full max-w-[32px] md:max-w-[48px] rounded-t-lg transition-all duration-500 ease-out group-hover/bar:bg-teal-400 dark:group-hover/bar:bg-teal-500 ${isPeak
+                                                    ? 'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
+                                                    : 'bg-slate-200 dark:bg-slate-800'
                                                     }`}
                                                 style={{ height: `${Math.max(heightPercent, 12)}%` }}
                                             />
@@ -68,7 +68,7 @@ export default function ShipmentAnalytics({
                                         </div>
 
                                         <div className="flex flex-col items-center mt-2">
-                                            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 group-hover/bar:text-slate-900 dark:group-hover/bar:text-slate-300 transition-colors">
+                                            <span className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 group-hover/bar:text-slate-900 dark:group-hover/bar:text-slate-300 transition-colors break-words text-center">
                                                 {data.month}
                                             </span>
                                         </div>

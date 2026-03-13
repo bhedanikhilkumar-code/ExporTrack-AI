@@ -29,13 +29,13 @@ const icons: Record<KpiCardProps['accent'], any> = {
 
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
   return (
-    <article className="card-premium group relative overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-slate-900/40">
+    <article className="kpi-card">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition-all group-hover:scale-110 ${colorMap[accent]}`}>
             <AppIcon name={icons[accent]} className="h-5 w-5" />
           </span>
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end gap-1">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</span>
             <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</p>
           </div>

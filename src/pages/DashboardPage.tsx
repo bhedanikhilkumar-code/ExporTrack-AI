@@ -114,12 +114,12 @@ export default function DashboardPage() {
   }, [shipments]);
 
   return (
-    <div className="space-y-8 animate-in">
+    <div className="page-stack">
       {/* ── Dashboard Header ── */}
-      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <header className="dashboard-grid-header">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Operations Overview</h1>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-white">Operations Overview</h1>
+          <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             Welcome back. Here's what's happening with your shipments today.
           </p>
         </div>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
       </header>
 
       {/* ── KPI Section ── */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="dashboard-grid-kpi">
         <KpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" />
         <KpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" />
         <KpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" />
@@ -156,9 +156,9 @@ export default function DashboardPage() {
         delayedShipments={delayedShipments}
       />
 
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="dashboard-grid-section">
         {/* Verification Status */}
-        <article className="card-premium h-full">
+        <article className="card-premium">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Document Health</h3>
             <AppIcon name="shield" className="h-4 w-4 text-slate-400" />
@@ -181,10 +181,10 @@ export default function DashboardPage() {
             </div>
             <div className="grid w-full grid-cols-3 gap-2">
               {docStats.map(stat => (
-                <div key={stat.label} className="text-center">
+                <div key={stat.label} className="rounded-lg bg-slate-50 p-3 text-center dark:bg-slate-800/30">
                   <div className="mx-auto mb-2 h-1.5 w-6 rounded-full" style={{ backgroundColor: stat.color }} />
                   <p className="text-[10px] font-bold uppercase text-slate-400">{stat.label}</p>
-                  <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{stat.value}</p>
+                  <p className="text-lg font-bold text-slate-900 dark:text-slate-200">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -192,7 +192,7 @@ export default function DashboardPage() {
         </article>
 
         {/* Lane Distribution */}
-        <article className="card-premium h-full">
+        <article className="card-premium">
           <div className="mb-6 flex items-center justify-between">
             <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Top Lanes</h3>
             <AppIcon name="shipments" className="h-4 w-4 text-slate-400" />
@@ -219,7 +219,7 @@ export default function DashboardPage() {
         <AiLogisticsAssistant />
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-3">
+      <div className="dashboard-grid-wide">
         {/* Recent Activity */}
         <article className="card-premium xl:col-span-2">
           <div className="mb-6 flex items-center justify-between">
@@ -254,9 +254,9 @@ export default function DashboardPage() {
         </article>
 
         {/* AI Predictions Spotlight */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-teal-400 dark:bg-teal-500/10 shadow-sm">
+        <div className="card-premium">
+          <div className="mb-6 flex items-start gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-teal-400 dark:bg-teal-500/10 shadow-sm">
               <AppIcon name="ai-extract" className="h-5 w-5" />
             </div>
             <div>
@@ -285,7 +285,7 @@ export default function DashboardPage() {
 
       {/* ── Recent Shipments Table ── */}
       <article className="card-premium overflow-hidden">
-        <div className="mb-6 flex items-center justify-between px-2">
+        <div className="mb-6 flex items-center justify-between">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
           <button
             onClick={() => {
