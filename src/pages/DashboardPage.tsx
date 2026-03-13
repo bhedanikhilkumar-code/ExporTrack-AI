@@ -114,68 +114,34 @@ export default function DashboardPage() {
   }, [shipments]);
 
   return (
-    <div className="page-stack">
+    <div className="space-y-8 animate-in">
       {/* ── Dashboard Header ── */}
-      <div
-        className="relative mb-6 overflow-hidden rounded-2xl border border-navy-800/10"
-        style={{
-          background: 'linear-gradient(135deg, #0f2137 0%, #112c45 40%, #0e3a4a 70%, #0d9488 100%)'
-        }}
-      >
-        <div
-          className="pointer-events-none absolute -right-16 -top-16 h-64 w-64 rounded-full opacity-20"
-          style={{ background: 'radial-gradient(circle, #14b8a6 0%, transparent 70%)' }}
-        />
-        <div className="relative px-6 py-7 md:px-9 md:py-9 transition-all duration-700">
-          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-teal-400/30 bg-teal-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-teal-300">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-teal-400" />
-            {dateLabel}
-          </span>
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div className="min-w-0">
-              <h2 className="text-3xl font-extrabold tracking-tight md:text-3xl text-white">Operations Dashboard</h2>
-              <p className="mt-2.5 max-w-2xl text-sm leading-relaxed text-slate-300">Live command center for shipment health and document compliance.</p>
-            </div>
-            <div className="flex shrink-0 flex-wrap gap-2.5">
-            </div>
-          </div>
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Operations Overview</h1>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            Welcome back. Here's what's happening with your shipments today.
+          </p>
         </div>
-      </div>
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-1.5 dark:border-slate-800 dark:bg-slate-900">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500" />
+            <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
+          </div>
+          <button className="btn-primary">
+            <AppIcon name="create" className="mr-2 h-4 w-4" />
+            New Shipment
+          </button>
+        </div>
+      </header>
 
-      {/* ── Quick Actions ── */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <Link to="/shipments/create" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
-          <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 group-hover:scale-110 transition-transform">
-            <AppIcon name="create" className="h-5 w-5" />
-          </div>
-          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">Create Shipment</span>
-        </Link>
-        <Link to="/documents/upload" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
-          <div className="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400 group-hover:scale-110 transition-transform">
-            <AppIcon name="upload" className="h-5 w-5" />
-          </div>
-          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">Upload Document</span>
-        </Link>
-        <Link to="/ai-validator" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
-          <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 group-hover:scale-110 transition-transform">
-            <AppIcon name="verification" className="h-5 w-5" />
-          </div>
-          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">Run AI Validation</span>
-        </Link>
-        <Link to="/notifications" className="flex items-center gap-3 p-4 rounded-2xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 shadow-sm hover:shadow-md hover:border-teal-500/30 transition-all group">
-          <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-900/20 text-amber-600 dark:text-amber-400 group-hover:scale-110 transition-transform">
-            <AppIcon name="notifications" className="h-5 w-5" />
-          </div>
-          <span className="text-sm font-bold text-navy-800 dark:text-slate-200">View Alerts</span>
-        </Link>
-      </div>
-
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
-        <KpiCard title="Total Shipments" value={totalShipments} subtitle="Across active lanes" accent="navy" />
-        <KpiCard title="Pending Documents" value={pendingDocs} subtitle="Need verification" accent="amber" />
-        <KpiCard title="Verified Documents" value={verifiedDocs} subtitle="Compliance files" accent="emerald" />
-        <KpiCard title="Rejected / Missing" value={rejectedOrMissing} subtitle="Blockers" accent="rose" />
-        <KpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread reminders" accent="teal" />
+      {/* ── KPI Section ── */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <KpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" />
+        <KpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" />
+        <KpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" />
+        <KpiCard title="Compliance Rate" value={`${complianceRate}%`} subtitle="Verified documents" accent="indigo" />
+        <KpiCard title="Active Alerts" value={unreadAlerts} subtitle="Requires attention" accent="rose" />
       </section>
 
       {/* ── Analytics Dashboard ── */}
@@ -190,192 +156,177 @@ export default function DashboardPage() {
         delayedShipments={delayedShipments}
       />
 
-      {/* ── Visual Analytics Section ── */}
-      <section className="grid gap-6 md:grid-cols-3">
-        {/* Distribution by Country */}
-        <article className="card-panel">
-          <h3 className="text-sm font-bold text-navy-800 uppercase tracking-wider mb-4">Shipments by Country</h3>
-          <div className="space-y-4">
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Verification Status */}
+        <article className="card-premium h-full">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Document Health</h3>
+            <AppIcon name="shield" className="h-4 w-4 text-slate-400" />
+          </div>
+          <div className="flex flex-col items-center">
+            <div className="relative mb-8 h-48 w-48">
+              <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+                <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" strokeWidth="2.5" className="text-slate-100 dark:text-slate-800" />
+                {docStats.reduce(({ offset, elements }, stat) => {
+                  const element = (
+                    <circle key={stat.label} cx="18" cy="18" r="16" fill="transparent" stroke={stat.color} strokeWidth="3" strokeDasharray={`${stat.pct} 100`} strokeDashoffset={-offset} className="transition-all duration-1000" />
+                  );
+                  return { offset: offset + stat.pct, elements: [...elements, element] };
+                }, { offset: 0, elements: [] as React.ReactNode[] }).elements}
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-3xl font-bold text-slate-900 dark:text-white">{complianceRate}%</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Compliant</span>
+              </div>
+            </div>
+            <div className="grid w-full grid-cols-3 gap-2">
+              {docStats.map(stat => (
+                <div key={stat.label} className="text-center">
+                  <div className="mx-auto mb-2 h-1.5 w-6 rounded-full" style={{ backgroundColor: stat.color }} />
+                  <p className="text-[10px] font-bold uppercase text-slate-400">{stat.label}</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-slate-200">{stat.value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </article>
+
+        {/* Lane Distribution */}
+        <article className="card-premium h-full">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Top Lanes</h3>
+            <AppIcon name="shipments" className="h-4 w-4 text-slate-400" />
+          </div>
+          <div className="space-y-5">
             {countryDist.map(([country, count]) => (
-              <div key={country}>
-                <div className="flex justify-between text-xs mb-1.5 font-medium">
-                  <span className="text-slate-600">{country}</span>
-                  <span className="text-navy-800">{count} Shipments</span>
+              <div key={country} className="group">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{country}</span>
+                  <span className="text-[11px] font-bold text-slate-500">{count} Shipments</span>
                 </div>
-                <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                  <div className="h-full bg-teal-600 rounded-full transition-all duration-1000" style={{ width: `${(count / totalShipments) * 100}%` }} />
+                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+                  <div 
+                    className="h-full bg-teal-500 transition-all duration-1000 group-hover:bg-teal-400" 
+                    style={{ width: `${(count / totalShipments) * 100}%` }} 
+                  />
                 </div>
               </div>
             ))}
           </div>
         </article>
 
-        {/* Verification Donut SVG */}
-        <article className="card-panel flex flex-col items-center">
-          <h3 className="w-full text-sm font-bold text-navy-800 dark:text-teal-400 uppercase tracking-wider mb-4">Verification Health</h3>
-          <div className="relative w-40 h-40">
-            <svg viewBox="0 0 36 36" className="w-full h-full -rotate-90">
-              <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" strokeWidth="3.5" className="text-slate-100 dark:text-slate-800" />
-              {docStats.reduce(({ offset, elements }, stat) => {
-                const element = (
-                  <circle key={stat.label} cx="18" cy="18" r="16" fill="transparent" stroke={stat.color} strokeWidth="3.5" strokeDasharray={`${stat.pct} 100`} strokeDashoffset={-offset} className="transition-all duration-1000" />
-                );
-                return { offset: offset + stat.pct, elements: [...elements, element] };
-              }, { offset: 0, elements: [] as React.ReactNode[] }).elements}
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-2xl font-bold text-navy-800 dark:text-white">{complianceRate}%</span>
-              <span className="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-tight">Ready</span>
+        {/* AI Logistics Assistant */}
+        <AiLogisticsAssistant />
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-3">
+        {/* Recent Activity */}
+        <article className="card-premium xl:col-span-2">
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Live Logistics Feed</h3>
+              <p className="text-[11px] text-slate-400">Real-time collaboration and document events</p>
+            </div>
+            <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors">
+              View All Pipeline
+            </Link>
+          </div>
+          <div className="space-y-4">
+            {activityTimeline.slice(0, 6).map((item, idx) => (
+              <div key={item.id} className="relative flex gap-4">
+                {idx !== 5 && (
+                  <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
+                )}
+                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${
+                  item.type === 'Document' ? 'bg-indigo-500' : item.type === 'Alert' ? 'bg-rose-500' : 'bg-teal-500'
+                }`}>
+                  <AppIcon name={item.type === 'Document' ? 'upload' : item.type === 'Alert' ? 'bell' : 'team'} className="h-3.5 w-3.5" />
+                </div>
+                <div className="flex-1 pb-4">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
+                    <time className="text-[10px] font-medium text-slate-400">{item.time}</time>
+                  </div>
+                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{item.detail}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </article>
+
+        {/* AI Predictions Spotlight */}
+        <div className="space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-teal-400 dark:bg-teal-500/10 shadow-sm">
+              <AppIcon name="ai-extract" className="h-5 w-5" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Predictive Intelligence</h3>
+              <p className="text-[11px] font-medium text-slate-500">Neural Risk Assessment</p>
             </div>
           </div>
-          <div className="mt-5 grid grid-cols-3 gap-2 w-full">
-            {docStats.map(stat => (
-              <div key={stat.label} className="text-center">
-                <div className="w-2 h-2 rounded-full mx-auto mb-1" style={{ backgroundColor: stat.color }} />
-                <p className="text-[9px] font-bold text-slate-500 dark:text-slate-400 uppercase">{stat.label}</p>
-                <p className="text-xs font-bold text-navy-800 dark:text-slate-200">{stat.value}</p>
+          <div className="space-y-4">
+            {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
+              <AiDelayPrediction key={s.id} shipmentId={s.id} />
+            ))}
+            <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-800">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Stability</span>
+                <span className="text-[10px] font-bold text-teal-500">OPTIMAL</span>
               </div>
-            ))}
-          </div>
-        </article>
-
-        {/* Monthly Activity SVG Graph */}
-        <article className="card-panel">
-          <h3 className="text-sm font-bold text-navy-800 dark:text-teal-400 uppercase tracking-wider mb-2">Monthly Activity</h3>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium">Shipments per month (Last 6 months)</p>
-          <div className="h-32 w-full">
-            <svg viewBox="0 0 100 40" className="w-full h-full" preserveAspectRatio="none">
-              <path d={`M ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')}`} fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="text-teal-600 dark:text-teal-400" />
-              <path d={`M 0,40 ${monthlyActivity.map(([, count], i) => `${(i / Math.max(1, monthlyActivity.length - 1)) * 100},${40 - (count / 5) * 30}`).join(' L ')} L 100,40 Z`} fill="url(#gradient-activity)" />
-              <defs>
-                <linearGradient id="gradient-activity" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0d9488" stopOpacity="0.15" /><stop offset="100%" stopColor="#0d9488" stopOpacity="0" /></linearGradient>
-              </defs>
-            </svg>
-          </div>
-          <div className="mt-3 flex justify-between">
-            {monthlyActivity.map(([month]) => (
-              <span key={month} className="text-[8px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-tighter">
-                {new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' })}
-              </span>
-            ))}
-          </div>
-        </article>
-      </section>
-
-      <section className="grid gap-6 xl:grid-cols-[1.4fr_1fr]">
-        <article className="card-panel surface-glow">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-            <div><h3 className="card-title">Executive Snapshot</h3><p className="card-subtitle">Operational health across shipments.</p></div>
-            <Link to="/shipments" className="btn-secondary btn-sm">View All</Link>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="card-muted bg-navy-50/60"><p className="eyebrow text-navy-600">Active Shipments</p><p className="metric-value">{activeShipments}</p></div>
-            <div className="card-muted bg-teal-50/70"><p className="eyebrow text-teal-700">Compliance</p><p className="metric-value">{complianceRate}%</p></div>
-            <div className="card-muted bg-rose-50/60"><p className="eyebrow text-rose-700">Delayed</p><p className="metric-value">{delayedShipments}</p></div>
-          </div>
-        </article>
-        <article className="card-panel">
-          <h3 className="card-title text-base font-bold text-navy-800 mb-4">Unread Notifications</h3>
-          <div className="space-y-3">
-            {priorityAlerts.slice(0, 3).map(n => (
-              <div key={n.id} className="p-3 bg-slate-50 border border-slate-100 rounded-xl">
-                <p className="text-xs font-bold text-navy-800">{n.title}</p>
-                <p className="text-[11px] text-slate-500 mt-1">{n.message}</p>
+              <div className="flex gap-1">
+                {[...Array(12)].map((_, i) => (
+                  <div key={i} className={`h-4 flex-1 rounded-sm ${i > 8 ? 'bg-slate-200 dark:bg-slate-800' : 'bg-teal-500/40 animate-pulse'}`} />
+                ))}
               </div>
-            ))}
-            {priorityAlerts.length === 0 && <p className="text-xs text-slate-500 italic">No unread alerts.</p>}
-          </div>
-        </article>
-      </section>
-
-      {/* ── AI Predictions Spotlight ── */}
-      <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 animate-slide-up">
-        <div className="lg:col-span-1 flex flex-col justify-center">
-          <div className="flex items-center gap-3 text-navy-800 dark:text-teal-400 mb-2">
-            <div className="p-2 rounded-xl bg-navy-100 dark:bg-teal-900/30">
-              <AppIcon name="ai-extract" className="h-6 w-6" />
             </div>
-            <h3 className="text-lg font-bold">AI Risk Watch</h3>
           </div>
-          <p className="text-sm text-slate-500 dark:text-slate-400">Real-time neural monitoring of global shipping lanes and supply chain anomalies.</p>
         </div>
-        {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
-          <AiDelayPrediction key={s.id} shipmentId={s.id} />
-        ))}
-      </section>
+      </div>
 
-      <section className="grid gap-6 xl:grid-cols-[1.55fr_1fr]">
-        <article className="card-panel">
-          <div className="mb-4 flex items-center justify-between"><h3 className="card-title text-base font-bold">Recent Shipments</h3></div>
-          <div className="table-shell"><table className="data-table min-w-[700px]">
-            <thead><tr><th>ID</th><th>Client</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody>
+      {/* ── Recent Shipments Table ── */}
+      <article className="card-premium overflow-hidden">
+        <div className="mb-6 flex items-center justify-between px-2">
+          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
+          <button className="btn-secondary btn-sm">Export Report</button>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Client</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Departure</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {recentShipments.map(s => (
-                <tr key={s.id}>
-                  <td className="font-bold text-navy-700">{s.id}</td>
-                  <td className="text-xs">{s.clientName}</td>
-                  <td className="text-xs">{s.shipmentDate}</td>
-                  <td><StatusBadge value={s.status} /></td>
-                  <td><Link to={`/shipments/${s.id}`} className="text-xs font-bold text-teal-600 hover:underline">Details</Link></td>
+                <tr key={s.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="px-4 py-4">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white">{s.id}</span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{s.clientName}</span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <span className="text-xs font-medium text-slate-500">{s.shipmentDate}</span>
+                  </td>
+                  <td className="px-4 py-4">
+                    <StatusBadge value={s.status} />
+                  </td>
+                  <td className="px-4 py-4 text-right">
+                    <Link to={`/shipments/${s.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-teal-500/50 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-teal-500/50 transition-all">
+                      <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
-          </table></div>
-        </article>
-        <article className="card-panel"><h3 className="card-title text-base font-bold mb-4">Operations Timeline</h3>
-          <div className="space-y-3">
-            {activityTimeline.slice(0, 5).map(item => (
-              <div key={item.id} className="timeline-item">
-                <p className="text-[11px] font-bold text-navy-800">{item.title}</p>
-                <p className="text-[10px] text-slate-500">{item.detail}</p>
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
-      {/* ── AI Assistant & Analytics ── */}
-      <section className="grid gap-6 lg:grid-cols-[1fr_2fr] animate-slide-up mt-6">
-        <AiLogisticsAssistant />
-
-        <article className="card-panel bg-navy-900 border-none text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-8 opacity-10">
-            <AppIcon name="shipments" className="h-40 w-40" />
-          </div>
-          <div className="relative">
-            <h3 className="text-xl font-black uppercase tracking-tighter mb-2">Network Health Index</h3>
-            <p className="text-sm text-navy-200 mb-8">Aggregated intelligence from global logistics lanes.</p>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { label: 'Lane Stability', val: '94%', trend: '+2%' },
-                { label: 'Doc Accuracy', val: '98%', trend: '+0.5%' },
-                { label: 'Risk Mitigation', val: '87%', trend: '+4%' },
-                { label: 'Avg Lead Time', val: '12.4d', trend: '-1.2d' }
-              ].map(stat => (
-                <div key={stat.label} className="p-4 rounded-2xl bg-white/5 border border-white/10">
-                  <p className="text-[10px] font-bold uppercase text-navy-300 mb-1">{stat.label}</p>
-                  <p className="text-2xl font-black">{stat.val}</p>
-                  <p className="text-xs font-bold text-teal-400 mt-1">{stat.trend}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-8 flex items-center justify-between border-t border-white/10 pt-6">
-              <div className="flex gap-4">
-                <div className="text-center">
-                  <p className="text-[9px] font-bold uppercase text-navy-400 italic">Processing</p>
-                  <p className="text-xs font-bold">4.2 TB/Day</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-[9px] font-bold uppercase text-navy-400 italic">Nodes Active</p>
-                  <p className="text-xs font-bold">12 Active Regions</p>
-                </div>
-              </div>
-              <button className="btn-primary bg-teal-500 hover:bg-teal-600 border-none px-6">Strategic Report</button>
-            </div>
-          </div>
-        </article>
-      </section>
+          </table>
+        </div>
+      </article>
     </div>
   );
 }

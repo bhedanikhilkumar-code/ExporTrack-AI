@@ -4,45 +4,47 @@ interface KpiCardProps {
   title: string;
   value: string | number;
   subtitle: string;
-  accent: 'navy' | 'teal' | 'rose' | 'amber' | 'emerald';
+  accent: 'navy' | 'teal' | 'rose' | 'amber' | 'emerald' | 'slate' | 'indigo';
 }
 
-const accents: Record<KpiCardProps['accent'], string> = {
-  navy: 'from-navy-800 to-navy-600',
-  teal: 'from-teal-600 to-teal-500',
-  rose: 'from-rose-600 to-rose-500',
-  amber: 'from-amber-600 to-amber-500',
-  emerald: 'from-emerald-600 to-emerald-500'
+const colorMap: Record<KpiCardProps['accent'], string> = {
+  navy: 'text-blue-600 bg-blue-50 dark:bg-blue-900/20 dark:text-blue-400',
+  teal: 'text-teal-600 bg-teal-50 dark:bg-teal-900/20 dark:text-teal-400',
+  rose: 'text-rose-600 bg-rose-50 dark:bg-rose-900/20 dark:text-rose-400',
+  amber: 'text-amber-600 bg-amber-50 dark:bg-amber-900/20 dark:text-amber-400',
+  emerald: 'text-emerald-600 bg-emerald-50 dark:bg-emerald-900/20 dark:text-emerald-400',
+  slate: 'text-slate-600 bg-slate-50 dark:bg-slate-800 dark:text-slate-300',
+  indigo: 'text-indigo-600 bg-indigo-50 dark:bg-indigo-900/20 dark:text-indigo-400'
 };
 
-const iconWrap: Record<KpiCardProps['accent'], string> = {
-  navy: 'bg-navy-50 text-navy-700',
-  teal: 'bg-teal-50 text-teal-700',
-  rose: 'bg-rose-50 text-rose-700',
-  amber: 'bg-amber-50 text-amber-700',
-  emerald: 'bg-emerald-50 text-emerald-700'
-};
-
-const icons: Record<KpiCardProps['accent'], 'shipments' | 'notifications' | 'warning' | 'clock' | 'check'> = {
+const icons: Record<KpiCardProps['accent'], any> = {
   navy: 'shipments',
   teal: 'notifications',
   rose: 'warning',
   amber: 'clock',
-  emerald: 'check'
+  emerald: 'check',
+  slate: 'dashboard',
+  indigo: 'shield'
 };
 
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
   return (
-    <article className="card-premium card-hover">
-      <div className="mb-3 flex items-center justify-between">
-        <div className={`h-1.5 w-24 rounded-full bg-gradient-to-r ${accents[accent]}`} />
-        <span className={`inline-flex h-9 w-9 items-center justify-center rounded-lg transition-transform duration-200 hover-lift ${iconWrap[accent]}`} aria-hidden>
-          <AppIcon name={icons[accent]} className="h-4 w-4" />
-        </span>
+    <article className="card-premium group relative overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-slate-900/40">
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl transition-all group-hover:scale-110 ${colorMap[accent]}`}>
+            <AppIcon name={icons[accent]} className="h-5 w-5" />
+          </span>
+          <div className="flex flex-col items-end">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</span>
+            <p className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{value}</p>
+          </div>
+        </div>
+        <div className="flex items-center justify-between border-t border-slate-50 pt-3 dark:border-slate-800/50">
+          <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>
+          <div className="flex h-1.5 w-1.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+        </div>
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">{title}</p>
-      <p className="mt-1.5 text-3xl font-bold tracking-tight text-navy-800 dark:text-slate-100 md:text-[32px]">{value}</p>
-      <p className="mt-1.5 text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
     </article>
   );
 }

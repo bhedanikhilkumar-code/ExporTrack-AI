@@ -29,8 +29,13 @@ interface AppIconProps {
   | 'alert'
   | 'arrow-right'
   | 'user'
-  | 'settings';
+  | 'settings'
+  | 'trend-up'
+  | 'trend-down'
+  | 'folder';
   className?: string;
+  strokeWidth?: number;
+  'aria-hidden'?: boolean;
 }
 
 const iconMap: Record<AppIconProps['name'], string> = {
@@ -64,19 +69,22 @@ const iconMap: Record<AppIconProps['name'], string> = {
   'arrow-right': 'M5 12h14M12 5l7 7-7 7',
   user: 'M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2M12 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
   settings: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM19.07 4.93l-1.41 1.41a5 5 0 0 0-7.07 7.07l-1.41-1.41a7 7 0 0 1 9.9-9.9ZM4.93 4.93a7 7 0 0 1 9.9 9.9l-1.41-1.41a5 5 0 0 0-7.07-7.07l-1.41-1.41Z',
+  'trend-up': 'm22 7-8.5 8.5-5-5L2 17m20-10h-6m6 0v6',
+  'trend-down': 'm22 17-8.5-8.5-5 5L2 7m20 10h-6m6 0v-6',
+  folder: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
 };
 
-export default function AppIcon({ name, className }: AppIconProps) {
+export default function AppIcon({ name, className, strokeWidth, 'aria-hidden': ariaHidden }: AppIconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.8}
+      strokeWidth={strokeWidth ?? 1.8}
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className ?? 'h-4 w-4'}
-      aria-hidden
+      aria-hidden={ariaHidden ?? true}
     >
       <path d={iconMap[name]} />
     </svg>

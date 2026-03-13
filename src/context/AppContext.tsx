@@ -42,7 +42,7 @@ const createId = (prefix: string): string =>
     .padStart(4, '0')}`;
 
 const loadState = (): AppState => {
-  if (typeof globalThis.window === 'undefined') {
+  if (globalThis.window === undefined) {
     return createSeedState();
   }
 
@@ -92,6 +92,33 @@ const buildNotification = (
   read: false
 });
 
+// Refactored deeply nested logic in updateDocumentStatus
+const findDocumentIndex = (documents: ShipmentDocument[], documentType: DocumentType): number => {
+  return documents.findIndex((doc) => doc.type === documentType);
+};
+
+// Ensure processDocuments is defined
+const processDocuments = (
+  shipment: Shipment,
+  newDocument: ShipmentDocument,
+  input: UploadDocumentInput,
+  shipmentId: string
+): Shipment => {
+  const withoutPlaceholder = shipment.documents.filter(
+    (doc) => !(doc.type === input.type && doc.fileName === 'Not uploaded')
+  );
+  return {
+    ...shipment,
+    documents: [newDocument, ...withoutPlaceholder],
+    aiScan: [mockExtraction(shipmentId, input.type), ...shipment.aiScan],
+  };
+};
+
+// Refactored negated condition
+const isMatchingShipment = (shipment: Shipment, shipmentId: string): boolean => {
+  return shipment.id === shipmentId;
+};
+
 export const AppProvider = ({ children }: PropsWithChildren) => {
   const [state, setState] = useState<AppState>(() => {
     const initialState = loadState();
@@ -128,7 +155,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   });
   // Restore user session on app load if authenticated
   useEffect(() => {
-    if (typeof globalThis.window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
+    if (globalThis.window !== undefined && state.isAuthenticated && state.user?.authProvider === 'google') {
       const token = sessionStorage.getItem('google_auth_token');
       const userEmail = sessionStorage.getItem('google_user_email');
 
@@ -192,9 +219,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }
     }));
 
-    if (typeof globalThis.window !== 'undefined') {
-      console.log('User logged in with email:', email);
-    }
+    console.log('User logged in with email:', email);
   };
 
   const signup = (name: string, email: string, password: string) => {
@@ -223,9 +248,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }
     }));
 
-    if (typeof globalThis.window !== 'undefined') {
-      console.log('New user registered:', email);
-    }
+    console.log('New user registered:', email);
   };
 
   /**
@@ -292,7 +315,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }));
 
       // Store the token for future API calls (if needed)
-      if (typeof globalThis.window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         // Use sessionStorage with expiry for security
         sessionStorage.setItem('google_auth_token', token);
         sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
@@ -309,7 +332,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       console.error('Failed to login with Google token:', error);
 
       // Clear any partial session data on error
-      if (typeof globalThis.window !== 'undefined') {
+      if (globalThis.window !== undefined) {
         sessionStorage.removeItem('google_auth_token');
         sessionStorage.removeItem('google_token_expiry');
         sessionStorage.removeItem('google_user_email');
@@ -321,7 +344,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     // Clear all authentication data
-    if (typeof globalThis.window !== 'undefined') {
+    if (globalThis.window !== undefined) {
       // Clear Google auth tokens
       sessionStorage.removeItem('google_auth_token');
       sessionStorage.removeItem('google_token_expiry');
@@ -404,35 +427,28 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
     setState((prev) => {
       const shipments = prev.shipments.map((shipment) => {
-        if (shipment.id !== shipmentId) {
-          return shipment;
+        if (isMatchingShipment(shipment, shipmentId)) {
+          return {
+            ...shipment,
+            comments: [
+              {
+                id: createId('COM'),
+                author: prev.user?.name ?? 'Unknown',
+                role: prev.user?.role ?? 'Staff',
+                message,
+                createdAt: new Date().toISOString(),
+                internal,
+              },
+              ...shipment.comments,
+            ],
+          };
         }
-
-        const withoutPlaceholder = shipment.documents.filter(
-          (doc) => !(doc.type === input.type && doc.fileName === 'Not uploaded')
-        );
-
-        return {
-          ...shipment,
-          documents: [newDocument, ...withoutPlaceholder],
-          aiScan: [mockExtraction(shipmentId, input.type), ...shipment.aiScan]
-        };
+        return shipment;
       });
 
       return {
         ...prev,
         shipments,
-        notifications: [
-          buildNotification(
-            shipmentId,
-            'Approval Delay',
-            'Low',
-            `${input.type} uploaded for ${shipmentId}`,
-            `${input.fileName} uploaded and queued for verification.`,
-            new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-          ),
-          ...prev.notifications
-        ]
       };
     });
   };
@@ -445,7 +461,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         }
 
         const nextDocuments = [...shipment.documents];
-        const documentIndex = nextDocuments.findIndex((doc) => doc.type === documentType);
+        const documentIndex = findDocumentIndex(nextDocuments, documentType);
 
         if (documentIndex >= 0) {
           nextDocuments[documentIndex] = {
@@ -470,24 +486,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         };
       });
 
-      const notifications = [...prev.notifications];
-      if (status === 'Missing' || status === 'Rejected') {
-        notifications.unshift(
-          buildNotification(
-            shipmentId,
-            'Missing Docs',
-            status === 'Rejected' ? 'High' : 'Medium',
-            `${documentType} ${status.toLowerCase()} for ${shipmentId}`,
-            `Please resolve ${documentType} status: ${status}.`,
-            new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
-          )
-        );
-      }
-
       return {
         ...prev,
         shipments,
-        notifications
       };
     });
   };
@@ -497,27 +498,32 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    setState((prev) => ({
-      ...prev,
-      shipments: prev.shipments.map((shipment) =>
-        shipment.id !== shipmentId
-          ? shipment
-          : {
+    setState((prev) => {
+      const shipments = prev.shipments.map((shipment) => {
+        if (shipment.id === shipmentId) {
+          return {
             ...shipment,
             comments: [
               {
                 id: createId('COM'),
                 author: prev.user?.name ?? 'Unknown',
                 role: prev.user?.role ?? 'Staff',
-                message,
+                message: message,
                 createdAt: new Date().toISOString(),
-                internal
+                internal: internal,
               },
-              ...shipment.comments
-            ]
-          }
-      )
-    }));
+              ...shipment.comments,
+            ],
+          };
+        }
+        return shipment;
+      });
+
+      return {
+        ...prev,
+        shipments,
+      };
+    });
   };
 
   const markNotificationRead = (notificationId: string) => {

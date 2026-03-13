@@ -117,173 +117,174 @@ export default function ShipmentDetailsPage() {
   };
 
   return (
-    <>
-      <style>{`
-        @keyframes slideInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-slide-up { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        .delay-100 { animation-delay: 0.1s; }
-        .delay-200 { animation-delay: 0.2s; }
-        .hover-lift { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease; }
-        .hover-lift:hover { transform: translateY(-4px); }
-      `}</style>
-
-      <div className="page-stack pb-12">
-        <PageHeader
-          title={`Shipment Details: ${shipment.id}`}
-          subtitle={`${shipment.clientName} • ${shipment.destinationCountry} • Container ${shipment.containerNumber}`}
-          action={
-            <div className="flex gap-3">
-              <Link to={`/ai-extraction`} className="btn-secondary dark:bg-slate-800 dark:border-slate-700 dark:text-teal-400">
-                AI Extraction
-              </Link>
-              <button type="button" className="btn-primary shadow-soft bg-gradient-to-r from-teal-600 to-navy-700 border-none">
-                Export Data
-              </button>
-            </div>
-          }
-        />
-
-        {/* ── Shipment Summary & Risk ── */}
-        <section className="grid gap-5 md:grid-cols-2 lg:grid-cols-5 animate-slide-up">
-          <article className="card-panel relative overflow-hidden bg-gradient-to-br from-navy-800 to-navy-900 border-none text-white hover-lift">
-            <p className="text-[11px] uppercase tracking-wider text-navy-200 font-bold mb-3">Overall Progress</p>
-            <div className="flex items-end gap-2 mb-2">
-              <span className="text-4xl font-bold">{completion}%</span>
-              <span className="text-xs text-navy-200 mb-1">Verified</span>
-            </div>
-            <div className="mt-4 bg-navy-900/50 rounded-full h-2.5 overflow-hidden border border-navy-700">
-              <div className="h-full rounded-full bg-gradient-to-r from-teal-400 to-teal-300 transition-all duration-1000" style={{ width: `${completion}%` }} />
-            </div>
-          </article>
-
-          {/* Risk Score Widget */}
-          <article className="card-panel bg-white dark:bg-slate-900 border-rose-100 dark:border-rose-900/30 hover-lift lg:col-span-1">
-            <p className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-2">Shipment Risk Score</p>
-            <div className="flex items-center justify-between">
-              <span className={`text-3xl font-bold ${getRiskColor(riskScore)}`}>{riskScore}%</span>
-              <svg className={`w-8 h-8 ${riskScore > 50 ? 'text-rose-500' : 'text-emerald-500'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-            </div>
-            <div className="mt-3 space-y-1">
-              {riskFactors.length > 0 ? (
-                riskFactors.slice(0, 3).map((factor, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <span className="w-1 h-1 rounded-full bg-rose-400 shrink-0" />
-                    <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400 truncate">{factor}</span>
-                  </div>
-                ))
-              ) : (
-                <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-bold italic">No active risks.</p>
-              )}
-            </div>
-          </article>
-
-          <article className="card-panel bg-white/70 backdrop-blur-md dark:bg-slate-900/70 hover-lift flex flex-col justify-between">
-            <div>
-              <p className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">Status</p>
-              <StatusBadge value={shipment.status} />
-            </div>
-            <div className="space-y-1 mt-4 text-xs font-bold text-slate-600 dark:text-slate-300">
-              <p className="flex justify-between"><span>Departure:</span> <span>{shipment.shipmentDate}</span></p>
-              <p className="flex justify-between"><span>Deadline:</span> <span className="text-rose-600 dark:text-rose-400">{shipment.deadline}</span></p>
-            </div>
-          </article>
-
-          <article className="card-panel bg-white/70 backdrop-blur-md dark:bg-slate-900/70 hover-lift">
-            <p className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">Priority / Handler</p>
-            <StatusBadge value={shipment.priority} />
-            <div className="mt-4 flex items-center gap-2 bg-slate-50 dark:bg-slate-800 p-2 rounded-lg">
-              <div className="w-7 h-7 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-700 dark:text-teal-400 flex items-center justify-center font-bold text-[10px]">
-                {shipment.assignedTo.charAt(0)}
-              </div>
-              <span className="text-xs font-bold text-navy-800 dark:text-slate-200">{shipment.assignedTo}</span>
-            </div>
-          </article>
-
-          <article className="card-panel bg-white/70 backdrop-blur-md dark:bg-slate-900/70 hover-lift">
-            <p className="text-[11px] uppercase tracking-wider text-slate-500 dark:text-slate-400 font-bold mb-3">Verification Info</p>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30 rounded p-2 text-center">
-                <span className="block text-lg font-bold text-emerald-600 dark:text-emerald-400">{verifiedDocs}</span>
-                <span className="text-[8px] uppercase font-bold text-emerald-700 dark:text-emerald-500">Passed</span>
-              </div>
-              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/30 rounded p-2 text-center">
-                <span className="block text-lg font-bold text-amber-600 dark:text-amber-400">{pendingDocs}</span>
-                <span className="text-[8px] uppercase font-bold text-amber-700 dark:text-amber-500">Wait</span>
-              </div>
-            </div>
-          </article>
-        </section>
-
-        {/* ── AI Insights Row ── */}
-        <section className="mt-6 grid gap-6 lg:grid-cols-3 animate-slide-up delay-75">
-          <div className="lg:col-span-1">
-            <AiDelayPrediction shipmentId={shipment.id} />
+    <div className="space-y-6 animate-in">
+      {/* ── Page Header ── */}
+      <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-400">
+            <Link to="/shipments" className="hover:text-teal-600 transition-colors">Shipments Pipeline</Link>
+            <AppIcon name="chevron-right" className="h-2 w-2" />
+            <span className="text-slate-900 dark:text-white">Active Freight</span>
           </div>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            Shipment {shipment.id}
+          </h1>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            {shipment.clientName} • Container {shipment.containerNumber}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="btn-secondary">
+            <AppIcon name="upload" className="mr-2 h-4 w-4" />
+            Upload Manifest
+          </button>
+          <button className="btn-primary">
+            Export Report
+          </button>
+        </div>
+      </header>
 
-          <article className="lg:col-span-2 card-panel bg-gradient-to-br from-white to-slate-50 dark:from-slate-900 dark:to-slate-950 border-teal-100 dark:border-teal-900/30">
-            <div className="flex items-center gap-2 text-teal-600 dark:text-teal-400 mb-6">
-              <div className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-900/30">
-                <AppIcon name="ai-extract" className="h-4 w-4" />
-              </div>
-              <h3 className="text-sm font-bold uppercase tracking-wider">AI Route Intelligence</h3>
+      {/* ── Key Indicators ── */}
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="card-premium">
+          <div className="mb-4 flex items-center justify-between">
+             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Compliance</span>
+             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-900/20 text-teal-600">
+                <AppIcon name="shield" className="h-4 w-4" />
+             </div>
+          </div>
+          <div className="flex items-end gap-2">
+            <span className="text-3xl font-bold text-slate-900 dark:text-white">{completion}%</span>
+            <div className="mb-1.5 h-1.5 w-16 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <div className="h-full bg-teal-500" style={{ width: `${completion}%` }} />
             </div>
-            <div className="grid sm:grid-cols-2 gap-6">
-              <div>
-                <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 mb-3 tracking-widest">Efficiency Benchmark</p>
-                <div className="flex items-center gap-4">
-                  <div className="h-16 w-16 rounded-full border-4 border-teal-100 dark:border-teal-900/30 flex items-center justify-center">
-                    <span className="text-xl font-black text-navy-800 dark:text-teal-400">92%</span>
+          </div>
+          <p className="mt-2 text-[11px] font-medium text-slate-500">{verifiedDocs} of {REQUIRED_DOCUMENT_TYPES.length} documents verified</p>
+        </div>
+
+        <div className="card-premium">
+          <div className="mb-4 flex items-center justify-between">
+             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Network Risk</span>
+             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600">
+                <AppIcon name="warning" className="h-4 w-4" />
+             </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className={`text-3xl font-bold ${getRiskColor(riskScore)}`}>{riskScore}%</span>
+            <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[9px] font-bold uppercase text-rose-600 dark:bg-rose-900/20">
+              {riskScore > 50 ? 'Critical' : riskScore > 20 ? 'Monitor' : 'Stable'}
+            </span>
+          </div>
+          <p className="mt-2 text-[11px] font-medium text-slate-500 truncate">
+            {riskFactors[0] || 'No immediate risk factors detected'}
+          </p>
+        </div>
+
+        <div className="card-premium">
+          <div className="mb-4 flex items-center justify-between">
+             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Status</span>
+             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600">
+                <AppIcon name="clock" className="h-4 w-4" />
+             </div>
+          </div>
+          <div className="flex flex-col gap-1">
+            <StatusBadge value={shipment.status} />
+            <span className="mt-1 text-[11px] font-bold text-slate-500">EtD: {shipment.shipmentDate}</span>
+          </div>
+        </div>
+
+        <div className="card-premium">
+          <div className="mb-4 flex items-center justify-between">
+             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Lane Handler</span>
+             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
+                <AppIcon name="user" className="h-4 w-4" />
+             </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-full bg-slate-900 flex items-center justify-center text-[10px] font-bold text-teal-400">
+              {shipment.assignedTo.charAt(0)}
+            </div>
+            <div>
+              <p className="text-xs font-bold text-slate-900 dark:text-white">{shipment.assignedTo}</p>
+              <p className="text-[10px] text-slate-400">Lane Strategist</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Content Grid ── */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Span - AI and Docs */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* AI Intelligence Spotlight */}
+          <article className="card-premium overflow-hidden border-none bg-slate-900 text-white dark:bg-teal-900/10">
+            <div className="flex flex-col gap-6 md:flex-row md:items-center">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-teal-400">
+                    <AppIcon name="ai-extract" className="h-4 w-4" />
                   </div>
-                  <div>
-                    <p className="text-xs font-bold text-slate-700 dark:text-slate-200">Above Average</p>
-                    <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5">Performance vs Peer Lanes</p>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-teal-400">Neural Route Optimization</span>
+                </div>
+                <h3 className="text-lg font-bold mb-3">Predicted Lane Performance</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-6">
+                  Our neural engine has analyzed the Current transshipment hub performance and historical data for {shipment.destinationCountry}.
+                </p>
+                <div className="flex gap-4">
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-bold">94%</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-500">Stability</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-2xl font-bold text-teal-400">-12h</span>
+                    <span className="text-[10px] uppercase font-bold text-slate-500">EtA Delta</span>
                   </div>
                 </div>
               </div>
-              <div className="space-y-4">
-                <p className="text-[10px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest">Dynamic Recommendations</p>
-                <div className="p-3 rounded-xl bg-teal-50/50 dark:bg-teal-900/20 border border-teal-100/50 dark:border-teal-900/30">
-                  <p className="text-xs font-semibold text-teal-800 dark:text-teal-300">Alternate port suggested for transshipment to save ~14h lead time.</p>
-                </div>
-                <button className="text-xs font-black text-teal-600 dark:text-teal-400 hover:underline uppercase tracking-widest">
-                  View Optimal Route Maps →
-                </button>
+              <div className="shrink-0">
+                <AiDelayPrediction shipmentId={shipment.id} />
               </div>
             </div>
           </article>
-        </section>
 
-        {/* ── Documents & Checklist ── */}
-        <section className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr] animate-slide-up delay-100">
-          <article className="card-panel">
-            <div className="mb-4 flex items-center justify-between border-b border-slate-50 dark:border-slate-800 pb-4">
-              <h3 className="text-base font-bold text-navy-800 dark:text-slate-100 uppercase tracking-wide">Documents Log</h3>
-              <Link to={`/shipments/${shipment.id}/upload`} className="btn-primary btn-sm">Upload New</Link>
+          {/* Document Management */}
+          <article className="card-premium">
+            <div className="mb-6 flex items-center justify-between">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Manifest Repository</h3>
+              <Link to="/ai-validator" className="text-xs font-bold text-teal-600 hover:underline">
+                Run Validation Scan
+              </Link>
             </div>
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-sm">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="text-slate-400 dark:text-slate-500 text-[10px] uppercase border-b border-slate-100 dark:border-slate-800">
-                    <th className="px-2 py-3">Document Type</th>
-                    <th className="px-2 py-3">Status</th>
-                    <th className="px-2 py-3 text-right">Preview</th>
+                  <tr className="border-b border-slate-50 dark:border-slate-800">
+                    <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Document</th>
+                    <th className="pb-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                    <th className="pb-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
                   {shipment.documents.map((doc) => (
-                    <tr key={doc.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                      <td className="px-2 py-3">
-                        <p className="font-bold text-navy-800 dark:text-slate-200">{doc.type}</p>
-                        <p className="text-[9px] text-slate-400 dark:text-slate-500 truncate max-w-[120px]">{doc.fileName}</p>
+                    <tr key={doc.id} className="group hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-colors">
+                      <td className="py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-8 w-8 items-center justify-center rounded bg-slate-100 text-slate-400 dark:bg-slate-800">
+                            <AppIcon name="file" className="h-4 w-4" />
+                          </div>
+                          <div>
+                            <p className="text-xs font-bold text-slate-900 dark:text-white">{doc.type}</p>
+                            <p className="text-[10px] text-slate-400">{doc.fileName}</p>
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-2 py-3"><StatusBadge value={doc.status} /></td>
-                      <td className="px-2 py-3 text-right">
-                        <button type="button" className="text-teal-600 dark:text-teal-400 font-bold text-xs">View Original</button>
+                      <td className="py-4">
+                        <StatusBadge value={doc.status} />
+                      </td>
+                      <td className="py-4 text-right">
+                        <button className="text-[10px] font-bold text-teal-600 hover:text-teal-500 transition-colors uppercase tracking-widest">
+                          Full View
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -291,19 +292,28 @@ export default function ShipmentDetailsPage() {
               </table>
             </div>
           </article>
+        </div>
 
-          <article className="card-panel border-t-4 border-t-teal-500">
-            <h3 className="text-base font-bold text-navy-800 dark:text-slate-100 mb-4 uppercase tracking-wide">Mandatory Checklist</h3>
+        {/* Right Span - Checklist and Feed */}
+        <div className="space-y-6">
+          <article className="card-premium">
+            <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-slate-500 text-center">Mandatory Compliance</h3>
             <div className="space-y-2">
               {checklist.map((item) => {
                 const isVerified = item.status === 'Verified';
                 return (
-                  <div key={item.type} className={`p-2.5 rounded-xl border flex items-center justify-between ${isVerified ? 'bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/20' : 'bg-slate-50 dark:bg-slate-800/50 border-slate-100 dark:border-slate-800'}`}>
-                    <div className="flex items-center gap-2">
-                      <div className={`w-4 h-4 rounded-full flex items-center justify-center ${isVerified ? 'bg-emerald-500 text-white' : 'bg-slate-200 dark:bg-slate-700'}`}>
-                        {isVerified && <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={4}><path d="M5 13l4 4L19 7" /></svg>}
+                  <div key={item.type} className={`p-3 rounded-xl border flex items-center justify-between group transition-all hover:border-teal-500/30 ${
+                    isVerified 
+                      ? 'bg-emerald-50/20 border-emerald-100 dark:border-emerald-900/20' 
+                      : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                  }`}>
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
+                        isVerified ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
+                      }`}>
+                         {isVerified && <AppIcon name="check" className="h-3 w-3" strokeWidth={3} />}
                       </div>
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{item.type}</span>
+                      <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{item.type}</span>
                     </div>
                     <StatusBadge value={item.status} />
                   </div>
@@ -311,41 +321,64 @@ export default function ShipmentDetailsPage() {
               })}
             </div>
           </article>
-        </section>
 
-        {/* ── Timeline & Comments ── */}
-        <section className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr] animate-slide-up delay-200">
-          <ShipmentTimeline events={timeline} />
-
-          <article className="card-panel">
-            <h3 className="text-base font-bold text-navy-800 dark:text-slate-100 mb-4 uppercase tracking-wide">Collaboration</h3>
-            <form className="mb-6" onSubmit={handleCommentSubmit}>
-              <textarea
-                value={message} onChange={(e) => setMessage(e.target.value)}
-                rows={2} className="input-field mb-2 text-xs"
-                placeholder="Team message..."
-              />
-              <div className="flex justify-between items-center">
-                <label className="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase cursor-pointer">
-                  <input type="checkbox" checked={internal} onChange={(e) => setInternal(e.target.checked)} /> Private Note
-                </label>
-                <button type="submit" className="btn-primary btn-sm px-4">Post</button>
-              </div>
-            </form>
-            <div className="space-y-3">
-              {visibleComments.map((comment) => (
-                <div key={comment.id} className={`p-3 rounded-xl border ${comment.internal ? 'bg-amber-50 dark:bg-amber-900/20 border-amber-100 dark:border-amber-900/30' : 'bg-white dark:bg-slate-800/40 border-slate-100 dark:border-slate-800'}`}>
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-xs font-bold text-navy-800 dark:text-slate-200">{comment.author}</span>
-                    <span className="text-[9px] font-bold text-slate-400 uppercase">{comment.createdAt.slice(8, 10)}-{comment.createdAt.slice(5, 7)}</span>
+          {/* Collaboration Hub */}
+          <article className="card-premium">
+             <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-slate-500">Lane Feed</h3>
+             <form className="mb-8" onSubmit={handleCommentSubmit}>
+                <div className="relative">
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    className="w-full h-24 rounded-xl border-slate-200 bg-slate-50 p-4 text-xs font-medium placeholder-slate-400 focus:border-teal-500 focus:ring-0 dark:border-slate-800 dark:bg-slate-900/50"
+                    placeholder="Broadcast message to team..."
+                  />
+                  <div className="absolute bottom-3 right-3 flex items-center gap-4">
+                     <label className="flex items-center gap-2 cursor-pointer group">
+                        <input 
+                          type="checkbox" 
+                          checked={internal} 
+                          onChange={(e) => setInternal(e.target.checked)} 
+                          className="rounded border-slate-300 text-teal-600 focus:ring-0 dark:border-slate-800"
+                        />
+                        <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-amber-500 transition-colors">Private</span>
+                     </label>
+                     <button type="submit" className="btn-primary btn-sm rounded-lg">
+                        Broadcast
+                     </button>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">{comment.message}</p>
                 </div>
-              ))}
-            </div>
+             </form>
+
+             <div className="space-y-4">
+               {visibleComments.map((comment) => (
+                 <div key={comment.id} className={`p-4 rounded-xl border relative ${
+                   comment.internal 
+                     ? 'bg-amber-50/30 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/20' 
+                     : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                 }`}>
+                   <div className="flex items-center justify-between mb-2">
+                     <div className="flex items-center gap-2">
+                       <span className="text-[11px] font-bold text-slate-900 dark:text-white">{comment.author}</span>
+                       {comment.internal && <span className="text-[8px] font-black uppercase text-amber-600">Internal</span>}
+                     </div>
+                     <span className="text-[10px] font-bold text-slate-400">
+                      {comment.createdAt.split('T')[0]}
+                     </span>
+                   </div>
+                   <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    {comment.message}
+                   </p>
+                 </div>
+               ))}
+             </div>
           </article>
-        </section>
+        </div>
       </div>
-    </>
+
+      <div className="mt-6">
+        <ShipmentTimeline events={timeline} />
+      </div>
+    </div>
   );
 }

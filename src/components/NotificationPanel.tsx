@@ -51,21 +51,22 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
     return (
         <div
             ref={panelRef}
-            className="absolute top-full right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] z-50 animate-slide-down"
+            className="absolute top-full right-0 mt-3 w-96 max-w-[calc(100vw-2rem)] z-50 animate-in fade-in slide-in-from-top-2 duration-200"
         >
-            <div className="rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900 overflow-hidden">
+            <div className="rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/95 overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-slate-100/50 px-4 py-3.5 dark:border-slate-800 dark:from-slate-800 dark:to-slate-800/50">
+                <div className="border-b border-slate-200/60 px-4 py-3 dark:border-slate-800/60">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <AppIcon name="bell" className="h-5 w-5 text-teal-600 dark:text-teal-400" />
-                            <h3 className="text-sm font-bold text-navy-800 dark:text-slate-100">
+                            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">
                                 Notifications
                             </h3>
                         </div>
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-teal-100 text-xs font-bold text-teal-700 dark:bg-teal-900/40 dark:text-teal-400">
-                            {unreadNotifications.length}
-                        </span>
+                        {unreadNotifications.length > 0 && (
+                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-teal-500 text-[10px] font-black text-white shadow-sm">
+                              {unreadNotifications.length}
+                          </span>
+                        )}
                     </div>
                 </div>
 
@@ -81,14 +82,14 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                 return (
                                     <div
                                         key={notification.id}
-                                        className={`group p-4 border-l-4 transition-all hover:bg-slate-50/50 dark:hover:bg-slate-800/50 ${isUnread
+                                        className={`group p-4 border-l-2 transition-all hover:bg-slate-50/50 dark:hover:bg-slate-800/50 ${isUnread
                                                 ? `${colors.bg} ${colors.border} border-l-teal-500`
-                                                : 'border-l-transparent bg-white dark:bg-slate-900/50'
+                                                : 'border-l-transparent bg-white/50 dark:bg-slate-900/30'
                                             }`}
                                     >
                                         <div className="flex gap-3">
                                             {/* Icon / Avatar */}
-                                            <div className={`flex-shrink-0 mt-0.5 h-9 w-9 rounded-lg flex items-center justify-center ${colors.badge.replace('text-', 'bg-').replace('bg-', 'text-').split(' ').slice(0, 2).join(' ')} ${colors.badge.split(' ').slice(2).join(' ')}`}>
+                                            <div className={`flex-shrink-0 mt-0.5 h-9 w-9 rounded-xl flex items-center justify-center shadow-sm ${colors.badge.replace('text-', 'bg-').replace('bg-', 'text-').split(' ').slice(0, 2).join(' ')} ${colors.badge.split(' ').slice(2).join(' ')}`}>
                                                 <AppIcon
                                                     name={
                                                         notification.type === 'Missing Docs'
@@ -98,35 +99,36 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                                                 : 'alert'
                                                     }
                                                     className="h-4 w-4"
+                                                    strokeWidth={2.5}
                                                 />
                                             </div>
 
                                             {/* Content */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex items-start justify-between gap-2 mb-1">
-                                                    <h4 className="text-sm font-semibold text-navy-800 dark:text-slate-100 line-clamp-1">
+                                                    <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 line-clamp-1">
                                                         {notification.title}
                                                     </h4>
                                                     {isUnread && (
-                                                        <div className="flex-shrink-0 h-2 w-2 rounded-full bg-teal-500 flex-shrink-0" />
+                                                        <div className="flex-shrink-0 h-2 w-2 rounded-full bg-teal-500 flex-shrink-0 animate-pulse" />
                                                     )}
                                                 </div>
 
-                                                <p className="text-xs text-slate-600 dark:text-slate-400 line-clamp-2 mb-2">
+                                                <p className="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 mb-2 font-medium leading-relaxed">
                                                     {notification.message}
                                                 </p>
 
                                                 <div className="flex flex-wrap items-center gap-1.5 mb-2.5">
-                                                    <span className={`inline-flex px-2 py-1 rounded text-[10px] font-semibold ${typeColor}`}>
+                                                    <span className={`inline-flex px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${typeColor}`}>
                                                         {notification.type}
                                                     </span>
-                                                    <span className={`inline-flex px-2 py-1 rounded text-[10px] font-semibold ${colors.badge}`}>
+                                                    <span className={`inline-flex px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${colors.badge}`}>
                                                         {notification.severity}
                                                     </span>
                                                 </div>
 
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-xs text-slate-500 dark:text-slate-400">
+                                                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500">
                                                         {new Date(notification.createdAt).toLocaleDateString('en-US', {
                                                             month: 'short',
                                                             day: 'numeric',
@@ -139,7 +141,7 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                                         <button
                                                             type="button"
                                                             onClick={() => markNotificationRead(notification.id)}
-                                                            className="text-xs font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                            className="text-[9px] font-bold uppercase tracking-widest text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 opacity-0 group-hover:opacity-100 transition-opacity"
                                                         >
                                                             Mark as read
                                                         </button>
@@ -152,15 +154,15 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                             })}
                         </div>
                     ) : (
-                        <div className="p-12 text-center">
-                            <div className="flex justify-center mb-3">
-                                <AppIcon name="bell" className="h-8 w-8 text-slate-300 dark:text-slate-700" />
+                        <div className="p-10 text-center flex flex-col items-center justify-center">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400 mb-4 transition-transform hover:scale-110 shadow-sm border border-slate-200 dark:border-slate-700">
+                                <AppIcon name="bell" className="h-5 w-5 text-slate-400 dark:text-slate-500" strokeWidth={2.5} />
                             </div>
-                            <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                            <p className="text-sm font-bold text-slate-900 dark:text-white">
                                 All caught up!
                             </p>
-                            <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">
-                                No notifications right now
+                            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1.5 uppercase tracking-widest font-bold">
+                                No new notifications
                             </p>
                         </div>
                     )}
@@ -168,14 +170,14 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
 
                 {/* Footer */}
                 {sorted.length > 0 && (
-                    <div className="border-t border-slate-100 bg-slate-50/50 px-4 py-3 dark:border-slate-800 dark:bg-slate-800/30">
+                    <div className="border-t border-slate-200/60 bg-slate-50/50 px-4 py-3 dark:border-slate-800/60 dark:bg-slate-900/50">
                         <Link
                             to="/notifications"
                             onClick={onClose}
-                            className="flex items-center justify-center gap-2 text-sm font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
+                            className="flex items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-widest text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors group"
                         >
-                            View all notifications
-                            <AppIcon name="arrow-right" className="h-3.5 w-3.5" />
+                            View all Activity
+                            <AppIcon name="arrow-right" className="h-3 w-3 transition-transform group-hover:translate-x-0.5" strokeWidth={3} />
                         </Link>
                     </div>
                 )}

@@ -84,83 +84,103 @@ export default function AiLogisticsAssistant() {
     return "I can help you with shipment tracking, document compliance, and risk assessments. Could you be more specific? For example: 'Which shipments are at risk?'";
   };
 
-  return (
-    <article className="card-panel flex flex-col h-[500px] border-none shadow-2xl overflow-hidden p-0 bg-white dark:bg-slate-900">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-navy-800 to-navy-950 p-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center border border-teal-500/30">
-            <AppIcon name="ai-extract" className="h-6 w-6 text-teal-400" />
-          </div>
-          <div>
-            <h3 className="text-white text-sm font-bold uppercase tracking-widest">Ops Intelligence</h3>
-            <p className="text-[10px] text-teal-400 font-black animate-pulse uppercase">AI Engine Online</p>
-          </div>
-        </div>
-        <div className="flex gap-1">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500/40"></span>
-        </div>
-      </div>
+    return (
+        <article className="flex flex-col h-[500px] border border-slate-200/60 shadow-xl overflow-hidden p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl dark:border-slate-800/60 relative group transition-all hover:shadow-2xl">
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-      {/* Chat Area */}
-      <div 
-        ref={scrollRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth bg-slate-50/50 dark:bg-slate-950/20"
-      >
-        {messages.map((msg) => (
-          <div 
-            key={msg.id} 
-            className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'} animate-slide-up`}
-          >
+            {/* Header */}
+            <div className="bg-slate-900 dark:bg-slate-950/80 p-4 flex items-center justify-between border-b border-slate-800/60 relative z-10">
+                <div className="flex items-center gap-3 relative">
+                    <div className="h-10 w-10 shrink-0 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shadow-sm relative overflow-hidden">
+                        <div className="absolute inset-0 bg-teal-400/20 animate-pulse" />
+                        <AppIcon name="ai-extract" className="h-5 w-5 text-teal-400 relative z-10" strokeWidth={2.5} />
+                    </div>
+                    <div className="flex flex-col justify-center">
+                        <h3 className="text-white text-sm font-bold tracking-tight">Ops Intelligence</h3>
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="relative flex h-1.5 w-1.5">
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500"></span>
+                            </span>
+                            <p className="text-[9px] text-teal-400/90 font-bold uppercase tracking-widest">AI Engine Online</p>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex gap-1.5 opacity-50">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-600"></span>
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-700"></span>
+                </div>
+            </div>
+
+            {/* Chat Area */}
             <div 
-              className={`max-w-[85%] p-3 rounded-2xl text-xs font-medium leading-relaxed shadow-sm ${
-                msg.sender === 'user' 
-                  ? 'bg-navy-700 text-white rounded-tr-none' 
-                  : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-100 dark:border-slate-700 rounded-tl-none'
-              }`}
+                ref={scrollRef}
+                className="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth bg-slate-50/50 dark:bg-slate-950/20 relative z-10 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-800"
             >
-              {msg.text}
-              <p className={`text-[8px] mt-1.5 opacity-50 ${msg.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-              </p>
+                {messages.map((msg) => (
+                    <div 
+                        key={msg.id} 
+                        className={`flex w-full animate-in fade-in slide-in-from-bottom-2 ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                    >
+                        <div className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'} max-w-[85%]`}>
+                            <div 
+                                className={`p-3 text-xs font-medium leading-relaxed shadow-sm relative ${
+                                    msg.sender === 'user' 
+                                        ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900 rounded-2xl rounded-tr-sm' 
+                                        : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 rounded-2xl rounded-tl-sm'
+                                }`}
+                            >
+                                {msg.text}
+                            </div>
+                            <span className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-1.5 px-1 px-1">
+                                {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </span>
+                        </div>
+                    </div>
+                ))}
+                {isTyping && (
+                    <div className="flex justify-start w-full animate-in fade-in">
+                        <div className="bg-white dark:bg-slate-800 p-3.5 rounded-2xl rounded-tl-sm border border-slate-200/60 dark:border-slate-700/60 shadow-sm flex items-center justify-center">
+                            <div className="flex gap-1.5">
+                                <div className="h-1.5 w-1.5 bg-slate-300 dark:bg-slate-500 rounded-full animate-bounce"></div>
+                                <div className="h-1.5 w-1.5 bg-slate-300 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                                <div className="h-1.5 w-1.5 bg-slate-300 dark:bg-slate-500 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
-          </div>
-        ))}
-        {isTyping && (
-          <div className="flex justify-start">
-            <div className="bg-white dark:bg-slate-800 p-3 rounded-2xl rounded-tl-none border border-slate-100 dark:border-slate-700">
-              <div className="flex gap-1">
-                <div className="h-1 w-1 bg-slate-400 rounded-full animate-bounce"></div>
-                <div className="h-1 w-1 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="h-1 w-1 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
 
-      {/* Input Area */}
-      <form onSubmit={handleSend} className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <div className="relative">
-          <input 
-            type="text" 
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about shipments, risks, or docs..."
-            className="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl py-3 pl-4 pr-12 text-xs focus:ring-2 focus:ring-teal-500/50 outline-none transition-all dark:text-slate-100"
-          />
-          <button 
-            type="submit"
-            className="absolute right-2 top-1.5 h-8 w-8 bg-teal-600 hover:bg-teal-700 text-white rounded-lg flex items-center justify-center transition-colors shadow-md"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-        <p className="text-[9px] text-slate-400 mt-2 text-center font-bold uppercase tracking-tight">Powered by Logistic-LLM v4</p>
-      </form>
-    </article>
-  );
+            {/* Input Area */}
+            <form onSubmit={handleSend} className="p-3 border-t border-slate-200/60 dark:border-slate-800/60 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm relative z-10">
+                <div className="relative flex items-center bg-slate-100 dark:bg-slate-800/80 rounded-xl border border-transparent shadow-inner focus-within:border-teal-500/30 focus-within:bg-white dark:focus-within:bg-slate-800 transition-all">
+                    <input 
+                        type="text" 
+                        value={input}
+                        onChange={(e) => setInput(e.target.value)}
+                        placeholder="Ask about shipments, risks, or docs..."
+                        className="flex-1 bg-transparent border-none rounded-xl py-2.5 pl-4 pr-12 text-xs font-semibold focus:ring-0 outline-none w-full text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500"
+                    />
+                    <button 
+                        type="submit"
+                        disabled={!input.trim()}
+                        className={`absolute right-1.5 h-7 w-7 rounded-lg flex items-center justify-center transition-all ${
+                            input.trim() 
+                            ? 'bg-teal-500 text-white shadow-sm hover:bg-teal-600 dark:bg-teal-600 dark:hover:bg-teal-500 hover:scale-105' 
+                            : 'bg-slate-200 text-slate-400 dark:bg-slate-700 dark:text-slate-500'
+                        }`}
+                    >
+                        <AppIcon name="arrow-right" className="w-3.5 h-3.5" strokeWidth={3} />
+                    </button>
+                </div>
+                <div className="flex justify-center mt-2.5">
+                   <p className="text-[9px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                      <AppIcon name="ai-extract" className="h-2.5 w-2.5" />
+                      Powered by Logistic-LLM v4
+                   </p>
+                </div>
+            </form>
+        </article>
+    );
 }

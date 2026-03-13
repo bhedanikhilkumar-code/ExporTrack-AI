@@ -28,7 +28,7 @@ export default function UserProfileDropdown() {
             {/* Profile Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="focus-ring flex items-center gap-2 p-1 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
                 aria-haspopup="true"
                 aria-expanded={isOpen}
             >
@@ -37,7 +37,7 @@ export default function UserProfileDropdown() {
                     <img
                         src={user.profilePicture}
                         alt={user.name}
-                        className="h-8 w-8 rounded-full object-cover"
+                        className="h-8 w-8 rounded-lg object-cover shadow-sm transition-transform group-hover:scale-105"
                         loading="lazy"
                         onError={(e) => {
                             // Fallback if image fails to load
@@ -46,35 +46,43 @@ export default function UserProfileDropdown() {
                         }}
                     />
                 ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-navy-600 text-white text-sm font-bold">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 text-white text-xs font-black shadow-sm transition-transform group-hover:scale-105">
                         {user.name.charAt(0).toUpperCase()}
                     </div>
                 )}
 
                 {/* User Name */}
-                <span className="hidden text-sm font-medium text-slate-700 dark:text-slate-300 sm:inline max-w-[150px] truncate">
-                    {user.name}
-                </span>
+                <div className="hidden sm:flex flex-col items-start px-1 mr-1">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 max-w-[120px] truncate leading-tight">
+                      {user.name}
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 leading-tight">
+                      {user.authProvider === 'demo' ? 'Demo' : 'Admin'}
+                  </span>
+                </div>
 
                 {/* Chevron */}
-                <AppIcon
-                    name={isOpen ? 'chevronUp' : 'chevronDown'}
-                    className="h-4 w-4 text-slate-500 dark:text-slate-400"
-                />
+                <div className="hidden sm:flex items-center justify-center h-5 w-5 rounded bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
+                  <AppIcon
+                      name={isOpen ? 'chevronUp' : 'chevronDown'}
+                      className="h-3 w-3 text-slate-500 dark:text-slate-400"
+                      strokeWidth={3}
+                  />
+                </div>
             </button>
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-lg z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-slate-200/60 bg-white/90 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/90 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 p-1">
                     {/* Profile Info Section */}
-                    <div className="border-b border-slate-200 dark:border-slate-700 p-4 bg-slate-50 dark:bg-slate-700/50">
+                    <div className="p-3 mb-1">
                         <div className="flex items-center gap-3">
                             {/* Profile Picture */}
                             {user.profilePicture ? (
                                 <img
                                     src={user.profilePicture}
                                     alt={user.name}
-                                    className="h-12 w-12 rounded-full object-cover"
+                                    className="h-10 w-10 rounded-xl object-cover shadow-sm"
                                     loading="lazy"
                                     onError={(e) => {
                                         // Fallback if image fails to load
@@ -83,57 +91,37 @@ export default function UserProfileDropdown() {
                                     }}
                                 />
                             ) : (
-                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-navy-600 text-white font-bold text-lg">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 text-white font-black shadow-sm">
                                     {user.name.charAt(0).toUpperCase()}
                                 </div>
                             )}
 
                             {/* User Details */}
-                            <div className="flex-1 min-w-0">
-                                <p className="font-semibold text-slate-900 dark:text-slate-100 truncate">
+                            <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
                                     {user.name}
                                 </p>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 truncate">
+                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
                                     {user.email}
                                 </p>
-                                {user.authProvider === 'google' && (
-                                    <div className="mt-1 flex items-center gap-1">
-                                        <AppIcon name="google" className="h-3 w-3 text-red-500" />
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                                            Google Account
-                                        </span>
-                                    </div>
-                                )}
-                                {user.authProvider === 'demo' && (
-                                    <div className="mt-1 flex items-center gap-1">
-                                        <span className="h-2 w-2 rounded-full bg-amber-500"></span>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                                            Demo Account
-                                        </span>
-                                    </div>
-                                )}
-                                {user.authProvider === 'email' && (
-                                    <div className="mt-1 flex items-center gap-1">
-                                        <span className="h-2 w-2 rounded-full bg-teal-500"></span>
-                                        <span className="text-xs text-slate-500 dark:text-slate-400">
-                                            Email Account
-                                        </span>
-                                    </div>
-                                )}
                             </div>
                         </div>
                     </div>
 
+                    <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-2 my-1" />
+
                     {/* Menu Items */}
-                    <div className="py-1">
+                    <div className="p-1 space-y-0.5 relative">
                         <button
                             onClick={() => {
                                 // Navigate to profile page (implement as needed)
                                 setIsOpen(false);
                             }}
-                            className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
+                            className="w-full px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
                         >
-                            <AppIcon name="user" className="h-4 w-4" />
+                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
+                                <AppIcon name="user" className="h-3.5 w-3.5" />
+                            </div>
                             <span>My Profile</span>
                         </button>
 
@@ -142,22 +130,26 @@ export default function UserProfileDropdown() {
                                 // Navigate to settings (implement as needed)
                                 setIsOpen(false);
                             }}
-                            className="w-full px-4 py-2 text-left text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700/50 flex items-center gap-2 transition-colors"
+                            className="w-full px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
                         >
-                            <AppIcon name="settings" className="h-4 w-4" />
+                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
+                                <AppIcon name="settings" className="h-3.5 w-3.5" />
+                            </div>
                             <span>Settings</span>
                         </button>
 
-                        <div className="my-1 border-t border-slate-200 dark:border-slate-700" />
+                        <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-1 my-1.5" />
 
                         <button
                             onClick={() => {
                                 logout();
                                 setIsOpen(false);
                             }}
-                            className="w-full px-4 py-2 text-left text-sm text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-900/20 flex items-center gap-2 transition-colors"
+                            className="w-full px-3 py-2 rounded-lg text-left text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center gap-3 transition-all group"
                         >
-                            <AppIcon name="logout" className="h-4 w-4" />
+                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-100 text-rose-500 group-hover:bg-white dark:bg-rose-500/20 dark:text-rose-400 dark:group-hover:bg-rose-500/30 transition-colors shadow-sm">
+                                <AppIcon name="logout" className="h-3.5 w-3.5" />
+                            </div>
                             <span>Sign Out</span>
                         </button>
                     </div>
