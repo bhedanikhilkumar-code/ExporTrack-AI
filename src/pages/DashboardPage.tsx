@@ -284,7 +284,7 @@ export default function DashboardPage() {
       </div>
 
       {/* ── Recent Shipments Table ── */}
-      <article className="card-premium overflow-hidden">
+      <article className="dashboard-grid-table card-premium overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
           <button

@@ -322,142 +322,263 @@
   @apply bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400;
 }
 
-/* Main Page Container */
+/* ══════════════════════════════════════════════════════════════ */
+/* MODERN CSS GRID LAYOUT SYSTEM FOR DASHBOARD                    */
+/* ══════════════════════════════════════════════════════════════ */
+
+/* Main Dashboard Container - All content flows through here */
 .page-stack {
-  @apply mx-auto max-w-7xl space-y-6 sm:space-y-8 md:space-y-10;
-}
-
-/* Dashboard GridUtilities */
-.dashboard-grid-header {
-  @apply flex flex-col gap-4 md:flex-row md:items-center md:justify-between;
-}
-
-/* KPI Grid - 5 columns on desktop, responsive on smaller screens */
-.dashboard-grid-kpi {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1rem;
-  box-sizing: border-box;
-}
-
-@media (min-width: 1024px) {
-  .dashboard-grid-kpi {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-@media (min-width: 640px) and (max-width: 1023px) {
-  .dashboard-grid-kpi {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 639px) {
-  .dashboard-grid-kpi {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Secondary 4-column grid */
-.dashboard-grid-secondary {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  box-sizing: border-box;
-}
-
-@media (min-width: 1024px) {
-  .dashboard-grid-secondary {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-
-@media (min-width: 640px) and (max-width: 1023px) {
-  .dashboard-grid-secondary {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 639px) {
-  .dashboard-grid-secondary {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* 3-column section grid */
-.dashboard-grid-section {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
-  box-sizing: border-box;
-}
-
-@media (min-width: 1024px) {
-  .dashboard-grid-section {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 1023px) {
-  .dashboard-grid-section {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* Wide 2+1 layout */
-.dashboard-grid-wide {
+  /* Grid container setup */
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.5rem;
+  
+  /* Responsive sizing */
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1rem;
   box-sizing: border-box;
-}
 
-@media (min-width: 1280px) {
-  .dashboard-grid-wide {
-    grid-template-columns: 2fr 1fr;
+  /* Mobile-first spacing */
+  @media (max-width: 640px) {
+    gap: 1rem;
+    padding: 0 0.75rem;
   }
 }
 
-/* Full-width chart container */
+/* Responsive padding adjustments */
+@media (min-width: 641px) and (max-width: 768px) {
+  .page-stack {
+    gap: 1.25rem;
+    padding: 0 1rem;
+  }
+}
+
+@media (min-width: 769px) to (max-width: 1024px) {
+  .page-stack {
+    gap: 1.5rem;
+    padding: 0 1.5rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .page-stack {
+    gap: 1.75rem;
+    padding: 0 2rem;
+  }
+}
+
+/* ┌─── DASHBOARD HEADER ─────────────────────────────────────── */
+.dashboard-grid-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 1rem;
+  grid-column: 1 / -1;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* ┌─── KPI GRID - Primary Stats Row ──────────────────────────── */
+.dashboard-grid-kpi {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-auto-rows: 1fr;
+  gap: 1rem;
+  
+  /* Desktop: 5 equal columns */
+  grid-template-columns: repeat(5, 1fr);
+
+  @media (max-width: 1279px) {
+    /* Tablet-large: 4 columns */
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  @media (max-width: 1023px) {
+    /* Tablet: 3 columns */
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 767px) {
+    /* Mobile-large: 2 columns */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    /* Mobile: 1 column */
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+/* ┌─── ANALYTICS CHART - Full Width ─────────────────────────── */
 .dashboard-chart-container {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 1.5rem;
   width: 100%;
   box-sizing: border-box;
-  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    gap: 1rem;
+  }
 }
 
-/* KPI Card specific - ensure equal heights */
+/* ┌─── SECONDARY STATS GRID - 4 columns ─────────────────────── */
+.dashboard-grid-secondary {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-auto-rows: max-content;
+  gap: 1rem;
+
+  /* Desktop: 4 equal columns */
+  grid-template-columns: repeat(4, 1fr);
+
+  @media (max-width: 1199px) {
+    /* Tablet-large: 3 columns */
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @media (max-width: 767px) {
+    /* Mobile-large: 2 columns */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  @media (max-width: 480px) {
+    /* Mobile: 1 column */
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}
+
+/* ┌─── SECTION GRID - 3 Column Layout ══════════════════════════ */
+.dashboard-grid-section {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-auto-rows: auto;
+  gap: 1.5rem;
+
+  /* Desktop: 3 equal columns */
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: auto auto;
+
+  @media (max-width: 1023px) {
+    /* Tablet: 2 columns */
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 767px) {
+    /* Mobile: 1 column */
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+/* ┌─── WIDE GRID - 2+1 Activity + Predictions Layout ──────────── */
+.dashboard-grid-wide {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-auto-rows: auto;
+  gap: 1.5rem;
+
+  /* Desktop-XL: 2-column (2fr for activity, 1fr for predictions) */
+  grid-template-columns: 2fr 1fr;
+
+  @media (max-width: 1279px) {
+    /* Desktop: Still 2 columns but equal width */
+    grid-template-columns: 1.5fr 1fr;
+    gap: 1.25rem;
+  }
+
+  @media (max-width: 1023px) {
+    /* Tablet: Stack vertically */
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 767px) {
+    /* Mobile: Single column */
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+}
+
+/* Activity Feed spans full width on desktop, becomes responsive on smaller screens */
+@media (max-width: 1023px) {
+  .dashboard-grid-wide > article:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .dashboard-grid-wide > div:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* ┌─── TABLE GRID - Full Width ──────────────────────────────── */
+.dashboard-grid-table {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: 0;
+  width: 100%;
+  overflow: hidden;
+}
+
+/* ┌─── KPI CARD - Responsive Height Management ────────────────── */
 .kpi-card {
-  @apply card-premium h-full flex flex-col justify-between overflow-hidden group relative transition-all hover:shadow-lg dark:hover:shadow-slate-900/40;
+  @apply card-premium overflow-hidden group relative transition-all hover:shadow-lg dark:hover:shadow-slate-900/40;
+
+  /* Flexbox for content distribution */
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  
+  /* Minimum height to ensure consistency */
   min-height: 160px;
+  height: 100%;
+  
+  /* Proper box sizing */
+  box-sizing: border-box;
+
+  @media (max-width: 480px) {
+    min-height: 140px;
+  }
 }
 
-/* Responsive text and spacing adjustments */
-@media (max-width: 768px) {
-  .page-stack {
-    @apply space-y-4 sm:space-y-6 px-4;
-  }
-
+/* ┌─── GRID AUTO-FIT FALLBACK (CSS Grid Subgrid Support) ─────── */
+@supports (grid-template-rows: subgrid) {
   .dashboard-grid-section {
-    gap: 1rem;
-  }
-
-  .dashboard-grid-wide {
-    gap: 1rem;
+    grid-template-rows: subgrid subgrid;
   }
 }
 
-@media (max-width: 640px) {
+/* ┌─── ACCESSIBILITY - Ensure content is readable ────────────── */
+@media (prefers-reduced-motion: reduce) {
   .page-stack {
-    @apply space-y-4 px-3;
+    scroll-behavior: auto;
   }
 
-  .dashboard-grid-kpi {
-    gap: 0.75rem;
+  .kpi-card {
+    transition: none;
+  }
+}
+
+/* ┌─── PRINT LAYOUT - Stack everything vertically ───────────── */
+@media print {
+  .page-stack {
+    gap: 1rem;
+    max-width: 100%;
   }
 
-  .dashboard-grid-secondary {
-    gap: 0.75rem;
+  .dashboard-grid-kpi,
+  .dashboard-grid-section,
+  .dashboard-grid-wide {
+    grid-template-columns: 1fr;
   }
 }
