@@ -118,12 +118,12 @@ export default function DashboardPage() {
       {/* ── Dashboard Header ── */}
       <header className="dashboard-grid-header">
         <div>
-          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>Operations Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>Operations Overview</h1>
           <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             Welcome back. Here's what's happening with your shipments today.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <div className="hidden sm:flex items-center gap-2 rounded-xl border border-slate-200/60 bg-white/80 backdrop-blur-sm px-3.5 py-2 dark:border-slate-800/60 dark:bg-slate-900/80 shadow-sm">
             <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500 shadow-[0_0_6px_rgb(13_148_136/0.4)]" />
             <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>

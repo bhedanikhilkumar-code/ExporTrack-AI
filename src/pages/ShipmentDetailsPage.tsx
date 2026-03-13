@@ -133,13 +133,13 @@ export default function ShipmentDetailsPage() {
             {shipment.clientName} • Container {shipment.containerNumber}
           </p>
         </div>
-        <div className="flex items-center gap-3">
-          <button className="btn-secondary">
-            <AppIcon name="upload" className="mr-2 h-4 w-4" />
-            Upload Manifest
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <button className="btn-secondary btn-sm sm:btn-base">
+            <AppIcon name="upload" className="mr-1 sm:mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Upload </span>Manifest
           </button>
-          <button className="btn-primary">
-            Export Report
+          <button className="btn-primary btn-sm sm:btn-base">
+            <span className="hidden sm:inline">Export </span>Report
           </button>
         </div>
       </header>
@@ -218,7 +218,7 @@ export default function ShipmentDetailsPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* AI Intelligence Spotlight */}
           <article className="card-premium overflow-hidden border-none bg-slate-900 text-white dark:bg-teal-900/10">
-            <div className="flex flex-col gap-6 md:flex-row md:items-center">
+            <div className="flex flex-col gap-6">
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-4">
                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-teal-400">
@@ -230,7 +230,7 @@ export default function ShipmentDetailsPage() {
                 <p className="text-sm text-slate-400 leading-relaxed mb-6">
                   Our neural engine has analyzed the Current transshipment hub performance and historical data for {shipment.destinationCountry}.
                 </p>
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4 sm:gap-6">
                   <div className="flex flex-col">
                     <span className="text-2xl font-bold">94%</span>
                     <span className="text-[10px] uppercase font-bold text-slate-500">Stability</span>

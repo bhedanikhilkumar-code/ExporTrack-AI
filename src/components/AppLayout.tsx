@@ -184,7 +184,7 @@ export default function AppLayout() {
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <button
                 type="button"
-                className="focus-ring inline-flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors md:hidden"
+                className="focus-ring inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800 transition-colors md:hidden"
                 onClick={() => setMenuOpen((value) => !value)}
               >
                 <AppIcon name={menuOpen ? 'x' : 'menu'} className="h-5 w-5" />
@@ -258,11 +258,12 @@ export default function AppLayout() {
             </div>
 
             {/* Right Section */}
-            <div className="flex items-center gap-3 md:gap-4">
+            <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <button
                 onClick={toggleTheme}
-                className="focus-ring flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm"
+                className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm"
                 title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 <AppIcon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
               </button>
@@ -271,7 +272,8 @@ export default function AppLayout() {
                 <button
                   type="button"
                   onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm relative"
+                  className="flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm relative"
+                  aria-label="Notifications"
                 >
                   <AppIcon name="bell" className="h-4 w-4" />
                   {unreadCount > 0 && (
@@ -295,7 +297,29 @@ export default function AppLayout() {
 
           {/* Mobile Navigation Menu */}
           {menuOpen && (
-            <nav className="absolute top-16 left-0 right-0 border-b border-slate-200/60 bg-white/95 backdrop-blur-xl px-4 pb-6 pt-4 dark:border-slate-800/60 dark:bg-slate-950/95 md:hidden animate-in slide-in-from-top-4 shadow-xl">
+            <nav className="absolute top-16 left-0 right-0 border-b border-slate-200/60 bg-white/95 backdrop-blur-xl px-4 pb-6 pt-4 dark:border-slate-800/60 dark:bg-slate-950/95 md:hidden animate-in slide-in-from-top-4 shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
+              {/* Dark Mode Toggle Row */}
+              <div className="flex items-center justify-between px-1 pb-4 mb-3 border-b border-slate-200/60 dark:border-slate-800/60">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                    <AppIcon name={theme === 'dark' ? 'moon' : 'sun'} className="h-4 w-4" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
+                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                  </span>
+                </div>
+                <button
+                  onClick={toggleTheme}
+                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
+                    theme === 'dark' ? 'bg-teal-500' : 'bg-slate-300'
+                  }`}
+                  aria-label="Toggle dark mode"
+                >
+                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
+                    theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 {navItems.map((item) => (
                   <NavLink
@@ -303,9 +327,9 @@ export default function AppLayout() {
                     to={item.to}
                     onClick={() => setMenuOpen(false)}
                     className={({ isActive }) =>
-                      `focus-ring flex flex-col items-center gap-2 rounded-xl p-4 text-xs font-bold transition-all ${isActive
+                      `focus-ring flex flex-col items-center gap-2 rounded-xl p-4 text-xs font-bold transition-all min-h-[56px] justify-center ${isActive
                         ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-md transform scale-[1.02]'
-                        : 'bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400 border border-slate-100 dark:border-slate-800'
+                        : 'bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400 border border-slate-100 dark:border-slate-800 active:scale-95'
                       }`
                     }
                   >
