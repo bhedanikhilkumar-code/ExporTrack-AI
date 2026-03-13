@@ -6,11 +6,11 @@
   :root {
     color-scheme: light;
     --surface-base: #ffffff;
-    --surface-subtle: #f9fafb;
+    --surface-subtle: #f8fafc;
     --surface-accent: #f0fdfa;
-    --ink-primary: #111827;
-    --ink-secondary: #4b5563;
-    --ink-tertiary: #9ca3af;
+    --ink-primary: #0f172a;
+    --ink-secondary: #475569;
+    --ink-tertiary: #94a3b8;
     --brand-navy: #0f172a;
     --brand-teal: #0d9488;
     --border-base: #f1f5f9;
@@ -20,6 +20,9 @@
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
     --radius-2xl: 1.25rem;
+    --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.04);
+    --shadow-card-hover: 0 10px 25px -5px rgb(0 0 0 / 0.08), 0 8px 10px -6px rgb(0 0 0 / 0.04);
+    --shadow-premium: 0 4px 6px -1px rgb(0 0 0 / 0.03), 0 2px 4px -2px rgb(0 0 0 / 0.03);
   }
 
   .dark {
@@ -87,11 +90,11 @@
 
 @layer components {
   .shadow-soft {
-    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   }
 
   .shadow-premium {
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    box-shadow: var(--shadow-premium);
   }
 
   .dark .shadow-premium {
@@ -103,7 +106,8 @@
   }
 
   .card-surface {
-    @apply rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/50 dark:backdrop-blur-sm;
+    @apply rounded-2xl border border-slate-200/80 bg-white dark:border-slate-800/80 dark:bg-slate-900/60 dark:backdrop-blur-sm;
+    box-shadow: var(--shadow-card);
   }
 
   .card-panel {
@@ -111,7 +115,18 @@
   }
 
   .card-premium {
-    @apply rounded-2xl border border-slate-200/60 bg-white p-6 shadow-sm transition-all dark:border-slate-800/60 dark:bg-slate-900/50 dark:backdrop-blur-sm hover:shadow-md dark:hover:shadow-slate-900/50;
+    @apply rounded-2xl border border-slate-200/60 bg-white p-6 transition-all duration-300 dark:border-slate-800/60 dark:bg-slate-900/60 dark:backdrop-blur-sm;
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-premium:hover {
+    box-shadow: var(--shadow-card-hover);
+    border-color: rgb(226 232 240 / 0.9);
+  }
+
+  .dark .card-premium:hover {
+    box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.3);
+    border-color: rgb(51 65 85 / 0.9);
   }
 
   .card-muted {
@@ -307,15 +322,26 @@
   align-items: center;
   max-width: 100%;
   height: auto;
-  padding: 1rem;
+  padding: 1.25rem;
   margin: 0 auto;
   background-color: var(--surface-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-premium);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--border-base);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+.chart-container:hover {
+  box-shadow: var(--shadow-card-hover);
 }
 
 .card-hover-effect {
-  @apply transition-all duration-300 hover:shadow-lg hover:shadow-slate-200/50 hover:-translate-y-1 dark:hover:shadow-none;
+  @apply transition-all duration-300 hover:-translate-y-0.5 dark:hover:shadow-none;
+  box-shadow: var(--shadow-card);
+}
+
+.card-hover-effect:hover {
+  box-shadow: var(--shadow-card-hover);
 }
 
 .nav-item-active {
@@ -355,7 +381,7 @@
   }
 }
 
-@media (min-width: 769px) to (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1024px) {
   .page-stack {
     gap: 1.5rem;
     padding: 0 1.5rem;
@@ -532,7 +558,7 @@
 
 /* ┌─── KPI CARD - Responsive Height Management ────────────────── */
 .kpi-card {
-  @apply card-premium overflow-hidden group relative transition-all hover:shadow-lg dark:hover:shadow-slate-900/40;
+  @apply card-premium overflow-hidden relative transition-all duration-300;
 
   /* Flexbox for content distribution */
   display: flex;
@@ -540,21 +566,34 @@
   justify-content: space-between;
 
   /* Minimum height to ensure consistency */
-  min-height: 160px;
+  min-height: 150px;
   height: 100%;
+  padding: 1.25rem;
 
   /* Proper box sizing */
   box-sizing: border-box;
+}
 
-  @media (max-width: 480px) {
-    min-height: 140px;
+.kpi-card:hover {
+  box-shadow: var(--shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+.dark .kpi-card:hover {
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.35);
+}
+
+@media (max-width: 480px) {
+  .kpi-card {
+    min-height: 130px;
+    padding: 1rem;
   }
 }
 
 /* ┌─── GRID AUTO-FIT FALLBACK (CSS Grid Subgrid Support) ─────── */
 @supports (grid-template-rows: subgrid) {
   .dashboard-grid-section {
-    grid-template-rows: subgrid subgrid;
+    grid-template-rows: subgrid;
   }
 }
 
