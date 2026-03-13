@@ -430,17 +430,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         if (isMatchingShipment(shipment, shipmentId)) {
           return {
             ...shipment,
-            comments: [
-              {
-                id: createId('COM'),
-                author: prev.user?.name ?? 'Unknown',
-                role: prev.user?.role ?? 'Staff',
-                message,
-                createdAt: new Date().toISOString(),
-                internal,
-              },
-              ...shipment.comments,
-            ],
+            documents: [newDocument, ...shipment.documents]
           };
         }
         return shipment;

@@ -144,8 +144,8 @@ const styles = {
     fill: 'none',
     stroke: 'white',
     strokeWidth: 1.8,
-    strokeLinecap: 'round',
-    strokeLinejoin: 'round',
+    strokeLinecap: 'round' as const,
+    strokeLinejoin: 'round' as const,
   },
   statusBadge: {
     display: 'flex',

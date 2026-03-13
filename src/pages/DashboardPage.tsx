@@ -205,9 +205,9 @@ export default function DashboardPage() {
                   <span className="text-[11px] font-bold text-slate-500">{count} Shipments</span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                  <div 
-                    className="h-full bg-teal-500 transition-all duration-1000 group-hover:bg-teal-400" 
-                    style={{ width: `${(count / totalShipments) * 100}%` }} 
+                  <div
+                    className="h-full bg-teal-500 transition-all duration-1000 group-hover:bg-teal-400"
+                    style={{ width: `${(count / totalShipments) * 100}%` }}
                   />
                 </div>
               </div>
@@ -237,9 +237,8 @@ export default function DashboardPage() {
                 {idx !== 5 && (
                   <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
                 )}
-                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${
-                  item.type === 'Document' ? 'bg-indigo-500' : item.type === 'Alert' ? 'bg-rose-500' : 'bg-teal-500'
-                }`}>
+                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${item.type === 'Document' ? 'bg-indigo-500' : item.type === 'Alert' ? 'bg-rose-500' : 'bg-teal-500'
+                  }`}>
                   <AppIcon name={item.type === 'Document' ? 'upload' : item.type === 'Alert' ? 'bell' : 'team'} className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 pb-4">
@@ -288,7 +287,7 @@ export default function DashboardPage() {
       <article className="card-premium overflow-hidden">
         <div className="mb-6 flex items-center justify-between px-2">
           <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
-          <button 
+          <button
             onClick={() => {
               const csvContent = ['ID,Client,Date,Status'];
               recentShipments.forEach(s => {

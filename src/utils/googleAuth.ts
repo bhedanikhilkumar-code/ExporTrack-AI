@@ -43,7 +43,7 @@ export function decodeJWT(token: string): GoogleTokenPayload | null {
         }
 
         const decoded = JSON.parse(
-            atob(parts[1].replaceAll('-', '+').replaceAll('_', '/'))
+            atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
         );
 
         // Validate required fields
