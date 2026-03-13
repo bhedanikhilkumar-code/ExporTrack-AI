@@ -104,6 +104,22 @@ export default function UserProfileDropdown() {
                                         </span>
                                     </div>
                                 )}
+                                {user.authProvider === 'demo' && (
+                                    <div className="mt-1 flex items-center gap-1">
+                                        <span className="h-2 w-2 rounded-full bg-amber-500"></span>
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                                            Demo Account
+                                        </span>
+                                    </div>
+                                )}
+                                {user.authProvider === 'email' && (
+                                    <div className="mt-1 flex items-center gap-1">
+                                        <span className="h-2 w-2 rounded-full bg-teal-500"></span>
+                                        <span className="text-xs text-slate-500 dark:text-slate-400">
+                                            Email Account
+                                        </span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

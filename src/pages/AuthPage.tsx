@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 import { initGoogleSignIn, renderGoogleSignInButton, GoogleAuthError, GoogleSignInCallbackResponse } from '../utils/googleAuth';
+import { logEnvironmentCheck, canUseGoogleOAuth } from '../utils/envCheck';
 
 type Mode = 'login' | 'signup';
 
@@ -25,6 +26,13 @@ export default function AuthPage() {
   useEffect(() => {
     let mounted = true;
 
+    // Log environment check on page load
+    console.log('AuthPage mounted - checking environment...');
+    logEnvironmentCheck();
+    
+    const oauthCheck = canUseGoogleOAuth();
+    console.log('Google OAuth status:', oauthCheck);
+
     const initializeGoogleSDK = () => {
       if (document.querySelector('script[src*="google.com/gsi/client"]')) {
         // SDK already loaded
@@ -41,11 +49,13 @@ export default function AuthPage() {
       script.defer = true;
       script.onload = () => {
         if (mounted) {
+          console.log('Google SDK loaded successfully');
           setTimeout(() => initializeGoogleSignIn(), 0);
         }
       };
       script.onerror = () => {
         if (mounted) {
+          console.error('Failed to load Google SDK script');
           setGoogleError('Failed to load Google Sign-In. Please check your internet connection and refresh the page.');
         }
       };
@@ -71,9 +81,15 @@ export default function AuthPage() {
       // Get Client ID from environment variables
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-      if (!clientId) {
-        setGoogleError('Google Sign-In is not configured. Please contact support.');
-        console.error('VITE_GOOGLE_CLIENT_ID environment variable is not set');
+      console.log('Environment check:', {
+        clientIdExists: !!clientId,
+        clientIdLength: clientId?.length || 0,
+        clientIdPreview: clientId ? clientId.substring(0, 20) + '...' : 'NOT_SET'
+      });
+
+      if (!clientId || clientId.trim() === '') {
+        setGoogleError('Google Sign-In is not configured. Please ensure VITE_GOOGLE_CLIENT_ID is set in your environment. Contact support if the issue persists.');
+        console.error('VITE_GOOGLE_CLIENT_ID environment variable is not set or is empty');
         return;
       }
 
@@ -97,8 +113,10 @@ export default function AuthPage() {
         if (renderSuccess) {
           setGoogleInitialized(true);
           setGoogleError(''); // Clear any previous errors
+          console.log('Google Sign-In button initialized successfully');
         } else {
           setGoogleError('Failed to render Google Sign-In button. Please refresh the page.');
+          console.error('Failed to render Google button');
         }
       }
     } catch (error) {

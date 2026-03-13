@@ -91,8 +91,39 @@ const buildNotification = (
 });
 
 export const AppProvider = ({ children }: PropsWithChildren) => {
-  const [state, setState] = useState<AppState>(() => loadState());
-
+  const [state, setState] = useState<AppState>(() => {
+    const initialState = loadState();
+    
+    // Clean up invalid or demo sessions on app load
+    if (initialState.isAuthenticated && initialState.user) {
+      // Remove demo sessions - force re-login
+      if (initialState.user.authProvider === 'demo') {
+        console.log('Demo session cleared on app load');
+        return {
+          ...initialState,
+          isAuthenticated: false,
+          user: null
+        };
+      }
+      
+      // Validate Google sessions
+      if (initialState.user.authProvider === 'google') {
+        const token = sessionStorage.getItem('google_auth_token');
+        const userEmail = sessionStorage.getItem('google_user_email');
+        
+        if (!token || !userEmail) {
+          console.warn('Invalid Google session detected, logging out');
+          return {
+            ...initialState,
+            isAuthenticated: false,
+            user: null
+          };
+        }
+      }
+    }
+    
+    return initialState;
+  });
   // Restore user session on app load if authenticated
   useEffect(() => {
     if (typeof window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
@@ -195,10 +226,30 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }
   };
 
+  /**
+   * Demo login - creates a demo account session
+   * Only use this for demo purposes via demo buttons
+   */
   const loginWithGoogle = () => {
-    // This function is deprecated - use loginWithGoogleToken instead
-    console.warn('loginWithGoogle is deprecated, use loginWithGoogleToken instead');
-    throw new Error('Google OAuth flow must be used. Please use the Google Sign-In button.');
+    // Create demo user session
+    const demoUser = {
+      name: 'Demo User',
+      email: 'demo@exportrack.ai',
+      role: 'Staff' as const
+    };
+
+    setState((prev) => ({
+      ...prev,
+      isAuthenticated: true,
+      user: {
+        name: demoUser.name,
+        email: demoUser.email,
+        role: demoUser.role,
+        authProvider: 'demo' as any
+      }
+    }));
+
+    console.log('Demo account loaded for testing');
   };
 
   const loginWithGoogleToken = (token: string) => {

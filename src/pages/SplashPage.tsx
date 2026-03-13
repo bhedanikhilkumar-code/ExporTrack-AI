@@ -22,8 +22,15 @@ export default function SplashPage() {
   } = useAppContext();
 
   const handleDemo = () => {
-    loginWithGoogle();
-    navigate('/dashboard');
+    try {
+      loginWithGoogle();
+      // Redirect after state is updated
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 100);
+    } catch (error) {
+      console.error('Demo login error:', error);
+    }
   };
 
   const totalDocs = shipments.reduce((sum, shipment) => sum + shipment.documents.length, 0);
