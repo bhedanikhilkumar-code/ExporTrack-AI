@@ -43,7 +43,7 @@ export function decodeJWT(token: string): GoogleTokenPayload | null {
         }
 
         const decoded = JSON.parse(
-            atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
+            atob(parts[1].replaceAll('-', '+').replaceAll('_', '/'))
         );
 
         // Validate required fields
@@ -87,7 +87,7 @@ export function initGoogleSignIn(
     callback: (response: GoogleSignInCallbackResponse) => void,
     onError?: (error: GoogleAuthError) => void
 ) {
-    if (!window.google) {
+    if (!(globalThis as any).google) {
         const error = new GoogleAuthError('SDK_NOT_LOADED', 'Google SDK not loaded. Please reload the page.');
         onError?.(error);
         throw error;
@@ -100,7 +100,7 @@ export function initGoogleSignIn(
     }
 
     try {
-        window.google.accounts.id.initialize({
+        (globalThis as any).google.accounts.id.initialize({
             client_id: clientId,
             callback: (response: GoogleSignInCallbackResponse) => {
                 if (response.credential) {
@@ -139,7 +139,7 @@ export function initGoogleSignIn(
  * Render Google Sign-In button
  */
 export function renderGoogleSignInButton(elementId: string, options?: any): boolean {
-    if (!window.google) {
+    if (!(globalThis as any).google) {
         console.error('Google SDK not loaded');
         return false;
     }
@@ -151,7 +151,7 @@ export function renderGoogleSignInButton(elementId: string, options?: any): bool
     }
 
     try {
-        window.google.accounts.id.renderButton(
+        (globalThis as any).google.accounts.id.renderButton(
             element,
             {
                 theme: 'outline',
@@ -174,13 +174,13 @@ export function renderGoogleSignInButton(elementId: string, options?: any): bool
  * Show Google One Tap prompt
  */
 export function showGoogleOneTapPrompt(onSuccess?: (notification: any) => void, onError?: (notification: any) => void) {
-    if (!window.google) {
+    if (!(globalThis as any).google) {
         console.error('Google SDK not loaded');
         return;
     }
 
     try {
-        window.google.accounts.id.prompt((notification: any) => {
+        (globalThis as any).google.accounts.id.prompt((notification: any) => {
             if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
                 console.log('One Tap prompt not displayed:', notification);
                 onError?.(notification);
@@ -199,13 +199,13 @@ export function showGoogleOneTapPrompt(onSuccess?: (notification: any) => void, 
  * Cancel Google One Tap prompt
  */
 export function cancelGooglePrompt() {
-    if (!window.google) {
+    if (!(globalThis as any).google) {
         console.error('Google SDK not loaded');
         return;
     }
 
     try {
-        window.google.accounts.id.cancel();
+        (globalThis as any).google.accounts.id.cancel();
     } catch (error) {
         console.error('Error cancelling Google prompt:', error);
     }
@@ -226,5 +226,3 @@ declare global {
         };
     }
 }
-
-export { }

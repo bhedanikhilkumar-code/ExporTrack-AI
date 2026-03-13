@@ -1,9 +1,8 @@
-import { FormEvent, useState, useEffect, useRef } from 'react';
+/// <reference types="vite/client" />
+import { FormEvent, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
-import { initGoogleSignIn, renderGoogleSignInButton, GoogleAuthError, GoogleSignInCallbackResponse } from '../utils/googleAuth';
-import { logEnvironmentCheck, canUseGoogleOAuth } from '../utils/envCheck';
 
 type Mode = 'login' | 'signup';
 
@@ -19,51 +18,53 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleInitialized, setGoogleInitialized] = useState(false);
-  const googleButtonRef = useRef<HTMLDivElement>(null);
-  const googleScriptRef = useRef<HTMLScriptElement | null>(null);
 
   // Initialize Google Sign-In
   useEffect(() => {
     let mounted = true;
 
-    // Log environment check on page load
-    console.log('AuthPage mounted - checking environment...');
-    logEnvironmentCheck();
-    
-    const oauthCheck = canUseGoogleOAuth();
-    console.log('Google OAuth status:', oauthCheck);
+    const initializeGoogleSDK = async () => {
+      try {
+        // Check environment
+        console.log('🔍 Initializing Google Sign-In...');
+        console.log('Client ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID ? 'SET ✅' : 'MISSING ❌');
 
-    const initializeGoogleSDK = () => {
-      if (document.querySelector('script[src*="google.com/gsi/client"]')) {
-        // SDK already loaded
-        if (mounted) {
-          setTimeout(() => initializeGoogleSignIn(), 0);
+        // Wait for globalThis.google to be available
+        let attempts = 0;
+        while (!(globalThis as any).google && attempts < 50) {
+          // Check if script already loaded
+          if (!document.querySelector('script[src*="gsi/client"]')) {
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => {
+              console.log('✅ Google SDK script loaded');
+            };
+            document.head.appendChild(script);
+          }
+          await new Promise(resolve => setTimeout(resolve, 100));
+          attempts++;
         }
-        return;
+
+        if (!(globalThis as any).google) {
+          throw new Error('Google SDK failed to load');
+        }
+
+        console.log('✅ Google SDK ready');
+        if (mounted) {
+          initializeGoogleSignIn();
+        }
+      } catch (err) {
+        console.error('❌ SDK initialization error:', err);
+        if (mounted) {
+          setGoogleError('Google Sign-In service is unavailable. Please try again.');
+        }
       }
-
-      // Load Google Identity Services script
-      const script = document.createElement('script');
-      script.src = 'https://accounts.google.com/gsi/client';
-      script.async = true;
-      script.defer = true;
-      script.onload = () => {
-        if (mounted) {
-          console.log('Google SDK loaded successfully');
-          setTimeout(() => initializeGoogleSignIn(), 0);
-        }
-      };
-      script.onerror = () => {
-        if (mounted) {
-          console.error('Failed to load Google SDK script');
-          setGoogleError('Failed to load Google Sign-In. Please check your internet connection and refresh the page.');
-        }
-      };
-      document.head.appendChild(script);
-      googleScriptRef.current = script;
     };
 
-    initializeGoogleSDK();
+    // Start initialization
+    setTimeout(initializeGoogleSDK, 500);
 
     return () => {
       mounted = false;
@@ -71,93 +72,80 @@ export default function AuthPage() {
   }, []);
 
   const initializeGoogleSignIn = () => {
-    if (!window.google) {
-      console.error('Google SDK not loaded');
-      setGoogleError('Google Sign-In is not available. Please refresh the page.');
-      return;
-    }
-
     try {
-      // Get Client ID from environment variables
-      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-
-      console.log('Environment check:', {
-        clientIdExists: !!clientId,
-        clientIdLength: clientId?.length || 0,
-        clientIdPreview: clientId ? clientId.substring(0, 20) + '...' : 'NOT_SET'
-      });
-
-      if (!clientId || clientId.trim() === '') {
-        setGoogleError('Google Sign-In is not configured. Please ensure VITE_GOOGLE_CLIENT_ID is set in your environment. Contact support if the issue persists.');
-        console.error('VITE_GOOGLE_CLIENT_ID environment variable is not set or is empty');
-        return;
+      if (!(globalThis as any).google) {
+        throw new Error('Google SDK not loaded - globalThis.google not found');
       }
 
-      // Initialize Google Sign-In
-      initGoogleSignIn(
-        clientId,
-        handleGoogleCallback,
-        handleGoogleError
-      );
+      const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
-      // Render the Sign-In button
-      if (googleButtonRef.current) {
-        const renderSuccess = renderGoogleSignInButton('google-signin-button', {
+      if (!clientId) {
+        throw new Error('VITE_GOOGLE_CLIENT_ID environment variable not set');
+      }
+
+      console.log('📝 Initializing with Client ID:', clientId.substring(0, 15) + '...');
+
+      // Initialize Google Accounts
+      (globalThis as any).google.accounts.id.initialize({
+        client_id: clientId,
+        callback: handleGoogleCallback,
+        auto_select: false,
+        itp_support: true,
+      });
+
+      console.log('✅ Google initialized');
+
+      // Render button
+      const buttonElement = document.getElementById('google-signin-button');
+      if (!buttonElement) {
+        throw new Error('Button element not found');
+      }
+
+      (globalThis as any).google.accounts.id.renderButton(
+        buttonElement,
+        {
           theme: 'outline',
           size: 'large',
           width: '100%',
           text: 'signin_with',
-          logo_alignment: 'left'
-        });
-
-        if (renderSuccess) {
-          setGoogleInitialized(true);
-          setGoogleError(''); // Clear any previous errors
-          console.log('Google Sign-In button initialized successfully');
-        } else {
-          setGoogleError('Failed to render Google Sign-In button. Please refresh the page.');
-          console.error('Failed to render Google button');
+          locale: 'en'
         }
-      }
-    } catch (error) {
-      console.error('Google Sign-In initialization error:', error);
-      if (error instanceof GoogleAuthError) {
-        setGoogleError(error.message);
-      } else {
-        setGoogleError('Failed to initialize Google Sign-In. Please refresh the page.');
-      }
+      );
+
+      console.log('✅ Google button rendered');
+      setGoogleInitialized(true);
+      setGoogleError('');
+    } catch (err: any) {
+      console.error('❌ Google initialization failed:', err.message);
+      setGoogleError(err.message || 'Failed to initialize Google Sign-In');
+      setGoogleInitialized(false);
     }
   };
 
-  const handleGoogleCallback = (response: GoogleSignInCallbackResponse) => {
+  const handleGoogleCallback = (response: any) => {
     try {
-      setError('');
-      setGoogleError('');
-      setIsGoogleLoading(true);
+      console.log('🔔 Google callback received');
 
       if (!response.credential) {
-        throw new Error('No credential received from Google');
+        throw new Error('No credential in response');
       }
 
-      // Login with the Google JWT token
+      console.log('✅ Got credential, logging in...');
+      setIsGoogleLoading(true);
+
+      // Call context login function
       loginWithGoogleToken(response.credential);
 
-      // Redirect to dashboard
+      // Redirect after a short delay
       setTimeout(() => {
+        console.log('➡️ Redirecting to dashboard...');
         navigate('/dashboard', { replace: true });
-      }, 300);
+      }, 500);
     } catch (err: any) {
-      console.error('Google callback error:', err);
-      const errorMessage = err.message || 'Google sign-in failed. Please try again.';
-      setGoogleError(errorMessage);
+      console.error('❌ Callback error:', err);
+      setGoogleError(err.message || 'Authentication failed');
       setIsGoogleLoading(false);
     }
-  };
-
-  const handleGoogleError = (error: GoogleAuthError) => {
-    console.error('Google Auth Error:', error);
-    setGoogleError(error.message);
-    setIsGoogleLoading(false);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -350,7 +338,7 @@ export default function AuthPage() {
                       {mode === 'login' ? 'Signing in...' : 'Creating account...'}
                     </span>
                   ) : (
-                    mode === 'login' ? 'Sign In' : 'Create Account'
+                    <>{mode === 'login' ? 'Sign In' : 'Create Account'}</>
                   )}
                 </button>
               </form>
@@ -364,12 +352,14 @@ export default function AuthPage() {
 
               {/* Google Sign-In Button */}
               <div
-                ref={googleButtonRef}
                 id="google-signin-button"
-                className={`w-full ${!googleInitialized && !googleError ? 'flex items-center justify-center py-3 bg-slate-100 rounded-lg animate-pulse' : ''}`}
+                className="w-full min-h-12 flex items-center justify-center"
               >
-                {!googleInitialized && !googleError && (
-                  <span className="text-sm text-slate-500">Loading Google Sign-In...</span>
+                {!googleInitialized && (
+                  <div className="flex items-center gap-2 text-slate-500">
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"></span>
+                    <span className="text-sm">Loading Google...</span>
+                  </div>
                 )}
               </div>
 
