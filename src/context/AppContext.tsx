@@ -12,7 +12,7 @@ import {
   ShipmentDocument,
   UploadDocumentInput
 } from '../types';
-import { decodeJWT, type GoogleTokenPayload } from '../utils/googleAuth';
+import { decodeJWT } from '../utils/googleAuth';
 
 const STORAGE_KEY = 'exportrack-ai-state-v1';
 
@@ -20,7 +20,9 @@ interface AppContextValue {
   state: AppState;
   login: (email: string, password: string) => void;
   signup: (name: string, email: string, password: string) => void;
+  // Backwards-compatible alias (some UI may still call this)
   loginWithGoogle: () => void;
+  loginWithDemoAccount: () => void;
   loginWithGoogleToken: (token: string) => void;
   logout: () => void;
   switchRole: (role: Role) => void;
@@ -40,7 +42,7 @@ const createId = (prefix: string): string =>
     .padStart(4, '0')}`;
 
 const loadState = (): AppState => {
-  if (typeof window === 'undefined') {
+  if (typeof globalThis.window === 'undefined') {
     return createSeedState();
   }
 
@@ -93,7 +95,7 @@ const buildNotification = (
 export const AppProvider = ({ children }: PropsWithChildren) => {
   const [state, setState] = useState<AppState>(() => {
     const initialState = loadState();
-    
+
     // Clean up invalid or demo sessions on app load
     if (initialState.isAuthenticated && initialState.user) {
       // Remove demo sessions - force re-login
@@ -105,12 +107,12 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           user: null
         };
       }
-      
+
       // Validate Google sessions
       if (initialState.user.authProvider === 'google') {
         const token = sessionStorage.getItem('google_auth_token');
         const userEmail = sessionStorage.getItem('google_user_email');
-        
+
         if (!token || !userEmail) {
           console.warn('Invalid Google session detected, logging out');
           return {
@@ -121,12 +123,12 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         }
       }
     }
-    
+
     return initialState;
   });
   // Restore user session on app load if authenticated
   useEffect(() => {
-    if (typeof window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
+    if (typeof globalThis.window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
       const token = sessionStorage.getItem('google_auth_token');
       const userEmail = sessionStorage.getItem('google_user_email');
 
@@ -190,7 +192,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }
     }));
 
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       console.log('User logged in with email:', email);
     }
   };
@@ -221,16 +223,16 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }
     }));
 
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       console.log('New user registered:', email);
     }
   };
 
   /**
    * Demo login - creates a demo account session
-   * Only use this for demo purposes via demo buttons
+   * Only use this for demo purposes via demo buttons - NOT real Google OAuth!
    */
-  const loginWithGoogle = () => {
+  const loginWithDemoAccount = () => {
     // Create demo user session
     const demoUser = {
       name: 'Demo User',
@@ -249,7 +251,12 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }
     }));
 
-    console.log('Demo account loaded for testing');
+    console.warn('⚠️ Demo account loaded for testing - this is NOT real Google OAuth authentication');
+  };
+
+  // Backwards-compatible alias for older UI code.
+  const loginWithGoogle = () => {
+    loginWithDemoAccount();
   };
 
   const loginWithGoogleToken = (token: string) => {
@@ -257,7 +264,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       // Decode the JWT token from Google
       const payload = decodeJWT(token);
 
-      if (!payload || !payload.email) {
+      if (!payload?.email) {
         throw new Error('Invalid token or missing email');
       }
 
@@ -285,7 +292,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }));
 
       // Store the token for future API calls (if needed)
-      if (typeof window !== 'undefined') {
+      if (typeof globalThis.window !== 'undefined') {
         // Use sessionStorage with expiry for security
         sessionStorage.setItem('google_auth_token', token);
         sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
@@ -302,7 +309,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       console.error('Failed to login with Google token:', error);
 
       // Clear any partial session data on error
-      if (typeof window !== 'undefined') {
+      if (typeof globalThis.window !== 'undefined') {
         sessionStorage.removeItem('google_auth_token');
         sessionStorage.removeItem('google_token_expiry');
         sessionStorage.removeItem('google_user_email');
@@ -314,7 +321,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     // Clear all authentication data
-    if (typeof window !== 'undefined') {
+    if (typeof globalThis.window !== 'undefined') {
       // Clear Google auth tokens
       sessionStorage.removeItem('google_auth_token');
       sessionStorage.removeItem('google_token_expiry');
@@ -528,6 +535,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       login,
       signup,
       loginWithGoogle,
+      loginWithDemoAccount,
       loginWithGoogleToken,
       logout,
       switchRole,
