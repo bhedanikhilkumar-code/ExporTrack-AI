@@ -27,7 +27,7 @@ export default function ShipmentAnalytics({
     return (
         <div className="space-y-6">
             {/* Monthly Chart */}
-            <article className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden group shadow-sm transition-all hover:shadow-md h-full flex flex-col">
+            <article className="bg-white dark:bg-slate-900 p-6 sm:p-8 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden group shadow-md transition-all hover:shadow-lg h-full flex flex-col">
                 <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
                 <div className="relative">
                     <div className="flex items-center justify-between mb-8">
@@ -53,14 +53,13 @@ export default function ShipmentAnalytics({
                                         <div className="absolute -top-10 left-1/2 -translate-x-1/2 rounded-lg bg-slate-900 dark:bg-slate-800 border border-slate-800 dark:border-slate-700 px-3 py-1.5 text-[10px] font-black text-white opacity-0 transition-all duration-200 group-hover/bar:opacity-100 group-hover/bar:-translate-y-1 z-10 shadow-xl pointer-events-none">
                                             {data.value}
                                         </div>
-                                        
+
                                         <div className="relative w-full flex items-end justify-center h-full">
                                             <div
-                                                className={`w-full max-w-[40px] rounded-t-lg transition-all duration-500 ease-out group-hover/bar:bg-teal-400 dark:group-hover/bar:bg-teal-500 ${
-                                                    isPeak
+                                                className={`w-full max-w-[40px] rounded-t-lg transition-all duration-500 ease-out group-hover/bar:bg-teal-400 dark:group-hover/bar:bg-teal-500 ${isPeak
                                                         ? 'bg-teal-500 shadow-[0_0_15px_rgba(20,184,166,0.3)]'
                                                         : 'bg-slate-200 dark:bg-slate-800'
-                                                }`}
+                                                    }`}
                                                 style={{ height: `${Math.max(heightPercent, 12)}%` }}
                                             />
                                             {isPeak && (
@@ -112,7 +111,7 @@ export default function ShipmentAnalytics({
                     { label: 'Doc Health', val: `${complianceRate}%`, icon: 'check', color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
                     { label: 'Risk Flags', val: delayedShipments, icon: 'warning', color: 'text-rose-600', bg: 'bg-rose-500/10' }
                 ].map(card => (
-                    <div key={card.label} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-sm transition-all hover:shadow-md relative overflow-hidden">
+                    <div key={card.label} className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-md transition-all hover:shadow-lg relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                         <div className="relative">
                             <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110 ${card.bg} ${card.color}`}>
