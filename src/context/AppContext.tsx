@@ -93,6 +93,24 @@ const buildNotification = (
 export const AppProvider = ({ children }: PropsWithChildren) => {
   const [state, setState] = useState<AppState>(() => loadState());
 
+  // Restore user session on app load if authenticated
+  useEffect(() => {
+    if (typeof window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
+      const token = sessionStorage.getItem('google_auth_token');
+      const userEmail = sessionStorage.getItem('google_user_email');
+
+      // Verify session is still valid
+      if (!token || !userEmail) {
+        console.warn('Google session expired or invalid, logging out');
+        setState(prev => ({
+          ...prev,
+          isAuthenticated: false,
+          user: null
+        }));
+      }
+    }
+  }, []);
+
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
@@ -118,6 +136,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Invalid email format');
     }
 
+    if (!password || password.length < 6) {
+      throw new Error('Password must be at least 6 characters');
+    }
+
     // Check if known team member
     const knownMember = state.teamMembers.find(
       (member) => member.email.toLowerCase() === email.toLowerCase()
@@ -136,6 +158,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         authProvider: 'email'
       }
     }));
+
+    if (typeof window !== 'undefined') {
+      console.log('User logged in with email:', email);
+    }
   };
 
   const signup = (name: string, email: string, password: string) => {
@@ -149,6 +175,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Password must be at least 6 characters');
     }
 
+    if (!name.trim()) {
+      throw new Error('Name is required');
+    }
+
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
@@ -159,27 +189,16 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         authProvider: 'email'
       }
     }));
+
+    if (typeof window !== 'undefined') {
+      console.log('New user registered:', email);
+    }
   };
 
   const loginWithGoogle = () => {
-    // This is kept for backward compatibility and demo purposes
-    // In production, this would trigger the Google OAuth flow
-    const demoUser = {
-      name: 'Nikhil Bheda',
-      email: 'nikhil@bhedaexports.com',
-      role: 'Export Operations Manager' as const
-    };
-
-    setState((prev) => ({
-      ...prev,
-      isAuthenticated: true,
-      user: {
-        name: demoUser.name,
-        email: demoUser.email,
-        role: demoUser.role,
-        authProvider: 'google'
-      }
-    }));
+    // This function is deprecated - use loginWithGoogleToken instead
+    console.warn('loginWithGoogle is deprecated, use loginWithGoogleToken instead');
+    throw new Error('Google OAuth flow must be used. Please use the Google Sign-In button.');
   };
 
   const loginWithGoogleToken = (token: string) => {
@@ -196,35 +215,62 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         (member) => member.email.toLowerCase() === payload.email.toLowerCase()
       );
 
+      // Extract user information from Google token
+      const userName = payload.name || payload.given_name || 'Google User';
+      const userEmail = payload.email;
+      const profilePicture = payload.picture;
+
       // Create user session with Google data
       setState((prev) => ({
         ...prev,
         isAuthenticated: true,
         user: {
-          name: payload.name || payload.given_name || 'Google User',
-          email: payload.email,
+          name: userName,
+          email: userEmail,
           role: knownMember?.role ?? prev.user?.role ?? 'Staff',
           authProvider: 'google',
-          profilePicture: payload.picture
+          profilePicture: profilePicture
         }
       }));
 
       // Store the token for future API calls (if needed)
       if (typeof window !== 'undefined') {
+        // Use sessionStorage with expiry for security
         sessionStorage.setItem('google_auth_token', token);
         sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
+        sessionStorage.setItem('google_user_email', userEmail);
+
+        // Log successful authentication
+        console.log('User authenticated with Google:', {
+          name: userName,
+          email: userEmail,
+          hasProfilePicture: !!profilePicture
+        });
       }
     } catch (error) {
       console.error('Failed to login with Google token:', error);
+
+      // Clear any partial session data on error
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem('google_auth_token');
+        sessionStorage.removeItem('google_token_expiry');
+        sessionStorage.removeItem('google_user_email');
+      }
+
       throw new Error('Google authentication failed. Please try again.');
     }
   };
 
   const logout = () => {
-    // Clear Google auth token
+    // Clear all authentication data
     if (typeof window !== 'undefined') {
+      // Clear Google auth tokens
       sessionStorage.removeItem('google_auth_token');
       sessionStorage.removeItem('google_token_expiry');
+      sessionStorage.removeItem('google_user_email');
+
+      // Log logout
+      console.log('User logged out');
     }
 
     setState((prev) => ({

@@ -16,6 +16,20 @@ export interface GoogleTokenPayload {
     exp: number;
 }
 
+export interface GoogleSignInCallbackResponse {
+    credential: string;
+    select_by: string;
+    clientId?: string;
+    client_id?: string;
+}
+
+export class GoogleAuthError extends Error {
+    constructor(public code: string, message: string) {
+        super(message);
+        this.name = 'GoogleAuthError';
+    }
+}
+
 /**
  * Decode JWT token without verification (for client-side use only)
  * In production, always verify the token on your backend server!
@@ -24,13 +38,20 @@ export function decodeJWT(token: string): GoogleTokenPayload | null {
     try {
         const parts = token.split('.');
         if (parts.length !== 3) {
-            console.error('Invalid token format');
+            console.error('Invalid token format: expected 3 parts, got', parts.length);
             return null;
         }
 
         const decoded = JSON.parse(
             atob(parts[1].replace(/-/g, '+').replace(/_/g, '/'))
         );
+
+        // Validate required fields
+        if (!decoded.email || !decoded.sub) {
+            console.error('Token missing required fields (email or sub)');
+            return null;
+        }
+
         return decoded as GoogleTokenPayload;
     } catch (error) {
         console.error('Failed to decode token:', error);
@@ -39,63 +60,120 @@ export function decodeJWT(token: string): GoogleTokenPayload | null {
 }
 
 /**
+ * Check if token is expired
+ */
+export function isTokenExpired(token: GoogleTokenPayload): boolean {
+    const currentTime = Math.floor(Date.now() / 1000);
+    return currentTime >= token.exp;
+}
+
+/**
+ * Validate token expiry before using
+ */
+export function validateTokenExpiry(token: GoogleTokenPayload): boolean {
+    if (isTokenExpired(token)) {
+        console.warn('Google token has expired');
+        return false;
+    }
+    return true;
+}
+
+/**
  * Initialize Google Sign-In
  * Requires Google OAuth Client ID to be set
  */
-export function initGoogleSignIn(clientId: string, callback: (token: string) => void, onError: (error: any) => void) {
+export function initGoogleSignIn(
+    clientId: string,
+    callback: (response: GoogleSignInCallbackResponse) => void,
+    onError?: (error: GoogleAuthError) => void
+) {
     if (!window.google) {
-        onError('Google SDK not loaded');
-        return;
+        const error = new GoogleAuthError('SDK_NOT_LOADED', 'Google SDK not loaded. Please reload the page.');
+        onError?.(error);
+        throw error;
+    }
+
+    if (!clientId || clientId.trim() === '') {
+        const error = new GoogleAuthError('INVALID_CLIENT_ID', 'Google Client ID is not configured');
+        onError?.(error);
+        throw error;
     }
 
     try {
         window.google.accounts.id.initialize({
             client_id: clientId,
-            callback: (response: any) => {
+            callback: (response: GoogleSignInCallbackResponse) => {
                 if (response.credential) {
-                    callback(response.credential);
+                    // Decode and validate token immediately
+                    const payload = decodeJWT(response.credential);
+                    if (!payload) {
+                        const error = new GoogleAuthError('INVALID_TOKEN', 'Failed to decode Google token');
+                        onError?.(error);
+                        return;
+                    }
+
+                    if (!validateTokenExpiry(payload)) {
+                        const error = new GoogleAuthError('TOKEN_EXPIRED', 'Google token has expired');
+                        onError?.(error);
+                        return;
+                    }
+
+                    callback(response);
                 } else {
-                    onError('No credential received');
+                    const error = new GoogleAuthError('NO_CREDENTIAL', 'No credential received from Google');
+                    onError?.(error);
                 }
-            },
-            error_callback: () => {
-                onError('Google Sign-In initialization failed');
             }
         });
+
+        console.log('Google Sign-In initialized successfully');
     } catch (error) {
         console.error('Google Sign-In init error:', error);
-        onError(error);
+        const authError = new GoogleAuthError('INIT_FAILED', `Google Sign-In initialization failed: ${error}`);
+        onError?.(authError);
+        throw authError;
     }
 }
 
 /**
  * Render Google Sign-In button
  */
-export function renderGoogleSignInButton(elementId: string, options?: any) {
+export function renderGoogleSignInButton(elementId: string, options?: any): boolean {
     if (!window.google) {
         console.error('Google SDK not loaded');
-        return;
+        return false;
+    }
+
+    const element = document.getElementById(elementId);
+    if (!element) {
+        console.error(`Element with id "${elementId}" not found`);
+        return false;
     }
 
     try {
         window.google.accounts.id.renderButton(
-            document.getElementById(elementId),
+            element,
             {
                 theme: 'outline',
                 size: 'large',
                 width: '100%',
+                text: 'signin_with',
+                logo_alignment: 'left',
                 ...options
             }
         );
+        console.log('Google Sign-In button rendered successfully');
+        return true;
     } catch (error) {
         console.error('Error rendering Google button:', error);
+        return false;
     }
 }
 
 /**
- * Handle Google Sign-In button click
+ * Show Google One Tap prompt
  */
-export function triggerGoogleSignIn() {
+export function showGoogleOneTapPrompt(onSuccess?: (notification: any) => void, onError?: (notification: any) => void) {
     if (!window.google) {
         console.error('Google SDK not loaded');
         return;
@@ -103,11 +181,33 @@ export function triggerGoogleSignIn() {
 
     try {
         window.google.accounts.id.prompt((notification: any) => {
-            // Handle prompt notification
-            console.log('Google prompt notification:', notification);
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+                console.log('One Tap prompt not displayed:', notification);
+                onError?.(notification);
+            } else {
+                console.log('One Tap prompt shown');
+                onSuccess?.(notification);
+            }
         });
     } catch (error) {
-        console.error('Error triggering Google Sign-In:', error);
+        console.error('Error showing One Tap prompt:', error);
+        onError?.(error);
+    }
+}
+
+/**
+ * Cancel Google One Tap prompt
+ */
+export function cancelGooglePrompt() {
+    if (!window.google) {
+        console.error('Google SDK not loaded');
+        return;
+    }
+
+    try {
+        window.google.accounts.id.cancel();
+    } catch (error) {
+        console.error('Error cancelling Google prompt:', error);
     }
 }
 
@@ -126,3 +226,5 @@ declare global {
         };
     }
 }
+
+export { }

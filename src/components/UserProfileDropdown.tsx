@@ -3,7 +3,7 @@ import { useAppContext } from '../context/AppContext';
 import AppIcon from './AppIcon';
 
 export default function UserProfileDropdown() {
-    const { user, logout } = useAppContext();
+    const { state: { user }, logout } = useAppContext();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +39,11 @@ export default function UserProfileDropdown() {
                         alt={user.name}
                         className="h-8 w-8 rounded-full object-cover"
                         loading="lazy"
+                        onError={(e) => {
+                            // Fallback if image fails to load
+                            const img = e.target as HTMLImageElement;
+                            img.style.display = 'none';
+                        }}
                     />
                 ) : (
                     <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-navy-600 text-white text-sm font-bold">
@@ -71,6 +76,11 @@ export default function UserProfileDropdown() {
                                     alt={user.name}
                                     className="h-12 w-12 rounded-full object-cover"
                                     loading="lazy"
+                                    onError={(e) => {
+                                        // Fallback if image fails to load
+                                        const img = e.target as HTMLImageElement;
+                                        img.style.display = 'none';
+                                    }}
                                 />
                             ) : (
                                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-navy-600 text-white font-bold text-lg">

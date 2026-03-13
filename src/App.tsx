@@ -18,6 +18,10 @@ import AiDocumentExtractionPage from './pages/AiDocumentExtractionPage';
 import AiDocumentValidatorPage from './pages/AiDocumentValidatorPage';
 import AiComplianceCopilotPage from './pages/AiComplianceCopilotPage';
 
+/**
+ * Protected layout component that ensures user is authenticated
+ * Redirects to auth page if not authenticated
+ */
 function ProtectedLayout() {
   const {
     state: { isAuthenticated }
@@ -30,6 +34,9 @@ function ProtectedLayout() {
   return <AppLayout />;
 }
 
+/**
+ * Helper component for shipment redirects
+ */
 function FirstShipmentRedirect({ kind }: { kind: 'upload' | 'verification' }) {
   const {
     state: { shipments }
@@ -47,10 +54,17 @@ export default function App() {
 
   return (
     <Routes>
+      {/* Public Routes */}
       <Route path="/" element={<SplashPage />} />
       <Route path="/splash" element={<Navigate to="/" replace />} />
-      <Route path="/auth" element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
 
+      {/* Auth Route - Redirect to dashboard if already authenticated */}
+      <Route
+        path="/auth"
+        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
+      />
+
+      {/* Protected Routes */}
       <Route element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
 
@@ -74,6 +88,7 @@ export default function App() {
         <Route path="/search" element={<Navigate to="/shipments" replace />} />
       </Route>
 
+      {/* 404 Not Found */}
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

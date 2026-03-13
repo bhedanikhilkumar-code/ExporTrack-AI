@@ -2,43 +2,68 @@ import { FormEvent, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
+import { initGoogleSignIn, renderGoogleSignInButton, GoogleAuthError, GoogleSignInCallbackResponse } from '../utils/googleAuth';
 
 type Mode = 'login' | 'signup';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { login, signup, loginWithGoogle, loginWithGoogleToken } = useAppContext();
+  const { login, signup, loginWithGoogleToken } = useAppContext();
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [googleError, setGoogleError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+  const [googleInitialized, setGoogleInitialized] = useState(false);
   const googleButtonRef = useRef<HTMLDivElement>(null);
+  const googleScriptRef = useRef<HTMLScriptElement | null>(null);
 
   // Initialize Google Sign-In
   useEffect(() => {
-    // Load Google Identity Services script
-    const script = document.createElement('script');
-    script.src = 'https://accounts.google.com/gsi/client';
-    script.async = true;
-    script.defer = true;
-    script.onload = () => {
-      initializeGoogleSignIn();
+    let mounted = true;
+
+    const initializeGoogleSDK = () => {
+      if (document.querySelector('script[src*="google.com/gsi/client"]')) {
+        // SDK already loaded
+        if (mounted) {
+          setTimeout(() => initializeGoogleSignIn(), 0);
+        }
+        return;
+      }
+
+      // Load Google Identity Services script
+      const script = document.createElement('script');
+      script.src = 'https://accounts.google.com/gsi/client';
+      script.async = true;
+      script.defer = true;
+      script.onload = () => {
+        if (mounted) {
+          setTimeout(() => initializeGoogleSignIn(), 0);
+        }
+      };
+      script.onerror = () => {
+        if (mounted) {
+          setGoogleError('Failed to load Google Sign-In. Please check your internet connection and refresh the page.');
+        }
+      };
+      document.head.appendChild(script);
+      googleScriptRef.current = script;
     };
-    document.head.appendChild(script);
+
+    initializeGoogleSDK();
 
     return () => {
-      // Cleanup
-      if (document.head.contains(script)) {
-        document.head.removeChild(script);
-      }
+      mounted = false;
     };
   }, []);
 
   const initializeGoogleSignIn = () => {
     if (!window.google) {
       console.error('Google SDK not loaded');
+      setGoogleError('Google Sign-In is not available. Please refresh the page.');
       return;
     }
 
@@ -47,61 +72,80 @@ export default function AuthPage() {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
       if (!clientId) {
-        setError('Google Sign-In is not configured. Please contact support.');
+        setGoogleError('Google Sign-In is not configured. Please contact support.');
         console.error('VITE_GOOGLE_CLIENT_ID environment variable is not set');
         return;
       }
 
-      // Initialize Google Sign-In with your Client ID
-      window.google.accounts.id.initialize({
-        client_id: clientId,
-        callback: handleGoogleCallback,
-        auto_select: false
-      });
+      // Initialize Google Sign-In
+      initGoogleSignIn(
+        clientId,
+        handleGoogleCallback,
+        handleGoogleError
+      );
 
       // Render the Sign-In button
-      if (googleButtonRef.current && !googleButtonRef.current.innerHTML) {
-        window.google.accounts.id.renderButton(
-          googleButtonRef.current,
-          {
-            theme: 'outline',
-            size: 'large',
-            width: '100%',
-            text: 'signin_with'
-          }
-        );
+      if (googleButtonRef.current) {
+        const renderSuccess = renderGoogleSignInButton('google-signin-button', {
+          theme: 'outline',
+          size: 'large',
+          width: '100%',
+          text: 'signin_with',
+          logo_alignment: 'left'
+        });
+
+        if (renderSuccess) {
+          setGoogleInitialized(true);
+          setGoogleError(''); // Clear any previous errors
+        } else {
+          setGoogleError('Failed to render Google Sign-In button. Please refresh the page.');
+        }
       }
     } catch (error) {
       console.error('Google Sign-In initialization error:', error);
+      if (error instanceof GoogleAuthError) {
+        setGoogleError(error.message);
+      } else {
+        setGoogleError('Failed to initialize Google Sign-In. Please refresh the page.');
+      }
     }
   };
 
-  const handleGoogleCallback = (response: any) => {
-    if (response.credential) {
-      try {
-        setError('');
-        setIsLoading(true);
+  const handleGoogleCallback = (response: GoogleSignInCallbackResponse) => {
+    try {
+      setError('');
+      setGoogleError('');
+      setIsGoogleLoading(true);
 
-        // Login with the Google JWT token
-        loginWithGoogleToken(response.credential);
-
-        // Redirect to dashboard
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 300);
-      } catch (err: any) {
-        setError(err.message || 'Google sign-in failed. Please try again.');
-        setIsLoading(false);
+      if (!response.credential) {
+        throw new Error('No credential received from Google');
       }
-    } else {
-      setError('Google sign-in failed. Please try again.');
-      setIsLoading(false);
+
+      // Login with the Google JWT token
+      loginWithGoogleToken(response.credential);
+
+      // Redirect to dashboard
+      setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 300);
+    } catch (err: any) {
+      console.error('Google callback error:', err);
+      const errorMessage = err.message || 'Google sign-in failed. Please try again.';
+      setGoogleError(errorMessage);
+      setIsGoogleLoading(false);
     }
+  };
+
+  const handleGoogleError = (error: GoogleAuthError) => {
+    console.error('Google Auth Error:', error);
+    setGoogleError(error.message);
+    setIsGoogleLoading(false);
   };
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
+    setGoogleError('');
     setIsLoading(true);
 
     try {
@@ -123,29 +167,22 @@ export default function AuthPage() {
 
       // Small delay for UX
       setTimeout(() => {
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }, 300);
-    } catch (err) {
-      setError('An error occurred. Please try again.');
+    } catch (err: any) {
+      const errorMessage = err.message || 'An error occurred. Please try again.';
+      setError(errorMessage);
       setIsLoading(false);
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const toggleMode = () => {
+    setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
     setError('');
-    setIsLoading(true);
-
-    try {
-      // Simulate Google OAuth flow delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      loginWithGoogle();
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 300);
-    } catch (err) {
-      setError('Google sign-in failed. Please try again.');
-      setIsLoading(false);
-    }
+    setGoogleError('');
+    setName('');
+    setEmail('');
+    setPassword('');
   };
 
   return (
@@ -209,10 +246,16 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              {/* Error Message */}
+              {/* Error Messages */}
               {error && (
                 <div className="mb-6 p-3 rounded-lg bg-rose-50 border border-rose-200 dark:bg-rose-900/20 dark:border-rose-800/50">
                   <p className="text-sm text-rose-700 dark:text-rose-400">{error}</p>
+                </div>
+              )}
+
+              {googleError && (
+                <div className="mb-6 p-3 rounded-lg bg-rose-50 border border-rose-200 dark:bg-rose-900/20 dark:border-rose-800/50">
+                  <p className="text-sm text-rose-700 dark:text-rose-400">{googleError}</p>
                 </div>
               )}
 
@@ -234,7 +277,7 @@ export default function AuthPage() {
                       required={mode === 'signup'}
                       className="input-field"
                       placeholder="Jane Doe"
-                      disabled={isLoading}
+                      disabled={isLoading || isGoogleLoading}
                     />
                   </div>
                 )}
@@ -254,7 +297,7 @@ export default function AuthPage() {
                     required
                     className="input-field"
                     placeholder="ops@company.com"
-                    disabled={isLoading}
+                    disabled={isLoading || isGoogleLoading}
                   />
                 </div>
 
@@ -274,14 +317,14 @@ export default function AuthPage() {
                     minLength={6}
                     className="input-field"
                     placeholder="Minimum 6 characters"
-                    disabled={isLoading}
+                    disabled={isLoading || isGoogleLoading}
                   />
                 </div>
 
                 <button
                   type="submit"
                   className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading}
+                  disabled={isLoading || isGoogleLoading}
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-2">
@@ -302,7 +345,15 @@ export default function AuthPage() {
               </div>
 
               {/* Google Sign-In Button */}
-              <div ref={googleButtonRef} />
+              <div
+                ref={googleButtonRef}
+                id="google-signin-button"
+                className={`w-full ${!googleInitialized && !googleError ? 'flex items-center justify-center py-3 bg-slate-100 rounded-lg animate-pulse' : ''}`}
+              >
+                {!googleInitialized && !googleError && (
+                  <span className="text-sm text-slate-500">Loading Google Sign-In...</span>
+                )}
+              </div>
 
               {/* Toggle Mode */}
               <div className="mt-6 text-center">
@@ -310,14 +361,9 @@ export default function AuthPage() {
                   {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
                   <button
                     type="button"
-                    onClick={() => {
-                      setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
-                      setError('');
-                      setName('');
-                      setEmail('');
-                      setPassword('');
-                    }}
-                    className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors"
+                    onClick={toggleMode}
+                    disabled={isLoading || isGoogleLoading}
+                    className="font-semibold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {mode === 'login' ? 'Sign up' : 'Sign in'}
                   </button>
