@@ -63,9 +63,9 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                             </h3>
                         </div>
                         {unreadNotifications.length > 0 && (
-                          <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-teal-500 text-[10px] font-black text-white shadow-sm">
-                              {unreadNotifications.length}
-                          </span>
+                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-teal-500 text-[10px] font-black text-white shadow-sm">
+                                {unreadNotifications.length}
+                            </span>
                         )}
                     </div>
                 </div>
@@ -83,8 +83,8 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                     <div
                                         key={notification.id}
                                         className={`group p-4 border-l-2 transition-all hover:bg-slate-50/50 dark:hover:bg-slate-800/50 ${isUnread
-                                                ? `${colors.bg} ${colors.border} border-l-teal-500`
-                                                : 'border-l-transparent bg-white/50 dark:bg-slate-900/30'
+                                            ? `${colors.bg} ${colors.border} border-l-teal-500`
+                                            : 'border-l-transparent bg-white/50 dark:bg-slate-900/30'
                                             }`}
                                     >
                                         <div className="flex gap-3">
@@ -110,7 +110,7 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                                         {notification.title}
                                                     </h4>
                                                     {isUnread && (
-                                                        <div className="flex-shrink-0 h-2 w-2 rounded-full bg-teal-500 flex-shrink-0 animate-pulse" />
+                                                        <div className="flex-shrink-0 h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
                                                     )}
                                                 </div>
 
