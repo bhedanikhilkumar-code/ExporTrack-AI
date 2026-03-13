@@ -80,7 +80,7 @@ export default function AuthPage() {
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
       if (!clientId) {
-        throw new Error('VITE_GOOGLE_CLIENT_ID environment variable not set');
+        throw new Error('VITE_GOOGLE_CLIENT_ID is missing. Check your .env file or Vercel environment variables.');
       }
 
       console.log('📝 Initializing with Client ID:', clientId.substring(0, 15) + '...');
@@ -260,11 +260,7 @@ export default function AuthPage() {
                 </div>
               )}
 
-              {googleError && (
-                <div className="mb-6 p-3 rounded-lg bg-rose-50 border border-rose-200 dark:bg-rose-900/20 dark:border-rose-800/50">
-                  <p className="text-sm text-rose-700 dark:text-rose-400">{googleError}</p>
-                </div>
-              )}
+              {/* Form level error was handled above */}
 
               {/* Form */}
               <form className="space-y-4" onSubmit={handleSubmit}>
@@ -352,16 +348,34 @@ export default function AuthPage() {
               </div>
 
               {/* Google Sign-In Button */}
-              <div
-                id="google-signin-button"
-                className="w-full min-h-12 flex items-center justify-center"
-              >
-                {!googleInitialized && (
+              <div className="w-full flex flex-col items-center justify-center min-h-[48px]">
+                {googleError ? (
+                  <div className="w-full p-3 rounded-xl bg-orange-50 border border-orange-200 dark:bg-orange-900/20 dark:border-orange-800/50 flex items-start gap-3">
+                    <AppIcon name="alert" className="h-5 w-5 text-orange-500 mt-0.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-orange-800 dark:text-orange-300">
+                        Authentication Config Error
+                      </p>
+                      <p className="text-[11px] text-orange-700/80 dark:text-orange-400/80 mt-0.5" title={googleError}>
+                        {googleError}
+                      </p>
+                    </div>
+                  </div>
+                ) : !googleInitialized ? (
                   <div className="flex items-center gap-2 text-slate-500">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"></span>
-                    <span className="text-sm">Loading Google...</span>
+                    <span className="text-sm font-medium">Loading Google...</span>
                   </div>
-                )}
+                ) : null}
+                
+                {/* 
+                  The Google button will be rendered into this specific div via the SDK.
+                  We use relative positioning so it sits on top if needed, and give it a class to ensure it's hidden if there's an error.
+                */}
+                <div 
+                  id="google-signin-button" 
+                  className={`w-full flex justify-center ${googleError || !googleInitialized ? 'hidden' : ''}`}
+                ></div>
               </div>
 
               {/* Toggle Mode */}
