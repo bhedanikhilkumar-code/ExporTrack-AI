@@ -10,10 +10,12 @@ import {
   Role,
   Shipment,
   ShipmentDocument,
-  UploadDocumentInput
+  UploadDocumentInput,
+  ShipmentStatus
 } from '../types';
 import { decodeJWT } from '../utils/googleAuth';
 import { safeStorage } from '../utils/storage';
+import { NotificationService } from '../services/NotificationService';
 
 const STORAGE_KEY = 'exportrack-ai-state-v1';
 
@@ -31,6 +33,7 @@ interface AppContextValue {
   createShipment: (input: CreateShipmentInput) => Shipment;
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
+  updateShipmentStatus: (shipmentId: string, status: ShipmentStatus) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
   triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
@@ -388,21 +391,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ]
     };
 
-    setState((prev) => ({
-      ...prev,
-      shipments: [shipment, ...prev.shipments],
-      notifications: [
-        buildNotification(
-          shipment.id,
-          'Deadline',
-          'Medium',
-          `Shipment ${shipment.id} created`,
-          'New shipment added. Upload and verify mandatory documents.',
-          shipment.deadline
-        ),
-        ...prev.notifications
-      ]
-    }));
+    const addNotif = (t: any) => {
+      setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
+    };
+    NotificationService.trigger('shipment_created', shipment, addNotif);
 
     return shipment;
   };
@@ -566,6 +558,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       createShipment,
       addDocument,
       updateDocumentStatus,
+      updateShipmentStatus,
       addComment,
       markNotificationRead,
       triggerDelayAlert

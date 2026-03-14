@@ -23,6 +23,12 @@ import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage';
 import DocumentOcrPage from './pages/DocumentOcrPage';
 import TeamWorkspacePage from './pages/TeamWorkspacePage';
 
+// Client Portal Components
+import ClientLayout from './components/ClientLayout';
+import ClientLoginPage from './pages/client/ClientLoginPage';
+import ClientDashboardPage from './pages/client/ClientDashboardPage';
+import ClientShipmentsPage from './pages/client/ClientShipmentsPage';
+
 /**
  * Protected layout component that ensures user is authenticated
  * Redirects to auth page if not authenticated
@@ -70,7 +76,14 @@ export default function App() {
         element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
       />
 
-      {/* Protected Routes */}
+      {/* Client Portal Routes */}
+      <Route path="/client/login" element={<ClientLoginPage />} />
+      <Route element={<ClientLayout />}>
+        <Route path="/client/dashboard" element={<ClientDashboardPage />} />
+        <Route path="/client/shipments" element={<ClientShipmentsPage />} />
+      </Route>
+
+      {/* Protected Admin/Staff Routes */}
       <Route element={<ProtectedLayout />}>
         <Route path="/dashboard" element={<DashboardPage />} />
 

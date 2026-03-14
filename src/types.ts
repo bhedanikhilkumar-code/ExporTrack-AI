@@ -17,7 +17,7 @@ export type ShipmentStatus =
   | 'Under Verification'
   | 'Customs Hold'
   | 'Delivered';
-export type Role = 'Admin' | 'Manager' | 'Staff' | 'Export Operations Manager';
+export type Role = 'Admin' | 'Manager' | 'Staff' | 'Export Operations Manager' | 'Client';
 
 export interface ShipmentDocument {
   id: string;
@@ -88,6 +88,15 @@ export interface TeamMember {
   lastActive: string;
 }
 
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  companyName: string;
+  activeShipments: number;
+  lastLogin: string;
+}
+
 export interface UserSession {
   name: string;
   email: string;
@@ -102,6 +111,7 @@ export interface AppState {
   shipments: Shipment[];
   notifications: NotificationItem[];
   teamMembers: TeamMember[];
+  clients: Client[];
   theme: 'light' | 'dark';
 }
 
@@ -148,6 +158,12 @@ export interface DelayEvaluation {
   isDelayed: boolean;
   daysDelayed: number;
 }
+
+export type NotificationEventType = 
+  | 'shipment_created'
+  | 'shipment_dispatched'
+  | 'shipment_delayed'
+  | 'shipment_delivered';
 
 export interface ShipmentTracking {
   shipmentId: string;
