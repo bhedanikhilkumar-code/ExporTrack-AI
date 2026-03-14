@@ -19,6 +19,9 @@ import AiDocumentValidatorPage from './pages/AiDocumentValidatorPage';
 import AiComplianceCopilotPage from './pages/AiComplianceCopilotPage';
 import TrackingPage from './pages/TrackingPage';
 import PublicTrackingPage from './pages/PublicTrackingPage';
+import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage';
+import DocumentOcrPage from './pages/DocumentOcrPage';
+import TeamWorkspacePage from './pages/TeamWorkspacePage';
 
 /**
  * Protected layout component that ensures user is authenticated
@@ -89,6 +92,9 @@ export default function App() {
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/team" element={<ProfileTeamPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/analytics" element={<AnalyticsDashboardPage />} />
+        <Route path="/document-ocr" element={<DocumentOcrPage />} />
+        <Route path="/team-workspace" element={<TeamWorkspacePage />} />
         <Route path="/search" element={<Navigate to="/shipments" replace />} />
       </Route>
 

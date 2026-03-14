@@ -9,14 +9,17 @@ import UserProfileDropdown from './UserProfileDropdown';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { to: '/analytics', label: 'Analytics', icon: 'bar-chart' },
   { to: '/shipments', label: 'Shipments', icon: 'shipments' },
   { to: '/shipments/create', label: 'Create Shipment', icon: 'create' },
   { to: '/documents/upload', label: 'Upload Docs', icon: 'upload' },
+  { to: '/document-ocr', label: 'Document OCR', icon: 'ai-extract' },
   { to: '/ai-extraction', label: 'AI Extraction', icon: 'ai-extract' },
   { to: '/ai-validator', label: 'AI Validator', icon: 'verification' },
   { to: '/ai-compliance', label: 'AI Compliance', icon: 'shield' },
   { to: '/verification', label: 'Verification', icon: 'verification' },
   { to: '/notifications', label: 'Notifications', icon: 'notifications' },
+  { to: '/team-workspace', label: 'Team Workspace', icon: 'users' },
   { to: '/team', label: 'Team', icon: 'team' }
 ] as const;
 

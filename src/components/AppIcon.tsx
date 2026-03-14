@@ -33,7 +33,9 @@ interface AppIconProps {
   | 'trend-up'
   | 'trend-down'
   | 'folder'
-  | 'share';
+  | 'share'
+  | 'bar-chart'
+  | 'users';
   className?: string;
   strokeWidth?: number;
   'aria-hidden'?: boolean;
@@ -74,6 +76,8 @@ const iconMap: Record<AppIconProps['name'], string> = {
   'trend-down': 'm22 17-8.5-8.5-5 5L2 7m20 10h-6m6 0v-6',
   folder: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
   share: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13',
+  'bar-chart': 'M12 20V10M18 20V4M6 20v-4',
+  users: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm14 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
 };
 
 export default function AppIcon({ name, className, strokeWidth, 'aria-hidden': ariaHidden }: AppIconProps) {
