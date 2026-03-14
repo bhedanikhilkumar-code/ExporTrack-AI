@@ -96,7 +96,7 @@ export default function CreateShipmentPage() {
               ))}
             </select>
           </div>
-          <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-teal-100 bg-teal-50 px-4 py-3 text-xs text-teal-900">
+          <div className="md:col-span-2 flex items-center justify-between rounded-xl border border-teal-100 dark:border-teal-800/50 bg-teal-50 dark:bg-teal-950/30 px-4 py-3 text-xs text-teal-900 dark:text-teal-300">
             <span>Tip: Assign an owner so approvals and reminders have clear accountability.</span>
             <span className="font-semibold">Hackathon-ready workflow</span>
           </div>

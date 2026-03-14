@@ -32,19 +32,19 @@ export default function NotificationsPage() {
 
       <section className="space-y-3">
         {filtered.map((notification) => (
-          <article key={notification.id} className={`card-surface p-4 md:p-5 ${notification.read ? 'border-slate-200 bg-white' : 'border-teal-200 bg-teal-50'}`}>
+          <article key={notification.id} className={`card-surface p-4 md:p-5 ${notification.read ? 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60' : 'border-teal-200 dark:border-teal-800/50 bg-teal-50 dark:bg-teal-950/30'}`}>
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-base font-semibold text-navy-800">{notification.title}</h3>
+                  <h3 className="text-base font-semibold text-navy-800 dark:text-white">{notification.title}</h3>
                   <StatusBadge value={notification.severity} />
                   <StatusBadge value={notification.type} />
                 </div>
-                <p className="text-sm text-slate-700">{notification.message}</p>
+                <p className="text-sm text-slate-700 dark:text-slate-300">{notification.message}</p>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
                   <span>Created: {notification.createdAt.slice(0, 10)}</span>
                   <span>Due: {notification.dueDate}</span>
-                  <Link to={`/shipments/${notification.shipmentId}`} className="font-semibold text-teal-700 hover:text-teal-800">
+                  <Link to={`/shipments/${notification.shipmentId}`} className="font-semibold text-teal-700 dark:text-teal-400 hover:text-teal-800 dark:hover:text-teal-300">
                     {notification.shipmentId}
                   </Link>
                 </div>
@@ -58,7 +58,7 @@ export default function NotificationsPage() {
                   Mark as Read
                 </button>
               ) : (
-                <span className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600">Read</span>
+                <span className="rounded-lg border border-slate-300 dark:border-slate-700 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400">Read</span>
               )}
             </div>
           </article>

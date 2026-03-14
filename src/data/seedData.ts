@@ -321,5 +321,31 @@ export const createSeedState = (): AppState => ({
       dueDate: '2026-03-08',
       read: true
     }
+  ],
+  clients: [
+    {
+      id: 'CL-001',
+      name: 'Apex Retail',
+      email: 'client@apex.com',
+      companyName: 'Apex Retail Imports',
+      activeShipments: 1,
+      lastLogin: '2026-03-14T10:00:00.000Z'
+    },
+    {
+      id: 'CL-002',
+      name: 'BlueWave',
+      email: 'client@bluewave.com',
+      companyName: 'BlueWave Foods',
+      activeShipments: 1,
+      lastLogin: '2026-03-14T11:00:00.000Z'
+    },
+    {
+      id: 'CL-003',
+      name: 'Nordic Auto',
+      email: 'client@nordic.com',
+      companyName: 'Nordic Auto Components',
+      activeShipments: 1,
+      lastLogin: '2026-03-14T09:00:00.000Z'
+    }
   ]
 });

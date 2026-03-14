@@ -31,7 +31,7 @@ export default function UploadDocumentsPage() {
   if (!shipment) {
     return (
       <div className="card-panel">
-        <h2 className="text-xl font-semibold text-navy-800">Shipment not found</h2>
+        <h2 className="text-xl font-semibold text-navy-800 dark:text-white">Shipment not found</h2>
         <Link to="/dashboard" className="btn-primary mt-3">
           Return to Dashboard
         </Link>
@@ -95,10 +95,10 @@ export default function UploadDocumentsPage() {
             }}
             onDragLeave={() => setIsDragOver(false)}
             onDrop={handleDrop}
-            className={`mt-4 block cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition ${isDragOver ? 'border-teal-500 bg-teal-50' : 'border-slate-300 bg-slate-50 hover:border-slate-400'
+            className={`mt-4 block cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition ${isDragOver ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/30' : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 hover:border-slate-400 dark:hover:border-slate-600'
               }`}
           >
-            <p className="text-sm font-semibold text-slate-800">Drop files here or click to browse</p>
+            <p className="text-sm font-semibold text-slate-800 dark:text-slate-200">Drop files here or click to browse</p>
             <p className="mt-1 text-xs text-slate-500">Mobile: camera capture enabled automatically</p>
             <input id="doc-files" type="file" multiple capture="environment" accept=".pdf,image/png,image/jpeg" onChange={(event: ChangeEvent<HTMLInputElement>) => setIncomingFiles(event.target.files)} className="hidden" />
           </label>

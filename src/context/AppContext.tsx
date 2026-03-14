@@ -209,8 +209,13 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       (member) => member.email.toLowerCase() === email.toLowerCase()
     );
 
+    // Check if known client
+    const knownClient = state.clients.find(
+      (client) => client.email.toLowerCase() === email.toLowerCase()
+    );
+
     const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
-    const displayName = knownMember?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
+    const displayName = knownMember?.name ?? knownClient?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
 
     setState((prev) => ({
       ...prev,
@@ -218,7 +223,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       user: {
         name: displayName,
         email,
-        role: knownMember?.role ?? prev.user?.role ?? 'Staff',
+        role: knownMember?.role ?? (knownClient ? 'Client' : (prev.user?.role ?? 'Staff')),
         authProvider: 'email'
       }
     }));

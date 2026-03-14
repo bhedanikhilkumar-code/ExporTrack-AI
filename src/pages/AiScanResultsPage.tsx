@@ -16,7 +16,7 @@ export default function AiScanResultsPage() {
   if (!shipment) {
     return (
       <div className="card-panel">
-        <h2 className="text-xl font-semibold text-navy-800">Shipment not found</h2>
+        <h2 className="text-xl font-semibold text-navy-800 dark:text-white">Shipment not found</h2>
         <Link to="/dashboard" className="btn-primary mt-3">
           Return to Dashboard
         </Link>
@@ -64,27 +64,27 @@ export default function AiScanResultsPage() {
             <dl className="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Invoice Number</dt>
-                <dd className="font-medium text-slate-800">{result.invoiceNumber}</dd>
+                <dd className="font-medium text-slate-800 dark:text-slate-200">{result.invoiceNumber}</dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Date</dt>
-                <dd className="font-medium text-slate-800">{result.date}</dd>
+                <dd className="font-medium text-slate-800 dark:text-slate-200">{result.date}</dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Buyer Name</dt>
-                <dd className="font-medium text-slate-800">{result.buyerName}</dd>
+                <dd className="font-medium text-slate-800 dark:text-slate-200">{result.buyerName}</dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Shipment Value</dt>
-                <dd className="font-medium text-slate-800">{result.shipmentValue}</dd>
+                <dd className="font-medium text-slate-800 dark:text-slate-200">{result.shipmentValue}</dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Destination</dt>
-                <dd className="font-medium text-slate-800">{result.destination}</dd>
+                <dd className="font-medium text-slate-800 dark:text-slate-200">{result.destination}</dd>
               </div>
               <div>
                 <dt className="text-xs uppercase tracking-wide text-slate-500">Confidence</dt>
-                <dd className="font-medium text-slate-800">{result.confidence}%</dd>
+                <dd className="font-medium text-slate-800 dark:text-slate-200">{result.confidence}%</dd>
               </div>
             </dl>
           </article>

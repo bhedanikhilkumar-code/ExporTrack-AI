@@ -124,7 +124,7 @@ export default function AiDocumentValidatorPage() {
           <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-slate-100 text-slate-400 transition-colors group-hover:bg-teal-100 group-hover:text-teal-600 dark:bg-slate-800 dark:group-hover:bg-teal-900/30">
             <AppIcon name="upload" className="h-10 w-10" />
           </div>
-          <h3 className="mt-6 text-xl font-bold text-navy-800 dark:text-slate-100">Drop document to validate</h3>
+          <h3 className="mt-6 text-xl font-bold text-navy-800 dark:text-white">Drop document to validate</h3>
           <p className="mt-2 text-center text-slate-500 dark:text-slate-400">
             AI will scan for compliance errors, missing data, and <br /> verify against international trade regulations.
           </p>
@@ -145,7 +145,7 @@ export default function AiDocumentValidatorPage() {
               <AppIcon name="ai-extract" className="h-10 w-10 text-teal-600 dark:text-teal-400" />
             </div>
           </div>
-          <h3 className="mt-8 text-2xl font-bold text-navy-800 dark:text-slate-100">
+          <h3 className="mt-8 text-2xl font-bold text-navy-800 dark:text-white">
             {stage === 'uploading' ? 'Uploading Document...' : 'Neural Analysis in Progress...'}
           </h3>
           <p className="mt-2 text-slate-500 dark:text-slate-400">

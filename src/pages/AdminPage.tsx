@@ -10,9 +10,9 @@ export default function AdminPage() {
 
   if (user?.role !== 'Admin') {
     return (
-      <section className="card-panel border-amber-200 bg-amber-50">
-        <h2 className="text-2xl font-semibold text-amber-800">Admin Access Required</h2>
-        <p className="mt-2 text-sm text-amber-700">
+      <section className="card-panel border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-950/30">
+        <h2 className="text-2xl font-semibold text-amber-800 dark:text-amber-300">Admin Access Required</h2>
+        <p className="mt-2 text-sm text-amber-700 dark:text-amber-400">
           Your current role is <span className="font-semibold">{user?.role ?? 'Staff'}</span>. Switch to Admin in Profile & Team
           Management to view this panel.
         </p>
@@ -34,7 +34,7 @@ export default function AdminPage() {
       <section className="grid gap-4 md:grid-cols-3">
         <article className="card-panel">
           <p className="text-sm text-slate-500">Open Cases</p>
-          <p className="mt-2 text-3xl font-semibold text-navy-800">{openCases}</p>
+          <p className="mt-2 text-3xl font-semibold text-navy-800 dark:text-white">{openCases}</p>
         </article>
         <article className="card-panel">
           <p className="text-sm text-slate-500">Pending Approvals</p>
@@ -69,8 +69,8 @@ export default function AdminPage() {
             <article key={shipment.id} className="card-muted p-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-semibold text-navy-800">{shipment.id}</p>
-                  <p className="text-sm text-slate-700">
+                  <p className="font-semibold text-navy-800 dark:text-white">{shipment.id}</p>
+                  <p className="text-sm text-slate-700 dark:text-slate-300">
                     {shipment.clientName} • {shipment.destinationCountry}
                   </p>
                   <p className="text-xs text-slate-500">Pending docs: {shipment.documents.filter((doc) => doc.status === 'Pending').length}</p>
@@ -95,10 +95,10 @@ export default function AdminPage() {
             return (
               <article key={role} className="card-muted p-4">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="font-semibold text-slate-800">{role}</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">{role}</p>
                   <StatusBadge value={role} />
                 </div>
-                <p className="text-sm text-slate-600">{members.length} team members</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{members.length} team members</p>
                 <p className="mt-2 text-xs text-slate-500">{members.map((member) => member.name).join(', ')}</p>
               </article>
             );

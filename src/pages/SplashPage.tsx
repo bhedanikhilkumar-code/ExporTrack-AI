@@ -38,16 +38,16 @@ export default function SplashPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+      <header className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10">
           <Link to="/" className="flex items-center gap-2">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 font-bold text-white shadow-md">EA</span>
             <span className="text-sm font-extrabold text-slate-900 dark:text-white md:text-base">ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span></span>
           </Link>
-          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 md:flex">
-            <a href="#features" className="hover:text-navy-800">Features</a>
-            <a href="#how" className="hover:text-navy-800">How it works</a>
-            <Link to="/auth" className="hover:text-navy-800">Login</Link>
+          <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400 md:flex">
+            <a href="#features" className="hover:text-slate-900 dark:hover:text-white transition-colors">Features</a>
+            <a href="#how" className="hover:text-slate-900 dark:hover:text-white transition-colors">How it works</a>
+            <Link to="/auth" className="hover:text-slate-900 dark:hover:text-white transition-colors">Login</Link>
             <button type="button" onClick={handleDemo} className="btn-primary px-4 py-2">Demo</button>
           </nav>
         </div>
@@ -59,7 +59,7 @@ export default function SplashPage() {
         <div className="absolute -right-28 top-6 h-96 w-96 rounded-full bg-blue-200/30 blur-3xl dark:bg-blue-500/10" />
         <div className="relative mx-auto grid max-w-7xl items-center gap-8 lg:grid-cols-2">
           <div>
-            <div className="mb-4 inline-flex w-fit items-center rounded-full border border-slate-200 bg-white px-4 py-1.5 text-xs font-semibold text-slate-600">
+            <div className="mb-4 inline-flex w-fit items-center rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 py-1.5 text-xs font-semibold text-slate-600 dark:text-slate-400">
               Export Logistics Document Management
             </div>
             <h1 className="max-w-2xl text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white md:text-5xl lg:text-6xl" style={{ letterSpacing: '-0.03em' }}>
@@ -80,18 +80,18 @@ export default function SplashPage() {
               <span className="rounded-full bg-teal-50 dark:bg-teal-500/10 px-3 py-1 text-xs font-bold text-teal-700 dark:text-teal-400">Live</span>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-xs text-slate-500">Shipments</p><p className="text-xl font-bold text-navy-800">{shipments.length}</p></div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-xs text-slate-500">Documents</p><p className="text-xl font-bold text-navy-800">{totalDocs}</p></div>
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-3"><p className="text-xs text-slate-500">Alerts</p><p className="text-xl font-bold text-navy-800">{liveAlerts}</p></div>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"><p className="text-xs text-slate-500 dark:text-slate-400">Shipments</p><p className="text-xl font-bold text-slate-900 dark:text-white">{shipments.length}</p></div>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"><p className="text-xs text-slate-500 dark:text-slate-400">Documents</p><p className="text-xl font-bold text-slate-900 dark:text-white">{totalDocs}</p></div>
+              <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-3"><p className="text-xs text-slate-500 dark:text-slate-400">Alerts</p><p className="text-xl font-bold text-slate-900 dark:text-white">{liveAlerts}</p></div>
             </div>
             <div className="mt-4 space-y-2">
               {shipments.slice(0, 3).map((s) => (
-                <div key={s.id} className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-3 py-2.5">
+                <div key={s.id} className="flex items-center justify-between rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800/50 px-3 py-2.5">
                   <div>
-                    <p className="text-sm font-semibold text-navy-800">{s.id}</p>
-                    <p className="text-xs text-slate-500">{s.clientName} • {s.destinationCountry}</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">{s.id}</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">{s.clientName} • {s.destinationCountry}</p>
                   </div>
-                  <span className="text-xs font-semibold text-slate-600">{s.status}</span>
+                  <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">{s.status}</span>
                 </div>
               ))}
             </div>
@@ -127,8 +127,8 @@ export default function SplashPage() {
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-6 py-8 text-sm text-slate-600 dark:text-slate-400 md:flex-row md:items-center md:justify-between md:px-10">
           <p>© 2026 ExporTrack-AI. Built for modern export operations.</p>
           <div className="flex items-center gap-4">
-            <Link to="/auth" className="hover:text-navy-800">Login</Link>
-            <button type="button" onClick={handleDemo} className="hover:text-navy-800">Open Demo</button>
+            <Link to="/auth" className="hover:text-slate-900 dark:hover:text-white transition-colors">Login</Link>
+            <button type="button" onClick={handleDemo} className="hover:text-slate-900 dark:hover:text-white transition-colors">Open Demo</button>
           </div>
         </div>
       </footer>

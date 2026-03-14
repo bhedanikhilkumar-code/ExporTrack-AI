@@ -130,8 +130,8 @@ export default function SearchFilterPage() {
               <article key={shipment.id} className="card-muted p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <p className="text-sm font-semibold text-navy-800">{shipment.id}</p>
-                    <p className="text-sm text-slate-700">
+                    <p className="text-sm font-semibold text-navy-800 dark:text-white">{shipment.id}</p>
+                    <p className="text-sm text-slate-700 dark:text-slate-300">
                       {shipment.clientName} • {shipment.destinationCountry}
                     </p>
                     <p className="text-xs text-slate-500">

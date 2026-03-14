@@ -1,5 +1,5 @@
 import { FormEvent, useMemo, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
@@ -14,6 +14,7 @@ export default function ShipmentDetailsPage() {
     state: { shipments, user },
     addComment
   } = useAppContext();
+  const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [internal, setInternal] = useState(false);
 
@@ -141,11 +142,32 @@ export default function ShipmentDetailsPage() {
              </span>
              <span className="hidden sm:inline">Live </span>Tracking
           </Link>
-          <button className="btn-secondary btn-sm sm:btn-base">
+          <button
+            onClick={() => navigate(`/shipments/${shipment.id}/upload`)}
+            className="btn-secondary btn-sm sm:btn-base"
+          >
             <AppIcon name="upload" className="mr-1 sm:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Upload </span>Manifest
           </button>
-          <button className="btn-primary btn-sm sm:btn-base">
+          <button
+            onClick={() => {
+              const csvContent = [
+                'Document Type,File Name,Status,Uploaded By,Uploaded At'
+              ];
+              shipment.documents.forEach(doc => {
+                csvContent.push(`"${doc.type}","${doc.fileName}","${doc.status}","${doc.uploadedBy}","${doc.uploadedAt}"`);
+              });
+              const header = `Shipment: ${shipment.id}\nClient: ${shipment.clientName}\nDestination: ${shipment.destinationCountry}\nContainer: ${shipment.containerNumber}\nStatus: ${shipment.status}\n\n`;
+              const element = document.createElement('a');
+              element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(header + csvContent.join('\n')));
+              element.setAttribute('download', `shipment-report-${shipment.id}-${new Date().toISOString().split('T')[0]}.csv`);
+              element.style.display = 'none';
+              document.body.appendChild(element);
+              element.click();
+              document.body.removeChild(element);
+            }}
+            className="btn-primary btn-sm sm:btn-base"
+          >
             <span className="hidden sm:inline">Export </span>Report
           </button>
         </div>
@@ -289,7 +311,10 @@ export default function ShipmentDetailsPage() {
                         <StatusBadge value={doc.status} />
                       </td>
                       <td className="py-4 text-right">
-                        <button className="text-[10px] font-bold text-teal-600 hover:text-teal-500 transition-colors uppercase tracking-widest">
+                        <button
+                          onClick={() => window.alert(`📄 ${doc.type}\n\nFile: ${doc.fileName}\nStatus: ${doc.status}\nUploaded by: ${doc.uploadedBy}\nUploaded at: ${new Date(doc.uploadedAt).toLocaleString()}`)}
+                          className="text-[10px] font-bold text-teal-600 hover:text-teal-500 transition-colors uppercase tracking-widest"
+                        >
                           Full View
                         </button>
                       </td>
