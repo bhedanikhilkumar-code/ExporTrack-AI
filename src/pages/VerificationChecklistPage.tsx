@@ -18,9 +18,9 @@ export default function VerificationChecklistPage() {
 
   if (!shipment) {
     return (
-      <div className="card-panel">
-        <h2 className="text-xl font-semibold text-navy-800">Shipment not found</h2>
-        <Link to="/dashboard" className="btn-primary mt-3">
+      <div className="card-premium">
+        <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100">Shipment not found</h2>
+        <Link to="/dashboard" className="btn-primary mt-3 inline-flex items-center gap-2">
           Return to Dashboard
         </Link>
       </div>
@@ -59,42 +59,42 @@ export default function VerificationChecklistPage() {
         }
       />
 
-      <section className="card-panel">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-medium text-slate-700">Verification Progress</p>
-          <p className="text-sm font-semibold text-navy-800">
+      <section className="card-premium">
+        <div className="mb-4 flex items-center justify-between">
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Verification Progress</p>
+          <p className="text-sm font-extrabold text-teal-600 dark:text-teal-400">
             {verifiedCount} / {checklist.length} verified ({progressPercent}%)
           </p>
         </div>
-        <div className="h-2 rounded-full bg-slate-200">
-          <div className="h-2 rounded-full bg-teal-600" style={{ width: `${progressPercent}%` }} />
+        <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+          <div className="h-full bg-teal-500 transition-all duration-1000" style={{ width: `${progressPercent}%` }} />
         </div>
       </section>
 
-      <section className="card-panel">
-        <div className="table-shell">
-          <table className="data-table min-w-[760px]">
+      <section className="card-premium overflow-hidden">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left min-w-[760px]">
             <thead>
-              <tr>
-                <th>Required Document</th>
-                <th>Current File</th>
-                <th>Status</th>
-                <th>Update Status</th>
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Required Document</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Current File</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Update Status</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {checklist.map((item) => (
-                <tr key={item.type}>
-                  <td className="font-semibold text-navy-700">{item.type}</td>
-                  <td>{item.document?.fileName ?? 'Not uploaded'}</td>
-                  <td>
+                <tr key={item.type} className="group hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                  <td className="px-4 py-4 font-bold text-slate-900 dark:text-slate-100">{item.type}</td>
+                  <td className="px-4 py-4 text-xs font-medium text-slate-600 dark:text-slate-400">{item.document?.fileName ?? 'Not uploaded'}</td>
+                  <td className="px-4 py-4">
                     <StatusBadge value={item.status} />
                   </td>
-                  <td>
+                  <td className="px-4 py-4 text-right flex justify-end">
                     <select
                       value={item.status}
                       onChange={(event) => handleStatusChange(item.type, event)}
-                      className="input-field py-2 text-xs"
+                      className="input-field py-1.5 px-3 rounded-lg text-xs font-semibold border-slate-200 dark:border-slate-700 dark:bg-slate-900 focus:border-teal-500 focus:ring-teal-500/20 w-32"
                     >
                       {statusOptions.map((option) => (
                         <option key={option} value={option}>
@@ -121,4 +121,3 @@ export default function VerificationChecklistPage() {
     </div>
   );
 }
-

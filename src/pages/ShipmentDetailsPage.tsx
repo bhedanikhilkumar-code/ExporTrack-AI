@@ -337,20 +337,20 @@ export default function ShipmentDetailsPage() {
                   <textarea
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    className="w-full h-24 rounded-xl border-slate-200 bg-slate-50 p-4 text-xs font-medium placeholder-slate-400 focus:border-teal-500 focus:ring-0 dark:border-slate-800 dark:bg-slate-900/50"
+                    className="w-full h-24 rounded-xl border-slate-200 bg-slate-50 p-4 pb-12 text-xs font-medium placeholder-slate-400 focus:border-teal-500 focus:ring-0 dark:border-slate-800 dark:bg-slate-900/50"
                     placeholder="Broadcast message to team..."
                   />
-                  <div className="absolute bottom-3 right-3 flex items-center gap-4">
+                  <div className="absolute bottom-2 right-2 left-2 flex items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/40 backdrop-blur-sm p-1 px-2 rounded-lg">
                      <label className="flex items-center gap-2 cursor-pointer group">
                         <input 
                           type="checkbox" 
                           checked={internal} 
                           onChange={(e) => setInternal(e.target.checked)} 
-                          className="rounded border-slate-300 text-teal-600 focus:ring-0 dark:border-slate-800"
+                          className="rounded border-slate-300 text-teal-600 focus:ring-0 dark:border-slate-800 h-3 w-3"
                         />
-                        <span className="text-[10px] font-bold uppercase text-slate-400 group-hover:text-amber-500 transition-colors">Private</span>
+                        <span className="text-[9px] font-bold uppercase text-slate-500 group-hover:text-amber-500 transition-colors">Private Note</span>
                      </label>
-                     <button type="submit" className="btn-primary btn-sm rounded-lg">
+                     <button type="submit" className="btn-primary py-1 px-3 text-[10px] font-bold rounded-lg h-7">
                         Broadcast
                      </button>
                   </div>

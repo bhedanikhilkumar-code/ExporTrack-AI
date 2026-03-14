@@ -468,6 +468,31 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
+  const updateShipmentStatus = (shipmentId: string, status: ShipmentStatus) => {
+    setState((prev) => {
+      const shipment = prev.shipments.find(s => s.id === shipmentId);
+      if (!shipment) return prev;
+      
+      const updatedShipment = { ...shipment, status };
+      const shipments = prev.shipments.map(s => 
+        s.id === shipmentId ? updatedShipment : s
+      );
+
+      // Trigger notifications based on new status
+      const addNotif = (t: any) => {
+        setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
+      };
+      
+      if (status === 'In Transit' && shipment.status !== 'In Transit') {
+        NotificationService.trigger('shipment_dispatched', updatedShipment, addNotif);
+      } else if (status === 'Delivered' && shipment.status !== 'Delivered') {
+        NotificationService.trigger('shipment_delivered', updatedShipment, addNotif);
+      }
+
+      return { ...prev, shipments };
+    });
+  };
+
   const addComment = (shipmentId: string, message: string, internal: boolean) => {
     if (!state.user) {
       return;
@@ -522,9 +547,15 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       const shipment = prev.shipments.find(s => s.id === shipmentId);
       if (!shipment) return prev;
 
+      const updatedShipment = { ...shipment, delayed: true, priority: 'High' as const };
       const updatedShipments = prev.shipments.map(s => 
-        s.id === shipmentId ? { ...s, delayed: true, priority: 'High' as const } : s
+        s.id === shipmentId ? updatedShipment : s
       );
+
+      const addNotif = (t: any) => {
+        setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
+      };
+      NotificationService.trigger('shipment_delayed', updatedShipment, addNotif);
 
       return {
         ...prev,
@@ -532,7 +563,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         notifications: [
           buildNotification(
             shipmentId,
-            'Approval Delay',
+            'Deadline', // Changed to Deadline as per NotificationService logic
             'High',
             `Delay Detected: ${shipment.clientName}`,
             `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. Network re-routing advised.`,

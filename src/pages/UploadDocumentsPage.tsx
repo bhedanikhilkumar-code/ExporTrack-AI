@@ -2,6 +2,7 @@ import { ChangeEvent, DragEvent, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
+import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import { REQUIRED_DOCUMENT_TYPES, UploadDocumentInput } from '../types';
 import AiDocumentSummary from '../components/AiDocumentSummary';
@@ -102,9 +103,26 @@ export default function UploadDocumentsPage() {
             <input id="doc-files" type="file" multiple capture="environment" accept=".pdf,image/png,image/jpeg" onChange={(event: ChangeEvent<HTMLInputElement>) => setIncomingFiles(event.target.files)} className="hidden" />
           </label>
 
-          <div className="mt-4 rounded-xl border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">
-            <p className="font-semibold">Selected files ({files.length})</p>
-            <ul className="mt-2 space-y-1 text-xs">{files.length ? files.map((file) => <li key={file.name}>{file.name}</li>) : <li>No files selected yet.</li>}</ul>
+          <div className="mt-4 rounded-xl border border-slate-200/60 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/20 p-4">
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Queue ({files.length})</p>
+              {files.length > 0 && (
+                <button type="button" onClick={() => setFiles([])} className="text-[10px] font-bold text-rose-500 hover:text-rose-600 uppercase tracking-wider">
+                  Clear All
+                </button>
+              )}
+            </div>
+            <ul className="space-y-2">
+              {files.length ? files.map((file, idx) => (
+                <li key={`${file.name}-${idx}`} className="flex items-center gap-2 text-xs font-semibold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 p-2 rounded-lg border border-slate-100 dark:border-slate-800 shadow-sm animate-in fade-in slide-in-from-left-2">
+                  <AppIcon name="upload" className="h-3.5 w-3.5 text-teal-500" />
+                  <span className="truncate flex-1">{file.name}</span>
+                  <span className="text-[10px] text-slate-400">{(file.size / 1024).toFixed(0)} KB</span>
+                </li>
+              )) : (
+                <li className="text-xs text-slate-400 italic py-2">No files selected yet.</li>
+              )}
+            </ul>
           </div>
 
           <button type="button" onClick={handleUpload} className="btn-primary mt-4">

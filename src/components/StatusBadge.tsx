@@ -75,6 +75,10 @@ const statusMap: Record<string, { tone: string; dot: string; icon?: IconName }> 
   Staff: { 
     tone: 'bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700', 
     dot: 'bg-slate-400' 
+  },
+  Client: { 
+    tone: 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20', 
+    dot: 'bg-indigo-500' 
   }
 };
 

@@ -113,10 +113,10 @@ export default function ClientDashboardPage() {
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Link 
-                        to={`/track/${shipment.id}`}
+                        to={`/client/shipments/${shipment.id}`}
                         className="btn-secondary px-3 py-1.5 text-[10px] inline-flex items-center"
                       >
-                        Track Status
+                        View Details
                       </Link>
                     </td>
                   </tr>
