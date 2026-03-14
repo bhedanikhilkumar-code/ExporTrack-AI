@@ -331,9 +331,17 @@ export default function DashboardPage() {
                     <StatusBadge value={s.status} />
                   </td>
                   <td className="px-4 py-4 text-right">
-                    <Link to={`/shipments/${s.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-teal-500/50 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-teal-500/50 transition-all">
-                      <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
-                    </Link>
+                    <div className="flex items-center justify-end gap-2">
+                       <Link to={`/shipments/${s.id}/tracking`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 dark:border-teal-900/50 dark:bg-teal-900/20 dark:hover:bg-teal-900/40 transition-all font-bold group" title="Live Tracking">
+                         <span className="relative flex h-3 w-3">
+                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
+                           <span className="relative inline-flex h-full w-full rounded-full bg-teal-500"></span>
+                         </span>
+                       </Link>
+                       <Link to={`/shipments/${s.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-teal-500/50 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-teal-500/50 transition-all">
+                         <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
+                       </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

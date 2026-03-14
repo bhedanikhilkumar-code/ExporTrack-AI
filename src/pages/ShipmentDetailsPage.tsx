@@ -134,6 +134,13 @@ export default function ShipmentDetailsPage() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <Link to={`/shipments/${shipment.id}/tracking`} className="btn-secondary btn-sm sm:btn-base group border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 dark:border-teal-900/50 dark:bg-teal-900/20 dark:text-teal-400 dark:hover:bg-teal-900/40">
+             <span className="relative flex h-2 w-2 mr-1.5 sm:mr-2">
+               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+               <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+             </span>
+             <span className="hidden sm:inline">Live </span>Tracking
+          </Link>
           <button className="btn-secondary btn-sm sm:btn-base">
             <AppIcon name="upload" className="mr-1 sm:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Upload </span>Manifest

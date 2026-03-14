@@ -63,6 +63,7 @@ export interface Shipment {
   documents: ShipmentDocument[];
   aiScan: OCRExtraction[];
   comments: ShipmentComment[];
+  trackingId?: string;
 }
 
 export interface NotificationItem {
@@ -119,5 +120,25 @@ export interface UploadDocumentInput {
   fileName: string;
   fileFormat: 'PDF' | 'JPG' | 'PNG';
   uploadedBy: string;
+}
+
+export interface LocationUpdate {
+  timestamp: string;
+  locationName: string;
+  lat: number;
+  lng: number;
+  status: string;
+  notes?: string;
+}
+
+export interface ShipmentTracking {
+  shipmentId: string;
+  currentStatus: string;
+  currentLocation: string;
+  latitude: number;
+  longitude: number;
+  lastUpdatedTime: string;
+  trackingHistory: LocationUpdate[];
+  estimatedArrival?: string;
 }
 

@@ -17,6 +17,7 @@ import VerificationChecklistPage from './pages/VerificationChecklistPage';
 import AiDocumentExtractionPage from './pages/AiDocumentExtractionPage';
 import AiDocumentValidatorPage from './pages/AiDocumentValidatorPage';
 import AiComplianceCopilotPage from './pages/AiComplianceCopilotPage';
+import TrackingPage from './pages/TrackingPage';
 
 /**
  * Protected layout component that ensures user is authenticated
@@ -75,6 +76,7 @@ export default function App() {
         <Route path="/shipments/:shipmentId/upload" element={<UploadDocumentsPage />} />
         <Route path="/shipments/:shipmentId/ai-scan" element={<AiScanResultsPage />} />
         <Route path="/shipments/:shipmentId/checklist" element={<VerificationChecklistPage />} />
+        <Route path="/shipments/:shipmentId/tracking" element={<TrackingPage />} />
 
         <Route path="/documents/upload" element={<FirstShipmentRedirect kind="upload" />} />
         <Route path="/ai-extraction" element={<AiDocumentExtractionPage />} />
