@@ -128,7 +128,7 @@ export default function DashboardPage() {
             <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500 shadow-[0_0_6px_rgb(13_148_136/0.4)]" />
             <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
           </div>
-          <Link to="/create-shipment" className="btn-primary inline-flex items-center gap-2">
+          <Link to="/shipments/create" className="btn-primary inline-flex items-center gap-2">
             <AppIcon name="create" className="h-4 w-4" />
             New Shipment
           </Link>
