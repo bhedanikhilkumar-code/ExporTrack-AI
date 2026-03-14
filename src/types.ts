@@ -122,6 +122,13 @@ export interface UploadDocumentInput {
   uploadedBy: string;
 }
 
+export interface TrackingEvent {
+  timestamp: string;
+  location: string;
+  status: string;
+  description: string;
+}
+
 export interface LocationUpdate {
   timestamp: string;
   locationName: string;
@@ -131,6 +138,17 @@ export interface LocationUpdate {
   notes?: string;
 }
 
+export interface AIEtaPrediction {
+  predictedArrival: string;
+  confidenceScore: number;
+  factors?: string[];
+}
+
+export interface DelayEvaluation {
+  isDelayed: boolean;
+  daysDelayed: number;
+}
+
 export interface ShipmentTracking {
   shipmentId: string;
   currentStatus: string;
@@ -138,7 +156,19 @@ export interface ShipmentTracking {
   latitude: number;
   longitude: number;
   lastUpdatedTime: string;
-  trackingHistory: LocationUpdate[];
+  trackingHistory: LocationUpdate[]; // Keeping existing for legacy support while migrating
   estimatedArrival?: string;
+  
+  // New unified tracking fields
+  tracking_number?: string;
+  carrier?: string;
+  status?: string; // Unified status
+  current_location?: string;
+  estimated_delivery?: string;
+  tracking_events?: TrackingEvent[];
+
+  // Step 2 & 3 Additions
+  aiEta?: AIEtaPrediction;
+  delayAlert?: DelayEvaluation;
 }
 

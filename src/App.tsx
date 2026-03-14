@@ -18,6 +18,7 @@ import AiDocumentExtractionPage from './pages/AiDocumentExtractionPage';
 import AiDocumentValidatorPage from './pages/AiDocumentValidatorPage';
 import AiComplianceCopilotPage from './pages/AiComplianceCopilotPage';
 import TrackingPage from './pages/TrackingPage';
+import PublicTrackingPage from './pages/PublicTrackingPage';
 
 /**
  * Protected layout component that ensures user is authenticated
@@ -58,6 +59,7 @@ export default function App() {
       {/* Public Routes */}
       <Route path="/" element={<SplashPage />} />
       <Route path="/splash" element={<Navigate to="/" replace />} />
+      <Route path="/track/:trackingNumber" element={<PublicTrackingPage />} />
 
       {/* Auth Route - Redirect to dashboard if already authenticated */}
       <Route

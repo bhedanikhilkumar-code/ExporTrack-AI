@@ -16,6 +16,22 @@ export default function TrackingPage() {
     shipment?.destinationCountry || 'US',
     5000 // Poll every 5 seconds for simulation purposes
   );
+  
+  const { triggerDelayAlert } = useAppContext();
+
+  // Trigger delay alert when AI detects a delay
+  useEffect(() => {
+    if (trackingData?.delayAlert?.isDelayed) {
+      triggerDelayAlert(shipmentId!, trackingData.delayAlert.daysDelayed);
+    }
+  }, [trackingData?.delayAlert?.isDelayed, shipmentId, triggerDelayAlert]);
+
+  const shareTracking = () => {
+    const trackingNumberToShare = trackingData?.tracking_number || trackingData?.shipmentId || shipmentId;
+    const url = `${window.location.origin}/track/${trackingNumberToShare}`;
+    const text = encodeURIComponent(`Track your shipment live: ${url}`);
+    window.open(`https://wa.me/?text=${text}`, '_blank');
+  };
 
   if (!shipment) {
     return (
@@ -46,10 +62,22 @@ export default function TrackingPage() {
                 <span className="relative inline-flex rounded-full h-3 w-3 bg-teal-500"></span>
               </span>
             )}
+            {trackingData?.carrier && (
+              <span className="ml-2 text-sm px-2 py-0.5 rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800 uppercase font-bold tracking-widest hidden sm:inline-block">
+                {trackingData.carrier}
+              </span>
+            )}
           </h1>
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {shipment.clientName} • Destination: {shipment.destinationCountry}
-          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm font-medium text-slate-500 dark:text-slate-400">
+            <p className="flex items-center gap-1">
+              {shipment.clientName} • Destination: {shipment.destinationCountry}
+            </p>
+            {trackingData?.tracking_number && (
+              <p className="flex items-center gap-1">
+                | Tracking #: <span className="font-mono text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-1 rounded">{trackingData.tracking_number}</span>
+              </p>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {lastPolled && (
@@ -60,6 +88,13 @@ export default function TrackingPage() {
                 </span>
              </div>
           )}
+          <button 
+            onClick={shareTracking} 
+            className="btn-primary btn-sm sm:btn-base bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white border-0"
+          >
+            <AppIcon name="share" className="mr-1 sm:mr-2 h-4 w-4" />
+            Share via WhatsApp
+          </button>
           <Link to={`/shipments/${shipment.id}`} className="btn-secondary btn-sm sm:btn-base">
             <AppIcon name="file" className="mr-1 sm:mr-2 h-4 w-4" />
             View Details
@@ -125,7 +160,34 @@ export default function TrackingPage() {
              </div>
 
              {/* Live Data Feed Cards */}
-             <div className="grid gap-4 sm:grid-cols-2">
+             <div className="grid gap-4 sm:grid-cols-3">
+                {/* AI ETA Card */}
+                {trackingData.aiEta && (
+                  <div className="card-premium border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-white dark:from-purple-900/10 dark:to-slate-900">
+                     <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <AppIcon name="ai-extract" className="h-4 w-4 text-purple-600" />
+                          <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">AI Prediction</h3>
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
+                          trackingData.aiEta.confidenceScore >= 90 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 
+                          trackingData.aiEta.confidenceScore >= 75 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' : 
+                          'bg-rose-100 text-rose-700 dark:bg-rose-900/30'
+                        }`}>
+                          {trackingData.aiEta.confidenceScore}% Conf
+                        </span>
+                     </div>
+                     <p className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                        {new Date(trackingData.aiEta.predictedArrival).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                     </p>
+                     {trackingData.delayAlert?.isDelayed && (
+                       <p className="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1 mt-1">
+                         <AppIcon name="warning" className="h-3 w-3" />
+                         Delay Detected
+                       </p>
+                     )}
+                  </div>
+                )}
                 <div className="card-premium border-l-4 border-l-teal-500">
                    <div className="flex items-center gap-3 mb-2">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-900/20">
@@ -160,16 +222,21 @@ export default function TrackingPage() {
                    Transit History
                 </h3>
                 <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold">
-                   {trackingData.trackingHistory.length} Updates
+                   {trackingData.tracking_events?.length || trackingData.trackingHistory.length} Updates
                 </span>
              </div>
 
              <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
                 <div className="relative border-l-2 border-slate-100 dark:border-slate-800 ml-3 space-y-6">
-                   {trackingData.trackingHistory.map((loc, idx) => {
+                   {(trackingData.tracking_events?.length ? trackingData.tracking_events : trackingData.trackingHistory).map((locItem: any, idx: number) => {
                      const isLatest = idx === 0;
+                     const timestamp = locItem.timestamp;
+                     const locationName = locItem.location || locItem.locationName;
+                     const status = locItem.status;
+                     const description = locItem.description || locItem.notes;
+
                      return (
-                       <div key={`${loc.timestamp}-${idx}`} className="relative pl-6">
+                       <div key={`${timestamp}-${idx}`} className="relative pl-6">
                          <div className={`absolute -left-[9px] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 ${
                             isLatest 
                               ? 'border-teal-500 bg-white dark:bg-slate-900' 
@@ -183,16 +250,19 @@ export default function TrackingPage() {
                                : 'bg-slate-50 border-slate-100 dark:bg-slate-800/40 dark:border-slate-800'
                          }`}>
                            <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">
-                             {new Date(loc.timestamp).toLocaleDateString()} at {new Date(loc.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                             {new Date(timestamp).toLocaleDateString()} at {new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                            </p>
                            <p className={`font-bold mb-2 ${isLatest ? 'text-teal-900 dark:text-teal-100' : 'text-slate-700 dark:text-slate-300'}`}>
-                             {loc.locationName}
+                             {locationName}
                            </p>
+                           {description && (
+                             <p className="text-xs text-slate-500 mb-2">{description}</p>
+                           )}
                            <div className="flex items-center justify-between">
                              <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${
                                isLatest ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
                              }`}>
-                               {loc.status}
+                               {status}
                              </span>
                            </div>
                          </div>

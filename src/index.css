@@ -399,6 +399,19 @@
 }
 
 /* ══════════════════════════════════════════════════════════════ */
+/* MAP AND MARKER OVERRIDES                                       */
+/* ══════════════════════════════════════════════════════════════ */
+
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+  transition: transform 1.5s ease-in-out, opacity 0.5s ease;
+}
+
+.leaflet-container {
+  font-family: inherit !important;
+}
+
+/* ══════════════════════════════════════════════════════════════ */
 /* DASHBOARD SPECIFICS                                            */
 /* ══════════════════════════════════════════════════════════════ */
 

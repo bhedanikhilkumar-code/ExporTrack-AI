@@ -1,4 +1,6 @@
 import { LocationUpdate, ShipmentTracking } from '../types';
+import { getTrackingFromCarrier } from './api/tracking';
+import { predictETA } from './aiEtaService';
 
 // Mock data generator for tracking routes
 const MOCK_ROUTES: Record<string, { lat: number; lng: number }[]> = {
@@ -94,12 +96,50 @@ const initTracking = (shipmentId: string, destCountry: string): ShipmentTracking
 
 /**
  * Gets real-time tracking data for a shipment.
- * Simulates network delay.
+ * Simulates network delay and merges local GPS sim with carrier adapter responses.
  */
 export const getShipmentTracking = async (shipmentId: string, destCountry: string = 'US'): Promise<ShipmentTracking> => {
+  const baseTracking = initTracking(shipmentId, destCountry);
+  
+  // Assign deterministic carrier if not present
+  if (!baseTracking.carrier) {
+    const charCode = shipmentId.charCodeAt(0) || 0;
+    const carriers = ['DHL', 'FedEx', 'UPS'];
+    baseTracking.carrier = carriers[charCode % 3];
+    const numPart = (shipmentId.match(/\d+/) || ['8471295'])[0];
+    baseTracking.tracking_number = `TRK${numPart.padEnd(8, '0')}`;
+  }
+
+  // Fetch actual data from our mock endpoint
+  const carrierData = await getTrackingFromCarrier(baseTracking.tracking_number!, baseTracking.carrier!);
+  
+  if (carrierData) {
+    baseTracking.status = carrierData.status;
+    baseTracking.current_location = carrierData.current_location;
+    baseTracking.estimated_delivery = carrierData.estimated_delivery;
+    baseTracking.tracking_events = carrierData.tracking_events;
+    
+    // We synchronize the legacy fields so the map map still works without breaking Dashboard
+    if (baseTracking.tracking_events.length > 0) {
+      baseTracking.currentStatus = baseTracking.status;
+      baseTracking.currentLocation = baseTracking.current_location;
+      
+      // If estimated arrival is given we replace the legacy one
+      baseTracking.estimatedArrival = baseTracking.estimated_delivery;
+    }
+  }
+
+  // AI Prediction & Delay Alert calculation
+  // Create a mock deadline (e.g., 5 days from now or existing estimated delivery)
+  const mockDeadline = baseTracking.estimatedArrival || new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
+  
+  const { aiEta, delayAlert } = predictETA(baseTracking, mockDeadline);
+  baseTracking.aiEta = aiEta;
+  baseTracking.delayAlert = delayAlert;
+
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve({ ...initTracking(shipmentId, destCountry) });
+      resolve({ ...baseTracking });
     }, 600); // 600ms artificial delay
   });
 };
@@ -128,12 +168,21 @@ export const simulateTrackingUpdate = (shipmentId: string, destCountry: string =
   const currentPt = route[currentSegment];
   const nextPt = route[currentSegment + 1];
   
-  // Create a point 20% along the path between current segment pt and next segment pt
-  // To avoid getting stuck, we'll randomize the progress taking past history into account
-  const progressRatio = Math.min(0.9, (tracking.trackingHistory.length % 5) * 0.2 + 0.1);
+  // Create a granular point along the path between current segment pt and next segment pt.
+  // We use a small randomized step so the marker visibly glides over the 5 second polling interval.
+  const storedProgressKey = `progress_${shipmentId}`;
+  const currentProgress = (trackingStore as any)[storedProgressKey] || 0;
+  let nextProgress = currentProgress + 0.15 + (Math.random() * 0.05); // Advance ~15-20% per poll
   
-  const newLat = currentPt.lat + (nextPt.lat - currentPt.lat) * progressRatio;
-  const newLng = currentPt.lng + (nextPt.lng - currentPt.lng) * progressRatio;
+  if (nextProgress >= 1) {
+    nextProgress = 0; // Reset progress for the next route segment
+    currentSegment++; // Move to next main waypoint
+  }
+  
+  (trackingStore as any)[storedProgressKey] = nextProgress;
+  
+  const newLat = currentPt.lat + (nextPt.lat - currentPt.lat) * nextProgress;
+  const newLng = currentPt.lng + (nextPt.lng - currentPt.lng) * nextProgress;
 
   const locNameIndex = Math.min(MOCK_LOCATION_NAMES.length - 1, currentSegment + 1);
   const newStatus = currentSegment > route.length - 3 ? 'Customs' : 'In Transit';

@@ -33,6 +33,7 @@ interface AppContextValue {
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
+  triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -517,6 +518,40 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
+  const triggerDelayAlert = (shipmentId: string, daysDelayed: number) => {
+    setState((prev) => {
+      // Check if we already have a delay alert for this shipment to avoid spam
+      const alreadyHasAlert = prev.notifications.some(
+        n => n.shipmentId === shipmentId && n.type === 'Approval Delay' && !n.read
+      );
+
+      if (alreadyHasAlert) return prev;
+
+      const shipment = prev.shipments.find(s => s.id === shipmentId);
+      if (!shipment) return prev;
+
+      const updatedShipments = prev.shipments.map(s => 
+        s.id === shipmentId ? { ...s, delayed: true, priority: 'High' as const } : s
+      );
+
+      return {
+        ...prev,
+        shipments: updatedShipments,
+        notifications: [
+          buildNotification(
+            shipmentId,
+            'Approval Delay',
+            'High',
+            `Delay Detected: ${shipment.clientName}`,
+            `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. Network re-routing advised.`,
+            new Date().toISOString()
+          ),
+          ...prev.notifications
+        ]
+      };
+    });
+  };
+
   const value = useMemo<AppContextValue>(
     () => ({
       state,
@@ -532,7 +567,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       addDocument,
       updateDocumentStatus,
       addComment,
-      markNotificationRead
+      markNotificationRead,
+      triggerDelayAlert
     }),
     [state]
   );

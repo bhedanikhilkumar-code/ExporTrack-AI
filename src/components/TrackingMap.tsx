@@ -63,13 +63,29 @@ export default function TrackingMap({ tracking, className = 'h-[400px] w-full ro
     .reverse()
     .map(loc => [loc.lat, loc.lng]);
     
-  // Add current position to the end of the route
+  // Add current position to the end of the traveled route
   if (routePositions.length > 0) {
      const lastPt = routePositions[routePositions.length - 1];
      if (lastPt[0] !== currentPosition[0] || lastPt[1] !== currentPosition[1]) {
        routePositions.push(currentPosition);
      }
   }
+
+  // Create an Expected/Full route that extends from Origin to final generic destination bounds.
+  // Assuming generic rough coordinates for final destinations if not passed down.
+  const originPosition: [number, number] = routePositions[0] || currentPosition;
+  
+  // Hardcode a mock global destination endpoint depending on the route for demo purposes
+  const finalDestination: [number, number] = tracking.longitude > 0 
+    ? [51.5074, -0.1278] // Europe/London fallback 
+    : [34.0522, -118.2437]; // US/LA fallback
+    
+  // Full Route Line from Origin -> Current -> Final
+  const fullExpectedRoute: [number, number][] = [
+    originPosition,
+    ...routePositions,
+    finalDestination
+  ];
 
   return (
     <div className={className}>
@@ -86,14 +102,24 @@ export default function TrackingMap({ tracking, className = 'h-[400px] w-full ro
         
         <RecenterMap lat={currentPosition[0]} lng={currentPosition[1]} />
         
-        {/* Draw the route up to current location */}
+        {/* Draw the full expected route (gray dotted line) */}
+        {fullExpectedRoute.length > 1 && (
+          <Polyline 
+            positions={fullExpectedRoute} 
+            color="#94a3b8" 
+            weight={3} 
+            opacity={0.5}
+            dashArray="10, 15"
+          />
+        )}
+
+        {/* Draw the actively traveled route up to current location */}
         {routePositions.length > 1 && (
           <Polyline 
             positions={routePositions} 
             color="#0d9488" 
-            weight={3} 
-            opacity={0.6}
-            dashArray="10, 10"
+            weight={4} 
+            opacity={0.9}
           />
         )}
 

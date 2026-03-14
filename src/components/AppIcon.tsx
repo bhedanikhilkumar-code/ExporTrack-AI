@@ -32,7 +32,8 @@ interface AppIconProps {
   | 'settings'
   | 'trend-up'
   | 'trend-down'
-  | 'folder';
+  | 'folder'
+  | 'share';
   className?: string;
   strokeWidth?: number;
   'aria-hidden'?: boolean;
@@ -72,6 +73,7 @@ const iconMap: Record<AppIconProps['name'], string> = {
   'trend-up': 'm22 7-8.5 8.5-5-5L2 17m20-10h-6m6 0v6',
   'trend-down': 'm22 17-8.5-8.5-5 5L2 7m20 10h-6m6 0v-6',
   folder: 'M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z',
+  share: 'M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8M16 6l-4-4-4 4M12 2v13',
 };
 
 export default function AppIcon({ name, className, strokeWidth, 'aria-hidden': ariaHidden }: AppIconProps) {
