@@ -13,6 +13,7 @@ import {
   UploadDocumentInput
 } from '../types';
 import { decodeJWT } from '../utils/googleAuth';
+import { safeStorage } from '../utils/storage';
 
 const STORAGE_KEY = 'exportrack-ai-state-v1';
 
@@ -42,17 +43,14 @@ const createId = (prefix: string): string =>
     .padStart(4, '0')}`;
 
 const loadState = (): AppState => {
-  if (globalThis.window === undefined) {
-    return createSeedState();
-  }
-
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeStorage.getItem(STORAGE_KEY);
     if (!raw) {
       return createSeedState();
     }
     return JSON.parse(raw) as AppState;
-  } catch {
+  } catch (error) {
+    console.warn('[AppContext] Failed to load state, using seed data:', error);
     return createSeedState();
   }
 };
@@ -137,8 +135,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
       // Validate Google sessions
       if (initialState.user.authProvider === 'google') {
-        const token = sessionStorage.getItem('google_auth_token');
-        const userEmail = sessionStorage.getItem('google_user_email');
+        const token = safeStorage.session.getItem('google_auth_token');
+        const userEmail = safeStorage.session.getItem('google_user_email');
 
         if (!token || !userEmail) {
           console.warn('Invalid Google session detected, logging out');
@@ -155,9 +153,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   });
   // Restore user session on app load if authenticated
   useEffect(() => {
-    if (globalThis.window !== undefined && state.isAuthenticated && state.user?.authProvider === 'google') {
-      const token = sessionStorage.getItem('google_auth_token');
-      const userEmail = sessionStorage.getItem('google_user_email');
+    if (state.isAuthenticated && state.user?.authProvider === 'google') {
+      const token = safeStorage.session.getItem('google_auth_token');
+      const userEmail = safeStorage.session.getItem('google_user_email');
 
       // Verify session is still valid
       if (!token || !userEmail) {
@@ -172,13 +170,15 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    safeStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
     // Sync theme with document class
-    if (state.theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    if (typeof document !== 'undefined') {
+      if (state.theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
     }
   }, [state]);
 
@@ -315,28 +315,23 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       }));
 
       // Store the token for future API calls (if needed)
-      if (globalThis.window !== undefined) {
-        // Use sessionStorage with expiry for security
-        sessionStorage.setItem('google_auth_token', token);
-        sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
-        sessionStorage.setItem('google_user_email', userEmail);
+      safeStorage.session.setItem('google_auth_token', token);
+      safeStorage.session.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
+      safeStorage.session.setItem('google_user_email', userEmail);
 
-        // Log successful authentication
-        console.log('User authenticated with Google:', {
-          name: userName,
-          email: userEmail,
-          hasProfilePicture: !!profilePicture
-        });
-      }
+      // Log successful authentication
+      console.log('User authenticated with Google:', {
+        name: userName,
+        email: userEmail,
+        hasProfilePicture: !!profilePicture
+      });
     } catch (error) {
       console.error('Failed to login with Google token:', error);
 
       // Clear any partial session data on error
-      if (globalThis.window !== undefined) {
-        sessionStorage.removeItem('google_auth_token');
-        sessionStorage.removeItem('google_token_expiry');
-        sessionStorage.removeItem('google_user_email');
-      }
+      safeStorage.session.removeItem('google_auth_token');
+      safeStorage.session.removeItem('google_token_expiry');
+      safeStorage.session.removeItem('google_user_email');
 
       throw new Error('Google authentication failed. Please try again.');
     }
@@ -344,15 +339,12 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     // Clear all authentication data
-    if (globalThis.window !== undefined) {
-      // Clear Google auth tokens
-      sessionStorage.removeItem('google_auth_token');
-      sessionStorage.removeItem('google_token_expiry');
-      sessionStorage.removeItem('google_user_email');
+    safeStorage.session.removeItem('google_auth_token');
+    safeStorage.session.removeItem('google_token_expiry');
+    safeStorage.session.removeItem('google_user_email');
 
-      // Log logout
-      console.log('User logged out');
-    }
+    // Log logout
+    console.log('User logged out');
 
     setState((prev) => ({
       ...prev,
