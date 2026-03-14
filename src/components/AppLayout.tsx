@@ -122,16 +122,16 @@ export default function AppLayout() {
         <div className="flex h-16 items-center justify-between px-5 border-b border-slate-200/60 dark:border-slate-800/60">
           {sidebarExpanded ? (
             <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 font-black text-white dark:from-teal-600 dark:to-teal-500 text-xs shadow-md">
-                EA
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
+                <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
               </div>
               <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100 truncate">
                 ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span>
               </h1>
             </div>
           ) : (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 font-black text-white dark:from-teal-600 dark:to-teal-500 text-xs shadow-md">
-              EA
+            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
+              <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
             </div>
           )}
         </div>

@@ -41,7 +41,9 @@ export default function SplashPage() {
       <header className="sticky top-0 z-20 border-b border-slate-200 dark:border-slate-800 bg-white/95 dark:bg-slate-950/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 md:px-10">
           <Link to="/" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-slate-800 to-slate-900 font-bold text-white shadow-md">EA</span>
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
+              <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
+            </span>
             <span className="text-sm font-extrabold text-slate-900 dark:text-white md:text-base">ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span></span>
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-600 dark:text-slate-400 md:flex">

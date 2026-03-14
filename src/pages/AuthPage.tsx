@@ -200,8 +200,8 @@ export default function AuthPage() {
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(45,212,191,0.15),transparent_60%)]" />
             <div className="relative">
               <div className="flex items-center gap-3 mb-8">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 backdrop-blur-sm text-white font-bold text-lg border border-white/10 shadow-lg">
-                  EA
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg overflow-hidden bg-white">
+                  <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
                 </div>
                 <h1 className="text-2xl font-extrabold tracking-tight">ExporTrack<span className="text-teal-300">AI</span></h1>
               </div>
