@@ -51,22 +51,22 @@ const icons: Record<KpiCardProps['accent'], any> = {
 export default function KpiCard({ title, value, subtitle, accent }: KpiCardProps) {
   const colors = colorMap[accent];
   return (
-    <article className="kpi-card group">
+    <article className="kpi-card group hover-premium cursor-default">
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} transition-all duration-300 group-hover:scale-110 group-hover:shadow-md`}>
-            <AppIcon name={icons[accent]} className={`h-5 w-5 ${colors.icon}`} />
+          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg`}>
+            <AppIcon name={icons[accent]} className={`h-5 w-5 ${colors.icon} transition-transform duration-300 group-hover:scale-110`} />
           </span>
           <div className="flex flex-col items-end gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors uppercase">{title}</span>
             <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>{value}</p>
           </div>
         </div>
         <div className="flex items-center justify-between border-t border-slate-100/80 pt-3 dark:border-slate-800/50">
           <p className="text-[11px] font-medium text-slate-500 dark:text-slate-400">{subtitle}</p>
           <div className="flex items-center gap-1">
-            <div className="h-1 w-1 rounded-full bg-teal-500/50" />
-            <span className="text-[9px] font-bold text-teal-600/50 dark:text-teal-400/50">LIVE</span>
+            <div className="h-1 w-1 rounded-full bg-teal-500/50 animate-pulse" />
+            <span className="text-[9px] font-bold text-teal-600/50 dark:text-teal-400/50 uppercase">Live</span>
           </div>
         </div>
       </div>

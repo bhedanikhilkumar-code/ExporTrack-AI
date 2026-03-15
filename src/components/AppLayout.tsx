@@ -350,7 +350,9 @@ export default function AppLayout() {
           )}
         </header>
         <main className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">
-          <Outlet />
+          <div key={location.pathname} className="page-transition-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
 

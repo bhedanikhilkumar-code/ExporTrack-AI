@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
 import StatusBadge from '../components/StatusBadge';
@@ -7,11 +7,20 @@ import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
 import ShipmentAnalytics from '../components/ShipmentAnalytics';
+import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard } from '../components/SkeletonLoader';
 
 export default function DashboardPage() {
   const {
     state: { shipments, notifications }
   } = useAppContext();
+
+  const [loading, setLoading] = useState(true);
+
+  // Simulate initial load for UX polish
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const allDocuments = shipments.flatMap((shipment) => shipment.documents);
   const totalShipments = shipments.length;
@@ -112,6 +121,33 @@ export default function DashboardPage() {
       .sort((a, b) => a[0].localeCompare(b[0]))
       .slice(-6);
   }, [shipments]);
+
+  if (loading) {
+    return (
+      <main className="page-stack">
+        <header className="dashboard-grid-header">
+          <div className="space-y-2">
+            <div className="h-8 w-64 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
+            <div className="h-4 w-96 animate-pulse rounded bg-slate-100 dark:bg-slate-800/50" />
+          </div>
+        </header>
+        <section className="dashboard-grid-kpi">
+          {[...Array(5)].map((_, i) => <SkeletonKpiCard key={i} />)}
+        </section>
+        <div className="dashboard-chart-container">
+          <SkeletonChart />
+        </div>
+        <div className="dashboard-grid-section">
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </div>
+        <div className="dashboard-grid-table">
+          <SkeletonTable />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="page-stack">

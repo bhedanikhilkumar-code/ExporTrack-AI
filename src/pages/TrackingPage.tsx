@@ -6,6 +6,7 @@ import TrackingMap from '../components/TrackingMap';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
 import DriverTrackingPanel from '../components/DriverTrackingPanel';
+import { SkeletonKpiCard, SkeletonDetailSection, SkeletonLine } from '../components/SkeletonLoader';
 
 export default function TrackingPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
@@ -118,11 +119,28 @@ export default function TrackingPage() {
         </div>
       </header>
 
-      {/* ── Loading / Error States ── */}
+      {/* Loading / Error States */}
       {loading && !trackingData && (
-        <div className="card-premium flex flex-col items-center justify-center p-12">
-           <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-teal-500 dark:border-slate-700"></div>
-           <p className="mt-4 text-sm font-medium text-slate-500 uppercase tracking-widest font-bold">Acquiring Satellite Lock...</p>
+        <div className="space-y-6 animate-pulse">
+          <div className="grid gap-6 lg:grid-cols-3 xl:grid-cols-4">
+             <div className="lg:col-span-2 xl:col-span-3 space-y-6">
+                <div className="card-premium h-[500px] flex items-center justify-center bg-slate-100 dark:bg-slate-800/50 border-0">
+                   <div className="flex flex-col items-center gap-4">
+                      <div className="h-12 w-12 animate-spin rounded-full border-4 border-slate-200 border-t-teal-500" />
+                      <SkeletonLine className="h-4 w-48" />
+                   </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3">
+                   <SkeletonKpiCard />
+                   <SkeletonKpiCard />
+                   <SkeletonKpiCard />
+                </div>
+             </div>
+             <div className="lg:col-span-1 space-y-6">
+                <SkeletonDetailSection />
+                <SkeletonDetailSection />
+             </div>
+          </div>
         </div>
       )}
 
