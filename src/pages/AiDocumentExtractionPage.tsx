@@ -250,7 +250,7 @@ export default function AiDocumentExtractionPage() {
           subtitle="Upload a logistics document for instant AI-powered field extraction and verification."
         />
 
-        <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fit,minmax(320px,1fr))' }}>
+        <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%, 320px),1fr))' }}>
 
           {/* ── Upload Panel ── */}
           <section className="card-panel" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>

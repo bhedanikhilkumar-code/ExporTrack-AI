@@ -44,7 +44,7 @@ export default function AnalyticsDashboardPage() {
   ];
 
   return (
-    <main className="page-stack px-4 md:px-6">
+    <main className="page-stack">
       {/* ── Page Header ── */}
       <header className="dashboard-grid-header">
         <div>

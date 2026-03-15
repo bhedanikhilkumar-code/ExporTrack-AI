@@ -49,6 +49,8 @@
   #root {
     @apply min-h-screen transition-colors duration-300;
     overflow-x: hidden;
+    position: relative;
+    max-width: 100%;
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
   }
@@ -458,10 +460,11 @@
   grid-template-columns: 1fr;
   gap: 1.5rem;
   width: 100%;
-  max-width: 1440px;
+  max-width: 100%;
   margin: 0 auto;
   padding: 0 1rem;
   box-sizing: border-box;
+  min-width: 0;
 
   @media (max-width: 640px) {
     gap: 1rem;
@@ -627,7 +630,9 @@
   grid-column: 1 / -1;
   gap: 0;
   width: 100%;
-  overflow: hidden;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ┌─── KPI CARD ────────────────────────────────────────────── */

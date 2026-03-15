@@ -72,7 +72,7 @@ export default function TeamWorkspacePage() {
         .tw-animate { animation: tw-fade-in 0.4s cubic-bezier(.4,0,.2,1) both; }
       `}</style>
 
-      <main className="page-stack px-4 md:px-6">
+      <main className="page-stack">
         {/* ── Header ── */}
         <header className="dashboard-grid-header">
           <div>
