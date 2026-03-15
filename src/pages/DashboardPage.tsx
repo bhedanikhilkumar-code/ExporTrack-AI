@@ -155,11 +155,11 @@ export default function DashboardPage() {
 
       {/* ── KPI Section ── */}
       <section className="dashboard-grid-kpi">
-        <DashboardKpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" icon="shipments" suffix="" />
-        <DashboardKpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" icon="clock" suffix="" />
-        <DashboardKpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" icon="shield" suffix="" />
-        <DashboardKpiCard title="Compliance Rate" value={`${complianceRate}%`} subtitle="Verified documents" accent="indigo" icon="check" suffix="%" />
-        <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Requires attention" accent="rose" icon="warning" suffix="" />
+        <DashboardKpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" icon="shipments" suffix="" trend={{ value: '+12.5%', isPositive: true }} />
+        <DashboardKpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" icon="clock" suffix="" trend={{ value: '+4.2%', isPositive: true }} />
+        <DashboardKpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" icon="shield" suffix="" trend={{ value: '-1.5%', isPositive: true }} />
+        <DashboardKpiCard title="Compliance Rate" value={complianceRate} subtitle="Verified documents" accent="indigo" icon="check" suffix="%" trend={{ value: '+0.8%', isPositive: true }} />
+        <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Requires attention" accent="rose" icon="warning" suffix="" trend={{ value: '+2', isPositive: false }} />
       </section>
 
       {/* ── Analytics Dashboard ── */}

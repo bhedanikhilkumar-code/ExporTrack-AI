@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import AppIcon from './AppIcon';
 
 interface ChartData {
@@ -14,13 +15,13 @@ interface ShipmentAnalyticsProps {
     delayedShipments: number;
 }
 
-export default function ShipmentAnalytics({
+const ShipmentAnalytics = memo(({
     monthlyData,
     totalShipments,
     activeShipments,
     complianceRate,
     delayedShipments
-}: ShipmentAnalyticsProps) {
+}: ShipmentAnalyticsProps) => {
     // Normalize chart data for visualization
     const maxValue = Math.max(...monthlyData.map((d) => d.value)) || 1;
 
@@ -127,4 +128,6 @@ export default function ShipmentAnalytics({
             </div>
         </div>
     );
-}
+});
+
+export default ShipmentAnalytics;
