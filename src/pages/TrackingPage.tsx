@@ -99,11 +99,16 @@ export default function TrackingPage() {
              </div>
           )}
           <button 
-            onClick={shareTracking} 
-            className="btn-primary btn-sm sm:btn-base bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-700 text-white border-0"
+            onClick={() => {
+              const trackingNumberToShare = trackingData?.tracking_number || trackingData?.shipmentId || shipmentId;
+              const url = `${window.location.origin}/track/${trackingNumberToShare}`;
+              navigator.clipboard.writeText(url);
+              alert('Public tracking link copied to clipboard!');
+            }}
+            className="btn-primary btn-sm sm:btn-base bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-600 dark:hover:bg-indigo-700 text-white border-0"
           >
-            <AppIcon name="share" className="mr-1 sm:mr-2 h-4 w-4" />
-            Share via WhatsApp
+            <AppIcon name="dashboard" className="mr-1 sm:mr-2 h-4 w-4" />
+            Copy Tracking Link
           </button>
           <Link to={`/shipments/${shipment.id}`} className="btn-secondary btn-sm sm:btn-base">
             <AppIcon name="file" className="mr-1 sm:mr-2 h-4 w-4" />

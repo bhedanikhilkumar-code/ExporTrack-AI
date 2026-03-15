@@ -38,7 +38,7 @@ interface AppContextValue {
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
-  triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
+  triggerDelayAlert: (shipmentId: string, daysDelayed: number, reason?: string) => void;
   applyOptimizedRoute: (shipmentId: string) => void;
 }
 
@@ -568,11 +568,11 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
-  const triggerDelayAlert = (shipmentId: string, daysDelayed: number) => {
+  const triggerDelayAlert = (shipmentId: string, daysDelayed: number, reason?: string) => {
     setState((prev) => {
       // Check if we already have a delay alert for this shipment to avoid spam
       const alreadyHasAlert = prev.notifications.some(
-        n => n.shipmentId === shipmentId && n.type === 'Approval Delay' && !n.read
+        n => n.shipmentId === shipmentId && n.type === 'Deadline' && !n.read
       );
 
       if (alreadyHasAlert) return prev;
@@ -590,20 +590,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       };
       NotificationService.trigger('shipment_delayed', updatedShipment, addNotif);
 
+      const newNotification = buildNotification(
+        shipmentId,
+        'Deadline', // Changed to Deadline as per NotificationService logic
+        'High',
+        `Delay Detected: ${shipment.clientName}`,
+        `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. ${reason || 'Network re-routing advised.'}`,
+        new Date().toISOString()
+      );
+
       return {
         ...prev,
         shipments: updatedShipments,
-        notifications: [
-          buildNotification(
-            shipmentId,
-            'Deadline', // Changed to Deadline as per NotificationService logic
-            'High',
-            `Delay Detected: ${shipment.clientName}`,
-            `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. Network re-routing advised.`,
-            new Date().toISOString()
-          ),
-          ...prev.notifications
-        ]
+        notifications: [newNotification, ...prev.notifications]
       };
     });
   };
