@@ -270,10 +270,10 @@ export default function AppLayout() {
               <button
                 onClick={toggleTheme}
                 className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm"
-                title={theme === 'dark' ? 'Switch to Light' : 'Switch to Dark'}
-                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                title={theme === 'dark' ? 'Switch to Light' : theme === 'light' ? 'Switch to System' : 'Switch to Dark'}
+                aria-label={theme === 'dark' ? 'Switch to light mode' : theme === 'light' ? 'Switch to system mode' : 'Switch to dark mode'}
               >
-                <AppIcon name={theme === 'dark' ? 'sun' : 'moon'} className="h-4 w-4" />
+                <AppIcon name={theme === 'dark' ? 'sun' : theme === 'light' ? 'monitor' : 'moon'} className="h-4 w-4" />
               </button>
 
               <div ref={notificationRef} className="relative flex items-center">
@@ -310,21 +310,21 @@ export default function AppLayout() {
               <div className="flex items-center justify-between px-1 pb-4 mb-3 border-b border-slate-200/60 dark:border-slate-800/60">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    <AppIcon name={theme === 'dark' ? 'moon' : 'sun'} className="h-4 w-4" />
+                    <AppIcon name={theme === 'dark' ? 'moon' : theme === 'light' ? 'sun' : 'monitor'} className="h-4 w-4" />
                   </div>
                   <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {theme === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                    {theme === 'dark' ? 'Dark Mode' : theme === 'light' ? 'Light Mode' : 'System Mode'}
                   </span>
                 </div>
                 <button
                   onClick={toggleTheme}
                   className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
-                    theme === 'dark' ? 'bg-teal-500' : 'bg-slate-300'
+                    theme === 'dark' ? 'bg-indigo-500' : theme === 'light' ? 'bg-slate-300' : 'bg-teal-500'
                   }`}
-                  aria-label="Toggle dark mode"
+                  aria-label="Toggle theme"
                 >
                   <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
-                    theme === 'dark' ? 'translate-x-6' : 'translate-x-1'
+                    theme === 'dark' ? 'translate-x-6' : theme === 'light' ? 'translate-x-1' : 'translate-x-3.5'
                   }`} />
                 </button>
               </div>

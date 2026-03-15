@@ -41,7 +41,7 @@ const scan = (
 export const createSeedState = (): AppState => ({
   isAuthenticated: false,
   user: null,
-  theme: 'light',
+  theme: 'system',
   teamMembers: [
     {
       id: 'TM-000',

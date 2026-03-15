@@ -120,7 +120,7 @@ export interface AppState {
   notifications: NotificationItem[];
   teamMembers: TeamMember[];
   clients: Client[];
-  theme: 'light' | 'dark';
+  theme: 'light' | 'dark' | 'system';
 }
 
 export interface CreateShipmentInput {

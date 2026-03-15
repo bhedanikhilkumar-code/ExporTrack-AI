@@ -29,6 +29,7 @@ interface AppContextValue {
   loginWithGoogleToken: (token: string) => void;
   logout: () => void;
   switchRole: (role: Role) => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
   toggleTheme: () => void;
   createShipment: (input: CreateShipmentInput) => Shipment;
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
@@ -181,19 +182,46 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
     // Sync theme with document class
     if (typeof document !== 'undefined') {
-      if (state.theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+      const applyTheme = (t: 'light' | 'dark' | 'system') => {
+        let isDark = t === 'dark';
+        if (t === 'system') {
+          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        
+        if (isDark) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+        }
+      };
+
+      applyTheme(state.theme);
+
+      // Listener for system theme changes if in system mode
+      if (state.theme === 'system') {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = () => applyTheme('system');
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
       }
     }
-  }, [state]);
+  }, [state.theme]);
 
   const toggleTheme = () => {
-    setState(prev => ({
-      ...prev,
-      theme: prev.theme === 'dark' ? 'light' : 'dark'
-    }));
+    setState(prev => {
+      let nextTheme: 'light' | 'dark' | 'system' = 'dark';
+      if (prev.theme === 'dark') nextTheme = 'light';
+      else if (prev.theme === 'light') nextTheme = 'system';
+      else nextTheme = 'dark';
+      
+      return { ...prev, theme: nextTheme };
+    });
+  };
+
+  const setTheme = (theme: 'light' | 'dark' | 'system') => {
+    setState(prev => ({ ...prev, theme }));
   };
 
   const login = (email: string, password: string) => {
@@ -647,6 +675,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       loginWithGoogleToken,
       logout,
       switchRole,
+      setTheme,
       toggleTheme,
       createShipment,
       addDocument,

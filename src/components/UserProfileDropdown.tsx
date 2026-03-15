@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import AppIcon from './AppIcon';
 
 export default function UserProfileDropdown() {
-    const { state: { user }, logout } = useAppContext();
+    const { state: { user, theme }, logout, setTheme } = useAppContext();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
     const navigate = useNavigate();
@@ -144,6 +144,51 @@ export default function UserProfileDropdown() {
                             </div>
                             <span>Settings</span>
                         </button>
+
+                        <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-1 my-1.5" />
+
+                        {/* Theme Switcher Section */}
+                        <div className="px-3 py-2">
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">Appearance</p>
+                            <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
+                                <button
+                                    onClick={() => setTheme('light')}
+                                    className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
+                                        theme === 'light' 
+                                            ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    }`}
+                                    title="Light Mode"
+                                >
+                                    <AppIcon name="sun" className="h-4 w-4" />
+                                    <span className="text-[9px] font-bold uppercase">Light</span>
+                                </button>
+                                <button
+                                    onClick={() => setTheme('dark')}
+                                    className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
+                                        theme === 'dark' 
+                                            ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    }`}
+                                    title="Dark Mode"
+                                >
+                                    <AppIcon name="moon" className="h-4 w-4" />
+                                    <span className="text-[9px] font-bold uppercase">Dark</span>
+                                </button>
+                                <button
+                                    onClick={() => setTheme('system')}
+                                    className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
+                                        theme === 'system' 
+                                            ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' 
+                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
+                                    }`}
+                                    title="System Mode"
+                                >
+                                    <AppIcon name="monitor" className="h-4 w-4" />
+                                    <span className="text-[9px] font-bold uppercase">System</span>
+                                </button>
+                            </div>
+                        </div>
 
                         <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-1 my-1.5" />
 
