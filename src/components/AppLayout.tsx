@@ -9,6 +9,7 @@ import UserProfileDropdown from './UserProfileDropdown';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import MobileBottomNav from './MobileBottomNav';
 import MobileFAB from './MobileFAB';
+import MobileSidebar from './MobileSidebar';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -304,53 +305,14 @@ export default function AppLayout() {
               <UserProfileDropdown />
             </div>
           </div>
-
-          {/* Mobile Navigation Menu */}
-          {menuOpen && (
-            <nav className="absolute top-16 left-0 right-0 border-b border-slate-200/60 bg-white/95 backdrop-blur-xl px-4 pb-6 pt-4 dark:border-slate-800/60 dark:bg-slate-950/95 md:hidden animate-in slide-in-from-top-4 shadow-xl max-h-[calc(100vh-4rem)] overflow-y-auto">
-              {/* Dark Mode Toggle Row */}
-              <div className="flex items-center justify-between px-1 pb-4 mb-3 border-b border-slate-200/60 dark:border-slate-800/60">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-                    <AppIcon name={theme === 'dark' ? 'moon' : theme === 'light' ? 'sun' : 'monitor'} className="h-4 w-4" />
-                  </div>
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                    {theme === 'dark' ? 'Dark Mode' : theme === 'light' ? 'Light Mode' : 'System Mode'}
-                  </span>
-                </div>
-                <button
-                  onClick={toggleTheme}
-                  className={`relative inline-flex h-7 w-12 items-center rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 ${
-                    theme === 'dark' ? 'bg-indigo-500' : theme === 'light' ? 'bg-slate-300' : 'bg-teal-500'
-                  }`}
-                  aria-label="Toggle theme"
-                >
-                  <span className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-md transition-transform duration-200 ${
-                    theme === 'dark' ? 'translate-x-6' : theme === 'light' ? 'translate-x-1' : 'translate-x-3.5'
-                  }`} />
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    onClick={() => setMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `focus-ring flex flex-col items-center gap-2 rounded-xl p-4 text-xs font-bold transition-all min-h-[56px] justify-center ${isActive
-                        ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-md transform scale-[1.02]'
-                        : 'bg-slate-50 text-slate-600 dark:bg-slate-900 dark:text-slate-400 border border-slate-100 dark:border-slate-800 active:scale-95'
-                      }`
-                    }
-                  >
-                    <AppIcon name={item.icon} className="h-5 w-5 mb-1" />
-                    <span>{item.label}</span>
-                  </NavLink>
-                ))}
-              </div>
-            </nav>
-          )}
         </header>
+
+        <MobileSidebar 
+          isOpen={menuOpen} 
+          onClose={() => setMenuOpen(false)} 
+          navItems={navItems} 
+        />
+
         <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 md:px-8 md:pb-8 md:py-8">
           <div key={location.pathname} className="page-transition-enter">
             <Outlet />
