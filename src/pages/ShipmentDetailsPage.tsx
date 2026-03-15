@@ -8,6 +8,7 @@ import { REQUIRED_DOCUMENT_TYPES, ShipmentStatus } from '../types';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import ShipmentTimeline from '../components/ShipmentTimeline';
 import ShipmentRiskAlert from '../components/ShipmentRiskAlert';
+import Modal from '../components/Modal';
 
 export default function ShipmentDetailsPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
@@ -20,6 +21,8 @@ export default function ShipmentDetailsPage() {
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [internal, setInternal] = useState(false);
+  const [isDriverModalOpen, setIsDriverModalOpen] = useState(false);
+  const [driverForm, setDriverForm] = useState({ name: '', phone: '', vehicle: '' });
 
   const shipment = shipments.find((item) => item.id === shipmentId);
 
@@ -139,11 +142,10 @@ export default function ShipmentDetailsPage() {
   };
 
   const handleAssignDriver = () => {
-    const name = window.prompt('Enter Driver Name:', 'John Doe');
-    const phone = window.prompt('Enter Driver Phone:', '+1 555-0123');
-    const vehicle = window.prompt('Enter Vehicle Number:', 'TRK-9900');
-    if (name && phone && vehicle) {
-      assignDriver(shipment.id, { name, phone, vehicle });
+    if (driverForm.name && driverForm.phone && driverForm.vehicle) {
+      assignDriver(shipment.id, driverForm);
+      setIsDriverModalOpen(false);
+      setDriverForm({ name: '', phone: '', vehicle: '' });
     }
   };
 
@@ -343,15 +345,18 @@ export default function ShipmentDetailsPage() {
                    </div>
                    {shipment.driverPhone}
                 </a>
-                {shipment.estimatedDeliveryTime && (
-                  <span className="text-[9px] font-bold text-slate-400">ETA: {new Date(shipment.estimatedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                )}
+                <button 
+                  onClick={() => setIsDriverModalOpen(true)}
+                  className="text-[9px] font-bold text-indigo-500 hover:text-indigo-600 uppercase tracking-wider transition-colors"
+                >
+                  Change
+                </button>
               </div>
             </div>
           ) : (
             <button 
-              onClick={handleAssignDriver}
-              className="w-full py-4 border-2 border-dashed border-slate-100 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:border-indigo-500/30 hover:text-indigo-600 transition-all flex flex-col items-center gap-2"
+              onClick={() => setIsDriverModalOpen(true)}
+              className="w-full py-4 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:border-indigo-500/30 hover:text-indigo-600 transition-all flex flex-col items-center gap-2"
             >
               <AppIcon name="team" className="h-5 w-5 opacity-40" />
               Assign Logistics Driver
@@ -612,6 +617,52 @@ export default function ShipmentDetailsPage() {
       <div className="mt-6">
         <ShipmentTimeline events={timeline} />
       </div>
+
+      <Modal 
+        isOpen={isDriverModalOpen} 
+        onClose={() => setIsDriverModalOpen(false)} 
+        title="Assign Logistics Driver"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="input-label">Driver Full Name</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="e.g. John Smith"
+              value={driverForm.name}
+              onChange={e => setDriverForm({ ...driverForm, name: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="input-label">Phone Number</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="+1 555-0123"
+              value={driverForm.phone}
+              onChange={e => setDriverForm({ ...driverForm, phone: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="input-label">Vehicle Registration</label>
+            <input 
+              type="text" 
+              className="input-field" 
+              placeholder="e.g. TRK-2024"
+              value={driverForm.vehicle}
+              onChange={e => setDriverForm({ ...driverForm, vehicle: e.target.value })}
+            />
+          </div>
+          <button 
+            onClick={handleAssignDriver}
+            className="btn-primary w-full mt-2"
+            disabled={!driverForm.name || !driverForm.phone || !driverForm.vehicle}
+          >
+            Confirm Assignment
+          </button>
+        </div>
+      </Modal>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
 import StatusBadge from '../components/StatusBadge';
@@ -8,6 +8,12 @@ import AiDelayPrediction from '../components/AiDelayPrediction';
 import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
 import ShipmentAnalytics from '../components/ShipmentAnalytics';
 import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard } from '../components/SkeletonLoader';
+
+/* ─── Sub-Components ─────────────────────────────────────────────────── */
+const DashboardKpiCard = memo(({ title, value, icon, accent, suffix, subtitle }: any) => (
+  <KpiCard title={title} value={value} icon={icon} accent={accent} suffix={suffix} subtitle={subtitle} />
+));
+DashboardKpiCard.displayName = 'DashboardKpiCard';
 
 export default function DashboardPage() {
   const {
@@ -34,60 +40,6 @@ export default function DashboardPage() {
 
   const recentShipments = [...shipments].sort((a, b) => (b.shipmentDate || '').localeCompare(a.shipmentDate || '')).slice(0, 7);
   const priorityAlerts = [...notifications].filter((n) => !n.read).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
-
-  const blockedDocs = shipments
-    .flatMap((shipment) =>
-      shipment.documents
-        .filter((d) => d.status === 'Missing' || d.status === 'Rejected')
-        .map((d) => ({ shipmentId: shipment.id, client: shipment.clientName, type: d.type, status: d.status }))
-    )
-    .slice(0, 6);
-
-  const verificationRows = recentShipments.map((shipment) => {
-    const requiredCount = 7;
-    const verifiedCount = shipment.documents.filter((d) => d.status === 'Verified').length;
-    const pct = Math.round((verifiedCount / requiredCount) * 100);
-    return {
-      id: shipment.id,
-      client: shipment.clientName,
-      pct,
-      verifiedCount,
-      requiredCount,
-      status: shipment.status,
-      pending: shipment.documents.filter((d) => d.status === 'Pending').length,
-      blocked: shipment.documents.filter((d) => d.status === 'Missing' || d.status === 'Rejected').length
-    };
-  });
-
-  const activityTimeline = [
-    ...shipments.flatMap((shipment) =>
-      shipment.documents.slice(0, 2).map((doc) => ({
-        id: `ACT-DOC-${doc.id}`,
-        time: doc.uploadedAt,
-        title: `${shipment.id} • ${doc.type}`,
-        detail: `${doc.status} by ${doc.uploadedBy}`,
-        type: 'Document'
-      }))
-    ),
-    ...shipments.flatMap((shipment) =>
-      shipment.comments.slice(0, 1).map((comment) => ({
-        id: `ACT-COM-${comment.id}`,
-        time: comment.createdAt,
-        title: `${shipment.id} • ${comment.author}`,
-        detail: comment.message,
-        type: 'Collaboration'
-      }))
-    ),
-    ...notifications.slice(0, 4).map((alert) => ({
-      id: `ACT-NT-${alert.id}`,
-      time: alert.createdAt,
-      title: `${alert.shipmentId} • ${alert.title}`,
-      detail: alert.message,
-      type: 'Alert'
-    }))
-  ]
-    .sort((a, b) => (b.time || '').localeCompare(a.time || ''))
-    .slice(0, 10);
 
   const now = new Date();
   const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
@@ -149,6 +101,36 @@ export default function DashboardPage() {
     );
   }
 
+  const activityTimeline = [
+    ...shipments.flatMap((shipment) =>
+      shipment.documents.slice(0, 2).map((doc) => ({
+        id: `ACT-DOC-${doc.id}`,
+        time: doc.uploadedAt,
+        title: `${shipment.id} • ${doc.type}`,
+        detail: `${doc.status} by ${doc.uploadedBy}`,
+        type: 'Document'
+      }))
+    ),
+    ...shipments.flatMap((shipment) =>
+      shipment.comments.slice(0, 1).map((comment) => ({
+        id: `ACT-COM-${comment.id}`,
+        time: comment.createdAt,
+        title: `${shipment.id} • ${comment.author}`,
+        detail: comment.message,
+        type: 'Collaboration'
+      }))
+    ),
+    ...notifications.slice(0, 4).map((alert) => ({
+      id: `ACT-NT-${alert.id}`,
+      time: alert.createdAt,
+      title: `${alert.shipmentId} • ${alert.title}`,
+      detail: alert.message,
+      type: 'Alert'
+    }))
+  ]
+    .sort((a, b) => (b.time || '').localeCompare(a.time || ''))
+    .slice(0, 10);
+
   return (
     <main className="page-stack">
       {/* ── Dashboard Header ── */}
@@ -173,11 +155,11 @@ export default function DashboardPage() {
 
       {/* ── KPI Section ── */}
       <section className="dashboard-grid-kpi">
-        <KpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" />
-        <KpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" />
-        <KpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" />
-        <KpiCard title="Compliance Rate" value={`${complianceRate}%`} subtitle="Verified documents" accent="indigo" />
-        <KpiCard title="Active Alerts" value={unreadAlerts} subtitle="Requires attention" accent="rose" />
+        <DashboardKpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" icon="shipments" suffix="" />
+        <DashboardKpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" icon="clock" suffix="" />
+        <DashboardKpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" icon="shield" suffix="" />
+        <DashboardKpiCard title="Compliance Rate" value={`${complianceRate}%`} subtitle="Verified documents" accent="indigo" icon="check" suffix="%" />
+        <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Requires attention" accent="rose" icon="warning" suffix="" />
       </section>
 
       {/* ── Analytics Dashboard ── */}

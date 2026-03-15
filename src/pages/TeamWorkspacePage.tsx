@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
@@ -21,6 +21,100 @@ const ALL_PERMISSIONS: Permission[] = [
   'access_analytics', 'manage_documents', 'approve_documents', 'view_documents',
   'manage_settings',
 ];
+
+/* ─── Sub-Components ─────────────────────────────────────────────────── */
+const RoleDistributionCard = memo(({ role, count, colors }: any) => (
+  <div className={`relative overflow-hidden bg-white dark:bg-slate-900/80 p-5 rounded-2xl border ${colors.border} flex flex-col gap-2 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}>
+    <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+    <div className="relative">
+      <div className={`mb-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${colors.bg} ${colors.text}`}>
+        <AppIcon name="team" className="h-3 w-3" />
+        {role}
+      </div>
+      <p className="text-2xl font-extrabold text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>{count}</p>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Member{count !== 1 ? 's' : ''}</p>
+    </div>
+  </div>
+));
+
+const MemberCard = memo(({ member, colors, wsRole, isOnline, isSelected, onClick, canManageUsers, ALL_PERMISSIONS, PERMISSION_LABELS, hasPermission }: any) => (
+  <article
+    className={`card-premium group cursor-pointer hover:shadow-xl transition-all ${isSelected ? 'ring-2 ring-teal-500/50' : ''}`}
+    onClick={onClick}
+  >
+    <div className="flex items-start justify-between gap-3 mb-4">
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-sm font-extrabold text-slate-600 dark:text-slate-300">
+            {member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+          </div>
+          <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
+        </div>
+        <div>
+          <p className="text-sm font-bold text-slate-900 dark:text-white">{member.name}</p>
+          <p className="text-[11px] text-slate-500">{member.email}</p>
+        </div>
+      </div>
+      <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${colors.bg} ${colors.text} border ${colors.border}`}>
+        {wsRole}
+      </span>
+    </div>
+
+    <div className="grid grid-cols-3 gap-3 mb-4">
+      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Assigned</p>
+        <p className="text-lg font-extrabold text-slate-900 dark:text-white">{member.assignedCount}</p>
+      </div>
+      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Pending</p>
+        <p className="text-lg font-extrabold text-amber-600 dark:text-amber-400">{member.pendingDocs}</p>
+      </div>
+      <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 text-center">
+        <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Region</p>
+        <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 mt-1">{member.region}</p>
+      </div>
+    </div>
+
+    <div className="flex items-center justify-between text-[10px]">
+      <span className="text-slate-400">
+        Last active: {new Date(member.lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+      </span>
+      {canManageUsers && (
+        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={e => { e.stopPropagation(); alert(`Role changed for ${member.name}`); }}
+            className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-teal-100 hover:text-teal-700 font-bold transition-colors"
+          >
+            Change
+          </button>
+        </div>
+      )}
+    </div>
+
+    {isSelected && (
+      <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 tw-animate">
+        <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Permissions</p>
+        <div className="flex flex-wrap gap-1.5">
+          {ALL_PERMISSIONS.map((perm: any) => {
+            const has = hasPermission(wsRole, perm);
+            return (
+              <span
+                key={perm}
+                className={`px-2 py-1 rounded-md text-[9px] font-bold ${
+                  has
+                    ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
+                    : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 line-through'
+                }`}
+              >
+                {PERMISSION_LABELS[perm]}
+              </span>
+            );
+          })}
+        </div>
+      </div>
+    )}
+  </article>
+));
 
 /* ─── Component ──────────────────────────────────────────────────────── */
 export default function TeamWorkspacePage() {
@@ -108,22 +202,14 @@ export default function TeamWorkspacePage() {
 
         {/* ── Role Distribution Cards ── */}
         <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {roleDistribution.map(({ role, count }) => {
-            const colors = ROLE_COLORS[role];
-            return (
-              <div key={role} className={`relative overflow-hidden bg-white dark:bg-slate-900/80 p-5 rounded-2xl border ${colors.border} flex flex-col gap-2 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}>
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                <div className="relative">
-                  <div className={`mb-2 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${colors.bg} ${colors.text}`}>
-                    <AppIcon name="team" className="h-3 w-3" />
-                    {role}
-                  </div>
-                  <p className="text-2xl font-extrabold text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>{count}</p>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mt-1">Member{count !== 1 ? 's' : ''}</p>
-                </div>
-              </div>
-            );
-          })}
+          {roleDistribution.map(({ role, count }) => (
+            <RoleDistributionCard 
+              key={role} 
+              role={role} 
+              count={count} 
+              colors={ROLE_COLORS[role]} 
+            />
+          ))}
         </section>
 
         {/* ── Tabs ── */}
@@ -146,97 +232,21 @@ export default function TeamWorkspacePage() {
         {/* ── Members Tab ── */}
         {activeTab === 'members' && (
           <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 tw-animate">
-            {memberStats.map(member => {
-              const wsRole = toWorkspaceRole(member.role);
-              const colors = ROLE_COLORS[wsRole];
-              const isOnline = Date.now() - new Date(member.lastActive).getTime() < 3600000;
-              return (
-                <article
-                  key={member.id}
-                  className="card-premium group cursor-pointer hover:shadow-xl transition-all"
-                  onClick={() => setSelectedMember(selectedMember?.id === member.id ? null : member)}
-                >
-                  <div className="flex items-start justify-between gap-3 mb-4">
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-sm font-extrabold text-slate-600 dark:text-slate-300">
-                          {member.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                        </div>
-                        <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
-                      </div>
-                      <div>
-                        <p className="text-sm font-bold text-slate-900 dark:text-white">{member.name}</p>
-                        <p className="text-[11px] text-slate-500">{member.email}</p>
-                      </div>
-                    </div>
-                    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold ${colors.bg} ${colors.text} border ${colors.border}`}>
-                      {wsRole}
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-3 gap-3 mb-4">
-                    <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 text-center">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Assigned</p>
-                      <p className="text-lg font-extrabold text-slate-900 dark:text-white">{member.assignedCount}</p>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 text-center">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Pending</p>
-                      <p className="text-lg font-extrabold text-amber-600 dark:text-amber-400">{member.pendingDocs}</p>
-                    </div>
-                    <div className="bg-slate-50 dark:bg-slate-800/30 rounded-xl p-3 text-center">
-                      <p className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Region</p>
-                      <p className="text-[10px] font-bold text-slate-700 dark:text-slate-300 mt-1">{member.region}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[10px]">
-                    <span className="text-slate-400">
-                      Last active: {new Date(member.lastActive).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </span>
-                    {canManageUsers && (
-                      <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={e => { e.stopPropagation(); alert(`Role changed for ${member.name}`); }}
-                          className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-teal-100 hover:text-teal-700 font-bold transition-colors"
-                        >
-                          Change Role
-                        </button>
-                        <button
-                          onClick={e => { e.stopPropagation(); alert(`Removed ${member.name} from team`); }}
-                          className="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-rose-500 hover:bg-rose-100 hover:text-rose-700 font-bold transition-colors"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Expanded permissions */}
-                  {selectedMember?.id === member.id && (
-                    <div className="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 tw-animate">
-                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3">Permissions</p>
-                      <div className="flex flex-wrap gap-1.5">
-                        {ALL_PERMISSIONS.map(perm => {
-                          const has = hasPermission(wsRole, perm);
-                          return (
-                            <span
-                              key={perm}
-                              className={`px-2 py-1 rounded-md text-[9px] font-bold ${
-                                has
-                                  ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400'
-                                  : 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 line-through'
-                              }`}
-                            >
-                              {PERMISSION_LABELS[perm]}
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </article>
-              );
-            })}
+            {memberStats.map(member => (
+              <MemberCard
+                key={member.id}
+                member={member}
+                colors={ROLE_COLORS[toWorkspaceRole(member.role)]}
+                wsRole={toWorkspaceRole(member.role)}
+                isOnline={Date.now() - new Date(member.lastActive).getTime() < 3600000}
+                isSelected={selectedMember?.id === member.id}
+                onClick={() => setSelectedMember(selectedMember?.id === member.id ? null : member)}
+                canManageUsers={canManageUsers}
+                ALL_PERMISSIONS={ALL_PERMISSIONS}
+                PERMISSION_LABELS={PERMISSION_LABELS}
+                hasPermission={hasPermission}
+              />
+            ))}
           </div>
         )}
 

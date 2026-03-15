@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom Base Styles */
 @layer base {
   :root {
     color-scheme: light;

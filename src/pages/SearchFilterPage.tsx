@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
@@ -16,17 +16,31 @@ export default function SearchFilterPage() {
   const [shipmentDate, setShipmentDate] = useState('');
   const [docType, setDocType] = useState('');
 
+  // Debounced search terms for performance
+  const [debouncedTerms, setDebouncedTerms] = useState({ id: '', client: '', country: '' });
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedTerms({ id: shipmentId, client: clientName, country: destination });
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [shipmentId, clientName, destination]);
+
   const filteredShipments = useMemo(() => {
+    const searchId = debouncedTerms.id.toLowerCase();
+    const searchClient = debouncedTerms.client.toLowerCase();
+    const searchCountry = debouncedTerms.country.toLowerCase();
+
     return shipments.filter((shipment) => {
-      const matchesShipmentId = shipment.id.toLowerCase().includes(shipmentId.toLowerCase());
-      const matchesClient = shipment.clientName.toLowerCase().includes(clientName.toLowerCase());
-      const matchesDestination = shipment.destinationCountry.toLowerCase().includes(destination.toLowerCase());
+      const matchesShipmentId = shipment.id.toLowerCase().includes(searchId);
+      const matchesClient = shipment.clientName.toLowerCase().includes(searchClient);
+      const matchesDestination = shipment.destinationCountry.toLowerCase().includes(searchCountry);
       const matchesDate = shipmentDate ? shipment.shipmentDate === shipmentDate : true;
       const matchesDocType = docType ? shipment.documents.some((doc) => doc.type === docType) : true;
 
       return matchesShipmentId && matchesClient && matchesDestination && matchesDate && matchesDocType;
     });
-  }, [shipments, shipmentId, clientName, destination, shipmentDate, docType]);
+  }, [shipments, debouncedTerms, shipmentDate, docType]);
 
   return (
     <div className="page-stack">
@@ -154,4 +168,3 @@ export default function SearchFilterPage() {
     </div>
   );
 }
-

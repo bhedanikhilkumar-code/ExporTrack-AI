@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, memo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 import {
@@ -21,6 +21,24 @@ const COLORS = {
 
 const CARRIER_COLORS = ['#14b8a6', '#3b82f6', '#8b5cf6', '#f59e0b', '#f43f5e', '#10b981'];
 const DIST_COLORS = ['#06b6d4', '#14b8a6', '#3b82f6', '#8b5cf6', '#f43f5e'];
+
+/* ─── Sub-Components ─────────────────────────────────────────────────── */
+const AnalyticsKpiCard = memo(({ card }: { card: any }) => (
+  <div className="relative overflow-hidden bg-white dark:bg-slate-900/80 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5">
+    <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+    <div className="relative">
+      <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110 ${card.accent.bg} ${card.accent.text}`}>
+        <AppIcon name={card.icon} className="h-5 w-5" strokeWidth={2.5} />
+      </div>
+      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{card.title}</p>
+      <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1" style={{ letterSpacing: '-0.03em' }}>
+        {card.value}{card.suffix}
+      </p>
+    </div>
+  </div>
+));
+
+AnalyticsKpiCard.displayName = 'AnalyticsKpiCard';
 
 /* ─── Main Page ──────────────────────────────────────────────────────── */
 export default function AnalyticsDashboardPage() {
@@ -70,21 +88,7 @@ export default function AnalyticsDashboardPage() {
       {/* ── KPI Cards ── */}
       <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         {kpiCards.map(card => (
-          <div
-            key={card.title}
-            className="relative overflow-hidden bg-white dark:bg-slate-900/80 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-            <div className="relative">
-              <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110 ${card.accent.bg} ${card.accent.text}`}>
-                <AppIcon name={card.icon} className="h-5 w-5" strokeWidth={2.5} />
-              </div>
-              <p className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">{card.title}</p>
-              <p className="text-2xl font-extrabold text-slate-900 dark:text-white mt-1" style={{ letterSpacing: '-0.03em' }}>
-                {card.value}{card.suffix}
-              </p>
-            </div>
-          </div>
+          <AnalyticsKpiCard key={card.title} card={card} />
         ))}
       </section>
 
