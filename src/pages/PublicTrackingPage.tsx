@@ -4,6 +4,7 @@ import TrackingMap from '../components/TrackingMap';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
 import ShipmentRiskAlert from '../components/ShipmentRiskAlert';
+import DriverTrackingPanel from '../components/DriverTrackingPanel';
 
 export default function PublicTrackingPage() {
   const { trackingNumber } = useParams<{ trackingNumber: string }>();
@@ -74,7 +75,7 @@ export default function PublicTrackingPage() {
               }}
               className="group flex items-center justify-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 font-bold shadow-sm transition-all focus:outline-none focus:ring-4 focus:ring-indigo-500/20 active:scale-[0.98]"
             >
-              <AppIcon name="dashboard" className="h-4 w-4" />
+              <AppIcon name="share" className="h-4 w-4" />
               <span className="text-[11px] uppercase tracking-widest hidden sm:inline-block">Copy Link</span>
             </button>
             <Link to="/auth" className="btn-secondary btn-sm sm:btn-base">
@@ -201,64 +202,69 @@ export default function PublicTrackingPage() {
                </div>
             </div>
 
-            {/* Timeline Sidebar */}
-            <div className="lg:col-span-1 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 p-6 flex flex-col h-[500px] sm:h-[600px]">
-               <div className="mb-6 flex items-center justify-between shrink-0">
-                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                     <AppIcon name="shipments" className="h-4 w-4 text-teal-600" />
-                     Transit History
-                  </h3>
-                  <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold">
-                     {trackingData.tracking_events?.length || trackingData.trackingHistory.length} Updates
-                  </span>
+            {/* Timeline Sidebar / Driver Panel */}
+            <div className="lg:col-span-1 space-y-6 flex flex-col h-[500px] sm:h-[600px]">
+               {/* Uber-style Driver Panel */}
+               <div className="shrink-0 h-[320px]">
+                 <DriverTrackingPanel tracking={trackingData} shipment={{ driverName: 'Registered Driver', vehicleNumber: 'X-TRACK-01' }} />
                </div>
 
-               <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
-                  <div className="relative border-l-2 border-slate-100 dark:border-slate-800 ml-3 space-y-6">
-                     {(trackingData.tracking_events?.length ? trackingData.tracking_events : trackingData.trackingHistory).map((locItem: any, idx: number) => {
-                       const isLatest = idx === 0;
-                       
-                       // Normalize tracking keys depending on if it's the mock trackingHistory or the new API format
-                       const timestamp = locItem.timestamp;
-                       const locationName = locItem.location || locItem.locationName;
-                       const status = locItem.status;
-                       const description = locItem.description || locItem.notes;
+               <div className="flex-1 border border-slate-200 dark:border-slate-800 rounded-2xl bg-white dark:bg-slate-900/50 p-6 flex flex-col overflow-hidden">
+                 <div className="mb-6 flex items-center justify-between shrink-0">
+                    <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                       <AppIcon name="shipments" className="h-4 w-4 text-teal-600" />
+                       Transit History
+                    </h3>
+                    <span className="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 px-2 py-0.5 rounded font-bold">
+                       {trackingData.tracking_events?.length || trackingData.trackingHistory.length} Updates
+                    </span>
+                 </div>
 
-                       return (
-                         <div key={`${timestamp}-${idx}`} className="relative pl-6">
-                           <div className={`absolute -left-[9px] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                              isLatest 
-                                ? 'border-teal-500 bg-white dark:bg-slate-900' 
-                                : 'border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800'
-                           }`}>
-                             {isLatest && <div className="h-1.5 w-1.5 rounded-full bg-teal-500" />}
-                           </div>
-                           <div className={`p-4 rounded-xl border ${
-                              isLatest 
-                                 ? 'bg-teal-50/50 border-teal-100 dark:bg-teal-900/10 dark:border-teal-900/30' 
-                                 : 'bg-slate-50 border-slate-100 dark:bg-slate-800/40 dark:border-slate-800'
-                           }`}>
-                             <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">
-                               {new Date(timestamp).toLocaleDateString()} at {new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                             </p>
-                             <p className={`font-bold mb-2 ${isLatest ? 'text-teal-900 dark:text-teal-100' : 'text-slate-700 dark:text-slate-300'}`}>
-                               {locationName}
-                             </p>
-                             {description && (
-                               <p className="text-xs text-slate-500 mb-2">{description}</p>
-                             )}
-                             <div className="flex items-center justify-between">
-                               <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${
-                                 isLatest ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
-                               }`}>
-                                 {status}
-                               </span>
+                 <div className="flex-1 overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-slate-200 dark:scrollbar-thumb-slate-700">
+                    <div className="relative border-l-2 border-slate-100 dark:border-slate-800 ml-3 space-y-6">
+                       {(trackingData.tracking_events?.length ? trackingData.tracking_events : trackingData.trackingHistory).map((locItem: any, idx: number) => {
+                         const isLatest = idx === 0;
+                         const timestamp = locItem.timestamp;
+                         const locationName = locItem.location || locItem.locationName;
+                         const status = locItem.status;
+                         const description = locItem.description || locItem.notes;
+
+                         return (
+                           <div key={`${timestamp}-${idx}`} className="relative pl-6">
+                             <div className={`absolute -left-[9px] top-1 flex h-4 w-4 items-center justify-center rounded-full border-2 ${
+                                isLatest 
+                                  ? 'border-teal-500 bg-white dark:bg-slate-900' 
+                                  : 'border-slate-200 bg-slate-100 dark:border-slate-700 dark:bg-slate-800'
+                             }`}>
+                               {isLatest && <div className="h-1.5 w-1.5 rounded-full bg-teal-500" />}
+                             </div>
+                             <div className={`p-4 rounded-xl border ${
+                                isLatest 
+                                   ? 'bg-teal-50/50 border-teal-100 dark:bg-teal-900/10 dark:border-teal-900/30' 
+                                   : 'bg-slate-50 border-slate-100 dark:bg-slate-800/40 dark:border-slate-800'
+                             }`}>
+                               <p className="text-[10px] font-bold uppercase text-slate-400 mb-1">
+                                 {new Date(timestamp).toLocaleDateString()} at {new Date(timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                               </p>
+                               <p className={`font-bold mb-2 ${isLatest ? 'text-teal-900 dark:text-teal-100' : 'text-slate-700 dark:text-slate-300'}`}>
+                                 {locationName}
+                               </p>
+                               {description && (
+                                 <p className="text-xs text-slate-500 mb-2">{description}</p>
+                               )}
+                               <div className="flex items-center justify-between">
+                                 <span className={`inline-flex px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-widest ${
+                                   isLatest ? 'bg-teal-100 text-teal-700 dark:bg-teal-900/50' : 'bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-400'
+                                 }`}>
+                                   {status}
+                                 </span>
+                               </div>
                              </div>
                            </div>
-                         </div>
-                       );
-                     })}
-                  </div>
+                         );
+                       })}
+                    </div>
+                 </div>
                </div>
             </div>
           </div>

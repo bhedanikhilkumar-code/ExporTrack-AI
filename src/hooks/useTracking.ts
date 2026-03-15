@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ShipmentTracking } from '../types';
 import { getShipmentTracking, simulateTrackingUpdate } from '../services/trackingApi';
+import { realTimeService } from '../services/realTimeService';
 
 interface UseTrackingResult {
   trackingData: ShipmentTracking | null;
@@ -60,7 +61,26 @@ export const useTracking = (shipmentId: string, destinationCountry: string, poll
       fetchTracking(true);
     }, pollingIntervalMs);
 
-    return () => clearInterval(intervalId);
+    // Real-Time Telemetry Subscription
+    const handleTelemetry = (tele: any) => {
+      setTrackingData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          latitude: tele.latitude,
+          longitude: tele.longitude,
+          driverTele: tele,
+          lastUpdatedTime: tele.timestamp
+        };
+      });
+    };
+
+    realTimeService.subscribe(shipmentId, handleTelemetry);
+
+    return () => {
+      clearInterval(intervalId);
+      realTimeService.unsubscribe(shipmentId, handleTelemetry);
+    };
   }, [shipmentId, fetchTracking, pollingIntervalMs]);
 
   return {

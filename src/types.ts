@@ -156,6 +156,16 @@ export interface LocationUpdate {
   notes?: string;
 }
 
+export interface DriverTelemetry {
+  driverId: string;
+  shipmentId: string;
+  latitude: number;
+  longitude: number;
+  speed: number;
+  heading: number; // direction in degrees
+  timestamp: string;
+}
+
 export interface AIEtaPrediction {
   predictedArrival: string;
   confidenceScore: number;
@@ -214,5 +224,10 @@ export interface ShipmentTracking {
   
   // Step 4: AI Route Optimization
   optimizedRoute?: OptimizedRoute;
+
+  // Step 5: Real-Time Driver Tracking
+  driverTele?: DriverTelemetry;
+  driverAvatar?: string;
+  driverVehicle?: string;
 }
 

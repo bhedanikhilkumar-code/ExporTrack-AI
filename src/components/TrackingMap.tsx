@@ -34,6 +34,24 @@ const liveMarkerIcon = new L.DivIcon({
   iconAnchor: [20, 20]
 });
 
+// Driver marker with rotation
+const driverMarkerIcon = (heading: number = 0) => new L.DivIcon({
+  className: 'driver-tracking-marker',
+  html: `<div class="relative flex h-12 w-12 items-center justify-center" style="transform: rotate(${heading}deg); transition: transform 0.5s ease-out;">
+            <div class="absolute inset-0 animate-pulse rounded-full bg-blue-400/20"></div>
+            <div class="relative flex h-10 w-10 items-center justify-center rounded-2xl bg-indigo-600 shadow-2xl border-4 border-white text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+                <path d="M1 3h15v13H1z"></path>
+                <path d="M16 8h4l3 3v5h-7V8z"></path>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+            </div>
+         </div>`,
+  iconSize: [48, 48],
+  iconAnchor: [24, 24]
+});
+
 // Hub marker (Origin/Destination)
 const hubMarkerIcon = (type: 'origin' | 'destination') => new L.DivIcon({
   className: `hub-marker-${type}`,
@@ -195,21 +213,45 @@ export default function TrackingMap({
         ))}
 
         {/* Live current location marker */}
-        <Marker position={currentPosition} icon={liveMarkerIcon}>
-          <Popup className="tracking-popup">
-            <div className="text-xs">
-              <p className="font-bold text-teal-700 mb-1">Current Location</p>
-              <p className="text-slate-600 font-medium mb-1">{tracking.currentLocation}</p>
-              <div className="flex items-center gap-1.5 mt-2">
-                 <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-                 </span>
-                 <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Live Data</p>
+        {!tracking.driverTele && (
+          <Marker position={currentPosition} icon={liveMarkerIcon}>
+            <Popup className="tracking-popup">
+              <div className="text-xs">
+                <p className="font-bold text-teal-700 mb-1">Current Location</p>
+                <p className="text-slate-600 font-medium mb-1">{tracking.currentLocation}</p>
+                <div className="flex items-center gap-1.5 mt-2">
+                   <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                   </span>
+                   <p className="text-[10px] text-slate-500 uppercase tracking-wider font-bold">Live Data</p>
+                </div>
               </div>
-            </div>
-          </Popup>
-        </Marker>
+            </Popup>
+          </Marker>
+        )}
+
+        {/* Real-Time Driver Marker */}
+        {tracking.driverTele && (
+          <Marker 
+            position={[tracking.driverTele.latitude, tracking.driverTele.longitude]} 
+            icon={driverMarkerIcon(tracking.driverTele.heading)}
+          >
+            <Popup className="tracking-popup">
+              <div className="text-xs">
+                <p className="font-bold text-indigo-700 mb-1">Driver: Active Delivery</p>
+                <p className="text-slate-600 font-medium mb-1">Speed: {tracking.driverTele.speed} km/h</p>
+                <div className="flex items-center gap-1.5 mt-2">
+                   <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
+                   </span>
+                   <p className="text-[10px] text-indigo-500 uppercase tracking-wider font-bold">Live GPS Stream</p>
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        )}
       </MapContainer>
     </div>
   );
