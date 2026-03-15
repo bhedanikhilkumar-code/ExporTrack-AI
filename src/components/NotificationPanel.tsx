@@ -23,7 +23,7 @@ const typeColors = {
 };
 
 export default function NotificationPanel({ notifications, isOpen, onClose }: NotificationPanelProps) {
-    const { markNotificationRead } = useAppContext();
+    const { markNotificationRead, markAllNotificationsRead } = useAppContext();
     const panelRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -45,8 +45,8 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
     const unreadNotifications = sorted.filter((n) => !n.read);
     const readNotifications = sorted.filter((n) => n.read);
 
-    // Show unread first, then read (max 6 in dropdown)
-    const displayedNotifications = [...unreadNotifications, ...readNotifications].slice(0, 6);
+    // Show unread first, then read (max 10 in dropdown now for better experience)
+    const displayedNotifications = [...unreadNotifications, ...readNotifications].slice(0, 10);
 
     return (
         <div
@@ -55,18 +55,26 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
         >
             <div className="rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/95 overflow-hidden flex flex-col">
                 {/* Header */}
-                <div className="border-b border-slate-200/60 px-4 py-3 dark:border-slate-800/60">
+                <div className="border-b border-slate-200/60 px-4 py-3 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 uppercase tracking-widest">
+                            <h3 className="text-[11px] font-black text-slate-900 dark:text-slate-100 uppercase tracking-[0.2em]">
                                 Notifications
                             </h3>
+                            {unreadNotifications.length > 0 && (
+                                <span className="inline-flex h-5 px-1.5 min-w-[20px] items-center justify-center rounded-lg bg-teal-500 text-[10px] font-black text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                                    {unreadNotifications.length}
+                                </span>
+                            )}
                         </div>
-                        {unreadNotifications.length > 0 && (
-                            <span className="inline-flex h-5 w-5 items-center justify-center rounded-md bg-teal-500 text-[10px] font-black text-white shadow-sm">
-                                {unreadNotifications.length}
-                            </span>
-                        )}
+                        
+                        <button
+                            onClick={markAllNotificationsRead}
+                            className="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-teal-600 dark:text-slate-500 dark:hover:text-teal-400 transition-colors flex items-center gap-1.5 group/btn"
+                        >
+                            <AppIcon name="check" className="h-3 w-3 transition-transform group-hover/btn:scale-110" strokeWidth={3} />
+                            Mark all read
+                        </button>
                     </div>
                 </div>
 
@@ -92,11 +100,19 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                             <div className={`flex-shrink-0 mt-0.5 h-9 w-9 rounded-xl flex items-center justify-center shadow-sm ${colors.badge.replace('text-', 'bg-').replace('bg-', 'text-').split(' ').slice(0, 2).join(' ')} ${colors.badge.split(' ').slice(2).join(' ')}`}>
                                                 <AppIcon
                                                     name={
-                                                        notification.type === 'Missing Docs'
-                                                            ? 'file'
-                                                            : notification.type === 'Approval Delay'
-                                                                ? 'clock'
-                                                                : 'alert'
+                                                        notification.title.includes('Created')
+                                                            ? 'create'
+                                                            : notification.title.includes('Dispatched')
+                                                                ? 'shipments'
+                                                                : notification.title.includes('Delivered')
+                                                                    ? 'check'
+                                                                    : notification.title.includes('Delay')
+                                                                        ? 'alert'
+                                                                        : notification.type === 'Missing Docs'
+                                                                            ? 'file'
+                                                                            : notification.type === 'Approval Delay'
+                                                                                ? 'clock'
+                                                                                : 'bell'
                                                     }
                                                     className="h-4 w-4"
                                                     strokeWidth={2.5}

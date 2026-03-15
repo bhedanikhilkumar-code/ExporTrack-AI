@@ -36,6 +36,7 @@ interface AppContextValue {
   updateShipmentStatus: (shipmentId: string, status: ShipmentStatus) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
+  markAllNotificationsRead: () => void;
   triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
 }
 
@@ -540,6 +541,13 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
+  const markAllNotificationsRead = () => {
+    setState((prev) => ({
+      ...prev,
+      notifications: prev.notifications.map((notification) => ({ ...notification, read: true }))
+    }));
+  };
+
   const triggerDelayAlert = (shipmentId: string, daysDelayed: number) => {
     setState((prev) => {
       // Check if we already have a delay alert for this shipment to avoid spam
@@ -597,6 +605,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       updateShipmentStatus,
       addComment,
       markNotificationRead,
+      markAllNotificationsRead,
       triggerDelayAlert
     }),
     [state]

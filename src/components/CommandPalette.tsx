@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAppContext } from '../context/AppContext';
+import { Shipment } from '../types';
 import AppIcon from './AppIcon';
 
 interface Command {
@@ -92,6 +94,7 @@ interface CommandPaletteProps {
 }
 
 export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps) {
+    const { state: { shipments } } = useAppContext();
     const [search, setSearch] = useState('');
     const [selectedIndex, setSelectedIndex] = useState(0);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -105,7 +108,25 @@ export default function CommandPalette({ isOpen, onClose }: CommandPaletteProps)
         )
         : commands;
 
-    const groupedCommands = filteredCommands.reduce((acc, cmd) => {
+    const filteredShipments = search.trim().length >= 2
+        ? shipments.filter(
+            (s: Shipment) =>
+                s.id.toLowerCase().includes(search.toLowerCase()) ||
+                s.clientName.toLowerCase().includes(search.toLowerCase()) ||
+                s.containerNumber.toLowerCase().includes(search.toLowerCase())
+        ).slice(0, 5).map(s => ({
+            id: s.id,
+            label: s.id,
+            description: `${s.clientName} • ${s.destinationCountry}`,
+            icon: 'shipments',
+            path: `/shipments/${s.id}`,
+            category: 'Shipments'
+        }))
+        : [];
+
+    const allFilteredResults = [...filteredCommands, ...filteredShipments];
+
+    const groupedCommands = allFilteredResults.reduce((acc, cmd) => {
         if (!acc[cmd.category]) {
             acc[cmd.category] = [];
         }
