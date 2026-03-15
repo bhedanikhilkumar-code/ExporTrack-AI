@@ -7,6 +7,7 @@ import NotificationPanel from './NotificationPanel';
 import CommandPalette from './CommandPalette';
 import UserProfileDropdown from './UserProfileDropdown';
 import { useScrollDirection } from '../hooks/useScrollDirection';
+import MobileBottomNav from './MobileBottomNav';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -349,12 +350,14 @@ export default function AppLayout() {
             </nav>
           )}
         </header>
-        <main className="mx-auto max-w-7xl px-4 py-6 md:px-8 md:py-8">
+        <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 md:px-8 md:pb-8 md:py-8">
           <div key={location.pathname} className="page-transition-enter">
             <Outlet />
           </div>
         </main>
       </div>
+
+      <MobileBottomNav />
 
       {/* Command Palette */}
       <CommandPalette
