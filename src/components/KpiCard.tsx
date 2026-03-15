@@ -57,8 +57,8 @@ const icons: Record<KpiCardProps['accent'], any> = {
 export default function KpiCard({ title, value, subtitle, accent, icon, suffix, trend }: KpiCardProps) {
   const colors = colorMap[accent];
   return (
-    <article className="kpi-card group hover-premium cursor-default">
-      <div className="flex flex-col gap-4">
+    <article className="kpi-card group hover-premium cursor-default p-4 sm:p-5">
+      <div className="flex flex-col gap-3 sm:gap-4">
         <div className="flex items-center justify-between">
           <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg`}>
             <AppIcon name={icon || icons[accent]} className={`h-5 w-5 ${colors.icon} transition-transform duration-300 group-hover:scale-110`} />

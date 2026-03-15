@@ -104,7 +104,7 @@ export default function StatusBadge({ value }: StatusBadgeProps) {
   };
 
   return (
-    <span className={`inline-flex shrink-0 items-center rounded-md border px-1.5 py-0.5 text-[10px] font-bold tracking-tight transition-all ${styles.tone}`}>
+    <span className={`inline-flex shrink-0 items-center rounded-md border px-1.5 py-0.5 text-[11px] md:text-[10px] font-bold tracking-tight transition-all ${styles.tone}`}>
       {styles.icon ? (
         <AppIcon name={styles.icon as any} className="mr-1 h-3 w-3 opacity-80" />
       ) : (

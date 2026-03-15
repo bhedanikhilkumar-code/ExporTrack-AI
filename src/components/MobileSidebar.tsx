@@ -54,7 +54,7 @@ export default function MobileSidebar({ isOpen, onClose, navItems }: MobileSideb
               to={item.to}
               onClick={onClose}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all min-h-[48px] ${
                   isActive
                     ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-md'
                     : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50'

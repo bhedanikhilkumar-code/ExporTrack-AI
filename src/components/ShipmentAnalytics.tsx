@@ -79,7 +79,7 @@ const ShipmentAnalytics = memo(({
                         </div>
 
                         {/* Chart Footer Stats */}
-                        <div className="mt-8 grid grid-cols-3 gap-6 border-t border-slate-200/60 pt-6 dark:border-slate-800/60">
+                        <div className="mt-8 grid grid-cols-3 gap-2 sm:gap-6 border-t border-slate-200/60 pt-6 dark:border-slate-800/60">
                             <div className="flex flex-col items-center text-center">
                                 <span className="text-[9px] font-bold uppercase tracking-widest text-slate-500">Average</span>
                                 <span className="mt-1 text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
@@ -112,7 +112,7 @@ const ShipmentAnalytics = memo(({
                     { label: 'Doc Health', val: `${complianceRate}%`, icon: 'check', color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
                     { label: 'Risk Flags', val: delayedShipments, icon: 'warning', color: 'text-rose-600', bg: 'bg-rose-500/10' }
                 ].map(card => (
-                    <div key={card.label} className="bg-white dark:bg-slate-900/80 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
+                    <div key={card.label} className="bg-white dark:bg-slate-900/80 p-4 sm:p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex flex-col gap-3 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
                         <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
                         <div className="relative">
                             <div className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-transform group-hover:scale-110 ${card.bg} ${card.color}`}>
