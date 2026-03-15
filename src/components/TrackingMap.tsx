@@ -69,15 +69,19 @@ const RecenterMap = ({ lat, lng }: { lat: number, lng: number }) => {
 interface TrackingMapProps {
   tracking: ShipmentTracking;
   className?: string;
+  showOptimizedRoute?: boolean;
 }
 
-export default function TrackingMap({ tracking, className = 'h-[400px] w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800' }: TrackingMapProps) {
+export default function TrackingMap({ 
+  tracking, 
+  className = 'h-[400px] w-full rounded-2xl overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800',
+  showOptimizedRoute = true
+}: TrackingMapProps) {
   if (!tracking) return null;
 
   const currentPosition: [number, number] = [tracking.latitude, tracking.longitude];
   
   // Extract coordinate paths from history for the polyline route
-  // History is reversed (newest first), so reserve it for proper route drawing
   const routePositions: [number, number][] = [...tracking.trackingHistory]
     .reverse()
     .map(loc => [loc.lat, loc.lng]);
@@ -90,16 +94,16 @@ export default function TrackingMap({ tracking, className = 'h-[400px] w-full ro
      }
   }
 
-  // Create an Expected/Full route that extends from Origin to final generic destination bounds.
-  // Assuming generic rough coordinates for final destinations if not passed down.
+  // Optimized Route Coordinates
+  const optimizedCoords: [number, number][] = tracking.optimizedRoute 
+    ? tracking.optimizedRoute.coordinates.map(c => [c.lat, c.lng] as [number, number])
+    : [];
+
   const originPosition: [number, number] = routePositions[0] || currentPosition;
-  
-  // Hardcode a mock global destination endpoint depending on the route for demo purposes
   const finalDestination: [number, number] = tracking.longitude > 0 
     ? [51.5074, -0.1278] // Europe/London fallback 
     : [34.0522, -118.2437]; // US/LA fallback
     
-  // Full Route Line from Origin -> Current -> Final
   const fullExpectedRoute: [number, number][] = [
     originPosition,
     ...routePositions,
@@ -121,6 +125,17 @@ export default function TrackingMap({ tracking, className = 'h-[400px] w-full ro
         
         <RecenterMap lat={currentPosition[0]} lng={currentPosition[1]} />
         
+        {/* Draw AI Optimized route (Indigo dotted line) */}
+        {showOptimizedRoute && optimizedCoords.length > 1 && (
+          <Polyline 
+            positions={optimizedCoords} 
+            color="#6366f1" 
+            weight={4} 
+            opacity={0.6}
+            dashArray="1, 10"
+          />
+        )}
+
         {/* Draw the full expected route (gray dotted line) */}
         {fullExpectedRoute.length > 1 && (
           <Polyline 

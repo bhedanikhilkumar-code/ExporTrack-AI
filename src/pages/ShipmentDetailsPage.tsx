@@ -380,6 +380,55 @@ export default function ShipmentDetailsPage() {
             </div>
           </article>
 
+          {/* AI Route Recommendation */}
+          {shipment.id && (
+            <article className="card-premium border-l-4 border-l-indigo-500 overflow-hidden bg-white dark:bg-slate-900 shadow-xl shadow-indigo-500/5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-500">
+                    <AppIcon name="ai-extract" className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">AI Route Optimization</h3>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Intelligent Guidance</p>
+                  </div>
+                </div>
+                <Link 
+                  to={`/shipments/${shipment.id}/tracking`}
+                  className="btn-primary py-1.5 px-4 text-[10px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/20"
+                >
+                  Visualize Path
+                </Link>
+              </div>
+              
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 mb-6 border border-slate-100 dark:border-slate-800">
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black uppercase text-slate-400 mb-1">Opt. Distance</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">11,840 km</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black uppercase text-slate-400 mb-1">Time Saved</span>
+                  <span className="text-sm font-bold text-emerald-500 font-mono">-38.5 hrs</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black uppercase text-slate-400 mb-1">Est. Arrival</span>
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">Mar 22</span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[9px] font-black uppercase text-slate-400 mb-1">Confidence</span>
+                  <span className="text-xs font-bold text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full inline-block text-center mt-0.5">92%</span>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 p-4 rounded-2xl border border-indigo-100 bg-indigo-50/30 dark:border-indigo-900/20 dark:bg-indigo-900/5">
+                <AppIcon name="notifications" className="h-5 w-5 text-indigo-500 mt-1 shrink-0" />
+                <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 italic">
+                  "Neural engine predicts 14.5% efficiency gain by diverting to the Southern Channel route, bypassing current port congestion at the primary transshipment hub."
+                </p>
+              </div>
+            </article>
+          )}
+
           {/* Document Management */}
           <article className="card-premium">
             <div className="mb-6 flex items-center justify-between">

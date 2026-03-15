@@ -94,6 +94,8 @@ const initTracking = (shipmentId: string, destCountry: string): ShipmentTracking
   return trackingStore[shipmentId];
 }
 
+import { calculateOptimizedRoute } from './aiRouteService';
+
 /**
  * Gets real-time tracking data for a shipment.
  * Simulates network delay and merges local GPS sim with carrier adapter responses.
@@ -130,12 +132,13 @@ export const getShipmentTracking = async (shipmentId: string, destCountry: strin
   }
 
   // AI Prediction & Delay Alert calculation
-  // Create a mock deadline (e.g., 5 days from now or existing estimated delivery)
   const mockDeadline = baseTracking.estimatedArrival || new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString();
-  
   const { aiEta, delayAlert } = predictETA(baseTracking, mockDeadline);
   baseTracking.aiEta = aiEta;
   baseTracking.delayAlert = delayAlert;
+  
+  // AI Route Optimization
+  baseTracking.optimizedRoute = calculateOptimizedRoute(baseTracking, destCountry);
 
   return new Promise((resolve) => {
     setTimeout(() => {

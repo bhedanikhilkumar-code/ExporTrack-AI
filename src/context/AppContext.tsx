@@ -39,6 +39,7 @@ interface AppContextValue {
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
   triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
+  applyOptimizedRoute: (shipmentId: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -607,6 +608,36 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
+  const applyOptimizedRoute = (shipmentId: string) => {
+    setState((prev) => {
+      const shipment = prev.shipments.find((s) => s.id === shipmentId);
+      if (!shipment) return prev;
+
+      return {
+        ...prev,
+        shipments: prev.shipments.map((s) =>
+          s.id === shipmentId
+            ? {
+                ...s,
+                status: 'In Transit' as ShipmentStatus,
+                comments: [
+                  {
+                    id: createId('COM'),
+                    author: 'AI Route Optimizer',
+                    role: 'Admin',
+                    message: 'AI Optimized Route applied. Vessel coordinates updated to reflect high-efficiency path.',
+                    createdAt: new Date().toISOString(),
+                    internal: true,
+                  },
+                  ...s.comments,
+                ],
+              }
+            : s
+        ),
+      };
+    });
+  };
+
   const value = useMemo<AppContextValue>(
     () => ({
       state,
@@ -626,7 +657,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       addComment,
       markNotificationRead,
       markAllNotificationsRead,
-      triggerDelayAlert
+      triggerDelayAlert,
+      applyOptimizedRoute
     }),
     [state]
   );

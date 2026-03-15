@@ -173,6 +173,23 @@ export type NotificationEventType =
   | 'shipment_delayed'
   | 'shipment_delivered';
 
+export interface DetailedAIEta extends AIEtaPrediction {
+  factors: string[];
+}
+
+export interface OptimizedRoute {
+  id: string;
+  coordinates: { lat: number; lng: number }[];
+  distance: string;
+  estimatedTime: string;
+  stops: number;
+  savings?: {
+    time: string;
+    distance: string;
+  };
+  recommendationReason: string;
+}
+
 export interface ShipmentTracking {
   shipmentId: string;
   currentStatus: string;
@@ -194,5 +211,8 @@ export interface ShipmentTracking {
   // Step 2 & 3 Additions
   aiEta?: AIEtaPrediction;
   delayAlert?: DelayEvaluation;
+  
+  // Step 4: AI Route Optimization
+  optimizedRoute?: OptimizedRoute;
 }
 

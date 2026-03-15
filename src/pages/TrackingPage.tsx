@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import { useTracking } from '../hooks/useTracking';
@@ -8,7 +8,7 @@ import StatusBadge from '../components/StatusBadge';
 
 export default function TrackingPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
-  const { state: { shipments } } = useAppContext();
+  const { state: { shipments }, addComment, applyOptimizedRoute } = useAppContext();
   
   const shipment = shipments.find(s => s.id === shipmentId);
   const { trackingData, loading, error, lastPolled } = useTracking(
@@ -33,6 +33,8 @@ export default function TrackingPage() {
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 
+  const [showOptimizedRoute, setShowOptimizedRoute] = useState(true);
+
   if (!shipment) {
     return (
       <div className="card-panel">
@@ -41,6 +43,14 @@ export default function TrackingPage() {
       </div>
     );
   }
+
+  const handleApplyRoute = () => {
+    if (window.confirm('Are you sure you want to apply the AI Optimized Route? This will update the vessel navigation plans.')) {
+      applyOptimizedRoute(shipment.id);
+      addComment(shipment.id, 'AI Optimized Route applied. New waypoint instructions sent to carrier.', true);
+      alert('Optimized route applied successfully.');
+    }
+  };
 
   return (
     <div className="space-y-6 animate-in">
@@ -148,6 +158,44 @@ export default function TrackingPage() {
                          </div>
                       </div>
                    </div>
+
+                   {/* AI Route Strategy Badge */}
+                   {trackingData.optimizedRoute && (
+                     <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/10 max-w-xs pointer-events-auto mt-2">
+                        <div className="flex items-center justify-between mb-2">
+                           <div className="flex items-center gap-2">
+                              <div className="flex h-5 w-5 items-center justify-center rounded bg-indigo-500/20 text-indigo-400">
+                                 <AppIcon name="ai-extract" className="h-3 w-3" />
+                              </div>
+                              <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">AI Route Strategy</span>
+                           </div>
+                           <button 
+                             onClick={() => setShowOptimizedRoute(!showOptimizedRoute)}
+                             className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border transition-colors ${
+                               showOptimizedRoute ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-white/20 text-white/40 hover:text-white hover:border-white/40'
+                             }`}
+                           >
+                             {showOptimizedRoute ? 'Visible' : 'Hidden'}
+                           </button>
+                        </div>
+                        <div className="flex items-center justify-between text-white gap-4 mb-3">
+                           <div className="flex flex-col">
+                              <span className="text-[8px] uppercase text-slate-500 font-bold">Time Saving</span>
+                              <span className="text-xs font-bold text-emerald-400">-{trackingData.optimizedRoute.savings?.time}</span>
+                           </div>
+                           <div className="flex flex-col">
+                              <span className="text-[8px] uppercase text-slate-500 font-bold">Dist Reduction</span>
+                              <span className="text-xs font-bold text-indigo-400">-{trackingData.optimizedRoute.savings?.distance}</span>
+                           </div>
+                        </div>
+                        <button 
+                          onClick={handleApplyRoute}
+                          className="w-full py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20"
+                        >
+                          Apply Optimized Route
+                        </button>
+                      </div>
+                   )}
                 </div>
 
                 <div className="absolute z-0 inset-0 h-full w-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
@@ -156,7 +204,11 @@ export default function TrackingPage() {
                 </div>
 
                 {/* The Map */}
-                <TrackingMap tracking={trackingData} className="relative z-[5] h-full w-full" />
+                <TrackingMap 
+                  tracking={trackingData} 
+                  showOptimizedRoute={showOptimizedRoute}
+                  className="relative z-[5] h-full w-full" 
+                />
              </div>
 
              {/* Live Data Feed Cards */}
