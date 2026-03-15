@@ -4,7 +4,7 @@ import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
-import { REQUIRED_DOCUMENT_TYPES } from '../types';
+import { REQUIRED_DOCUMENT_TYPES, ShipmentStatus } from '../types';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import ShipmentTimeline from '../components/ShipmentTimeline';
 
@@ -12,7 +12,9 @@ export default function ShipmentDetailsPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
   const {
     state: { shipments, user },
-    addComment
+    addComment,
+    updateShipmentStatus,
+    assignDriver
   } = useAppContext();
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
@@ -117,8 +119,78 @@ export default function ShipmentDetailsPage() {
     return 'text-emerald-500 dark:text-emerald-400';
   };
 
+  const statusStages: ShipmentStatus[] = [
+    'Shipment Created',
+    'Driver Assigned',
+    'Picked Up',
+    'In Transit',
+    'Reached Hub',
+    'Out For Delivery',
+    'Delivered'
+  ];
+
+  const currentStageIndex = statusStages.indexOf(shipment.status);
+
+  const handleNextStage = () => {
+    if (currentStageIndex < statusStages.length - 1) {
+      updateShipmentStatus(shipment.id, statusStages[currentStageIndex + 1]);
+    }
+  };
+
+  const handleAssignDriver = () => {
+    const name = window.prompt('Enter Driver Name:', 'John Doe');
+    const phone = window.prompt('Enter Driver Phone:', '+1 555-0123');
+    const vehicle = window.prompt('Enter Vehicle Number:', 'TRK-9900');
+    if (name && phone && vehicle) {
+      assignDriver(shipment.id, { name, phone, vehicle });
+    }
+  };
+
   return (
     <div className="space-y-6 animate-in">
+      {/* ── Journey Stepper ── */}
+      <section className="card-premium py-8 px-6 overflow-x-auto">
+        <div className="flex items-center justify-between min-w-[800px] px-4">
+          {statusStages.map((stage, idx) => {
+            const isCompleted = idx < currentStageIndex;
+            const isCurrent = idx === currentStageIndex;
+            return (
+              <div key={stage} className="flex flex-col items-center flex-1 relative group">
+                {/* Connector Line */}
+                {idx < statusStages.length - 1 && (
+                  <div className={`absolute left-1/2 top-4 w-full h-0.5 transition-colors duration-500 ${
+                    idx < currentStageIndex ? 'bg-teal-500' : 'bg-slate-100 dark:bg-slate-800'
+                  }`} />
+                )}
+                
+                {/* Node */}
+                <div className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ${
+                  isCompleted ? 'bg-teal-500 border-teal-500 text-white' : 
+                  isCurrent ? 'bg-white border-teal-500 text-teal-600 scale-110 shadow-lg dark:bg-slate-900' : 
+                  'bg-white border-slate-200 text-slate-300 dark:bg-slate-900 dark:border-slate-800'
+                }`}>
+                  {isCompleted ? (
+                    <AppIcon name="check" className="h-4 w-4" strokeWidth={3} />
+                  ) : (
+                    <span className="text-[10px] font-bold">{idx + 1}</span>
+                  )}
+                </div>
+                
+                {/* Labels */}
+                <p className={`mt-3 text-[10px] font-bold uppercase tracking-wider text-center ${
+                  isCurrent ? 'text-teal-600' : isCompleted ? 'text-slate-900 dark:text-white' : 'text-slate-400'
+                }`}>
+                  {stage}
+                </p>
+                {isCurrent && (
+                  <span className="mt-1 flex h-1.5 w-1.5 rounded-full bg-teal-500 animate-pulse" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* ── Page Header ── */}
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
@@ -170,6 +242,15 @@ export default function ShipmentDetailsPage() {
           >
             <span className="hidden sm:inline">Export </span>Report
           </button>
+          {currentStageIndex < statusStages.length - 1 && (
+            <button
+              onClick={handleNextStage}
+              className="btn-primary btn-sm sm:btn-base bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600"
+            >
+              <AppIcon name="chevron-right" className="mr-1 sm:mr-2 h-4 w-4" />
+              Next Stage
+            </button>
+          )}
         </div>
       </header>
 
@@ -224,20 +305,43 @@ export default function ShipmentDetailsPage() {
 
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Lane Handler</span>
+             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Driver & Vehicle</span>
              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
-                <AppIcon name="user" className="h-4 w-4" />
+                <AppIcon name="team" className="h-4 w-4" />
              </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-slate-900 flex items-center justify-center text-[10px] font-bold text-teal-400">
-              {shipment.assignedTo.charAt(0)}
+          {shipment.driverName ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-xs font-bold text-teal-400 shadow-sm border border-white/10">
+                  {shipment.driverName.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">{shipment.driverName}</p>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{shipment.vehicleNumber}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-800">
+                <a href={`tel:${shipment.driverPhone}`} className="text-[10px] font-bold text-teal-600 hover:text-teal-500 transition-colors flex items-center gap-1.5 group">
+                   <div className="h-5 w-5 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <AppIcon name="user" className="h-3 w-3" />
+                   </div>
+                   {shipment.driverPhone}
+                </a>
+                {shipment.estimatedDeliveryTime && (
+                  <span className="text-[9px] font-bold text-slate-400">ETA: {new Date(shipment.estimatedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                )}
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-bold text-slate-900 dark:text-white">{shipment.assignedTo}</p>
-              <p className="text-[10px] text-slate-400">Lane Strategist</p>
-            </div>
-          </div>
+          ) : (
+            <button 
+              onClick={handleAssignDriver}
+              className="w-full py-4 border-2 border-dashed border-slate-100 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:border-indigo-500/30 hover:text-indigo-600 transition-all flex flex-col items-center gap-2"
+            >
+              <AppIcon name="team" className="h-5 w-5 opacity-40" />
+              Assign Logistics Driver
+            </button>
+          )}
         </div>
       </section>
 

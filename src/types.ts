@@ -12,11 +12,15 @@ export type RequiredDocumentType = (typeof REQUIRED_DOCUMENT_TYPES)[number];
 export type DocumentType = RequiredDocumentType | 'Delivery Order' | 'Inspection Report' | 'Other';
 export type DocStatus = 'Pending' | 'Verified' | 'Missing' | 'Rejected';
 export type ShipmentStatus =
-  | 'Awaiting Documents'
+  | 'Shipment Created'
+  | 'Driver Assigned'
+  | 'Picked Up'
   | 'In Transit'
+  | 'Reached Hub'
+  | 'Out For Delivery'
+  | 'Delivered'
   | 'Under Verification'
-  | 'Customs Hold'
-  | 'Delivered';
+  | 'Customs Hold';
 export type Role = 'Admin' | 'Manager' | 'Staff' | 'Export Operations Manager' | 'Client';
 
 export interface ShipmentDocument {
@@ -64,6 +68,10 @@ export interface Shipment {
   aiScan: OCRExtraction[];
   comments: ShipmentComment[];
   trackingId?: string;
+  driverName?: string;
+  driverPhone?: string;
+  vehicleNumber?: string;
+  estimatedDeliveryTime?: string;
 }
 
 export interface NotificationItem {

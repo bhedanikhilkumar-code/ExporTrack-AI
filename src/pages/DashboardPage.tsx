@@ -310,7 +310,7 @@ export default function DashboardPage() {
               <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Client</th>
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Departure</th>
+                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Logistics Detail</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
                 <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
               </tr>
@@ -325,7 +325,10 @@ export default function DashboardPage() {
                     <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{s.clientName}</span>
                   </td>
                   <td className="px-4 py-4">
-                    <span className="text-xs font-medium text-slate-500">{s.shipmentDate}</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{s.driverName || 'Unassigned'}</span>
+                      <span className="text-[10px] text-slate-400">{s.vehicleNumber || 'No vehicle'}</span>
+                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <StatusBadge value={s.status} />

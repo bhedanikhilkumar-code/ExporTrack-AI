@@ -4,7 +4,7 @@ interface StatusBadgeProps {
   value: string;
 }
 
-type IconName = 'check' | 'clock' | 'warning' | 'cross' | 'shipments' | 'verification' | 'upload';
+type IconName = 'check' | 'clock' | 'warning' | 'cross' | 'shipments' | 'verification' | 'upload' | 'team' | 'user';
 
 const statusMap: Record<string, { tone: string; dot: string; icon?: IconName }> = {
   Pending: { 
@@ -27,30 +27,45 @@ const statusMap: Record<string, { tone: string; dot: string; icon?: IconName }> 
     dot: 'bg-red-500',
     icon: 'cross'
   },
-  'In Transit': { 
+  'Shipment Created': { 
+    tone: 'bg-slate-50 text-slate-700 border-slate-100 dark:bg-slate-500/10 dark:text-slate-400 dark:border-slate-500/20', 
+    dot: 'bg-slate-500',
+    icon: 'clock'
+  },
+  'Driver Assigned': { 
+    tone: 'bg-indigo-50 text-indigo-700 border-indigo-100 dark:bg-indigo-500/10 dark:text-indigo-400 dark:border-indigo-500/20', 
+    dot: 'bg-indigo-500',
+    icon: 'team'
+  },
+  'Picked Up': { 
     tone: 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20', 
     dot: 'bg-blue-500',
     icon: 'shipments'
   },
-  'Under Verification': { 
+  'In Transit': { 
+    tone: 'bg-amber-50 text-amber-700 border-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20', 
+    dot: 'bg-amber-500',
+    icon: 'shipments'
+  },
+  'Reached Hub': { 
     tone: 'bg-cyan-50 text-cyan-700 border-cyan-100 dark:bg-cyan-500/10 dark:text-cyan-400 dark:border-cyan-500/20', 
     dot: 'bg-cyan-500',
     icon: 'verification'
   },
-  'Awaiting Documents': { 
-    tone: 'bg-violet-50 text-violet-700 border-violet-100 dark:bg-violet-500/10 dark:text-violet-400 dark:border-violet-500/20', 
-    dot: 'bg-violet-500',
-    icon: 'upload'
-  },
-  'Customs Hold': { 
-    tone: 'bg-orange-50 text-orange-700 border-orange-100 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20', 
-    dot: 'bg-orange-500',
-    icon: 'warning'
+  'Out For Delivery': { 
+    tone: 'bg-blue-50 text-blue-700 border-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:border-blue-500/20', 
+    dot: 'bg-blue-500',
+    icon: 'shipments'
   },
   Delivered: { 
     tone: 'bg-emerald-50 text-emerald-700 border-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/20', 
     dot: 'bg-emerald-500',
     icon: 'check'
+  },
+  'Delayed': {
+    tone: 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20',
+    dot: 'bg-rose-500',
+    icon: 'warning'
   },
   High: { 
     tone: 'bg-rose-50 text-rose-700 border-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:border-rose-500/20', 

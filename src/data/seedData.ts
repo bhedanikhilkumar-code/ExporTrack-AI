@@ -131,7 +131,11 @@ export const createSeedState = (): AppState => ({
           createdAt: '2026-03-04T10:30:00.000Z',
           internal: false
         }
-      ]
+      ],
+      driverName: 'Rajesh Kumar',
+      driverPhone: '+91 98765-43210',
+      vehicleNumber: 'MH-12-PQ-4567',
+      estimatedDeliveryTime: '2026-03-12T18:00:00.000Z'
     },
     {
       id: 'EXP-2026-002',
@@ -139,7 +143,7 @@ export const createSeedState = (): AppState => ({
       destinationCountry: 'UAE',
       shipmentDate: '2026-02-26',
       containerNumber: 'TCKU3142857-6',
-      status: 'Customs Hold',
+      status: 'In Transit',
       delayed: true,
       deadline: '2026-03-12',
       priority: 'Medium',
@@ -155,15 +159,12 @@ export const createSeedState = (): AppState => ({
       ],
       aiScan: [scan('SCAN-003', 'Commercial Invoice', 'INV-UAE-33419', '2026-02-26', 'BlueWave Foods', 'USD 87,900.00', 'UAE', 92)],
       comments: [
-        {
-          id: 'COM-003',
-          author: 'Aarav Mehta',
-          role: 'Admin',
-          message: 'Bill of lading rejected due to vessel mismatch. Need revised copy from shipping line.',
-          createdAt: '2026-03-02T05:11:00.000Z',
-          internal: true
-        }
-      ]
+        /* ... existing comments ... */
+      ],
+      driverName: 'Amit Shah',
+      driverPhone: '+91 91234-56789',
+      vehicleNumber: 'MH-01-AX-7788',
+      estimatedDeliveryTime: '2026-03-14T10:00:00.000Z'
     },
     {
       id: 'EXP-2026-003',
@@ -171,7 +172,7 @@ export const createSeedState = (): AppState => ({
       destinationCountry: 'Sweden',
       shipmentDate: '2026-03-05',
       containerNumber: 'HLCU7294013-9',
-      status: 'Awaiting Documents',
+      status: 'Shipment Created',
       delayed: false,
       deadline: '2026-03-15',
       priority: 'Medium',
@@ -254,15 +255,12 @@ export const createSeedState = (): AppState => ({
       ],
       aiScan: [scan('SCAN-007', 'Shipping Bill', 'SB-KE-5512', '2026-03-06', 'TerraBuild Materials', 'USD 49,800.00', 'Kenya', 90)],
       comments: [
-        {
-          id: 'COM-006',
-          author: 'Emily Chen',
-          role: 'Manager',
-          message: 'Critical client. Push vendor for remaining docs before tomorrow noon.',
-          createdAt: '2026-03-07T03:30:00.000Z',
-          internal: true
-        }
-      ]
+        /* ... existing comments ... */
+      ],
+      driverName: 'Sanjay Dutt',
+      driverPhone: '+91 99887-76655',
+      vehicleNumber: 'KA-05-MN-1122',
+      estimatedDeliveryTime: '2026-03-13T14:30:00.000Z'
     }
   ],
   notifications: [

@@ -34,6 +34,7 @@ interface AppContextValue {
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
   updateShipmentStatus: (shipmentId: string, status: ShipmentStatus) => void;
+  assignDriver: (shipmentId: string, driverInfo: { name: string; phone: string; vehicle: string }) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
@@ -499,6 +500,24 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     });
   };
 
+  const assignDriver = (shipmentId: string, driverInfo: { name: string; phone: string; vehicle: string }) => {
+    setState((prev) => {
+      const shipments = prev.shipments.map((s) => {
+        if (s.id === shipmentId) {
+          return {
+            ...s,
+            driverName: driverInfo.name,
+            driverPhone: driverInfo.phone,
+            vehicleNumber: driverInfo.vehicle,
+            status: 'Driver Assigned' as ShipmentStatus
+          };
+        }
+        return s;
+      });
+      return { ...prev, shipments };
+    });
+  };
+
   const addComment = (shipmentId: string, message: string, internal: boolean) => {
     if (!state.user) {
       return;
@@ -603,6 +622,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       addDocument,
       updateDocumentStatus,
       updateShipmentStatus,
+      assignDriver,
       addComment,
       markNotificationRead,
       markAllNotificationsRead,
