@@ -76,61 +76,63 @@ export default function UserProfileDropdown() {
                 </div>
             </button>
 
-            {/* Dropdown Menu */}
+            {/* Dropdown Menu - YouTube Style */}
             {isOpen && (
                 <div 
-                    className="fixed right-4 sm:absolute sm:right-0 mt-3 w-[calc(100vw-2rem)] sm:w-64 max-w-sm rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/95 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-[100] overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 p-1"
+                    className="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:top-full mt-3 w-auto sm:w-72 rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/95 shadow-[0_20px_50px_rgba(0,0,0,0.2)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.4)] z-[100] overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-4 duration-300 ease-out p-1"
                     onClick={(e) => e.stopPropagation()}
                 >
-                    {/* Profile Info Section */}
-                    <div className="p-4 mb-1">
-                        <div className="flex items-center gap-3">
-                            {/* Profile Picture */}
-                            {user.profilePicture ? (
-                                <img
-                                    src={user.profilePicture}
-                                    alt={user.name}
-                                    className="h-12 w-12 rounded-xl object-cover shadow-sm"
-                                    loading="lazy"
-                                    onError={(e) => {
-                                        const img = e.target as HTMLImageElement;
-                                        img.style.display = 'none';
-                                    }}
-                                />
-                            ) : (
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 text-white text-lg font-black shadow-sm">
-                                    {user.name.charAt(0).toUpperCase()}
-                                </div>
-                            )}
-
-                            {/* User Details */}
-                            <div className="flex-1 min-w-0 flex flex-col justify-center">
-                                <p className="text-sm font-bold text-slate-900 dark:text-white truncate">
-                                    {user.name}
-                                </p>
-                                <p className="text-[10px] text-slate-500 dark:text-slate-400 truncate mt-0.5 font-medium">
-                                    {user.email}
-                                </p>
+                    {/* YouTube-style Header Section */}
+                    <div className="flex items-start gap-4 p-4 border-b border-slate-200/50 dark:border-slate-800/50 mb-1">
+                        {/* Avatar */}
+                        {user.profilePicture ? (
+                            <img
+                                src={user.profilePicture}
+                                alt={user.name}
+                                className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-slate-100 dark:ring-slate-800"
+                                loading="lazy"
+                            />
+                        ) : (
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-600 text-white text-base font-black shadow-sm ring-2 ring-slate-100 dark:ring-slate-800">
+                                {user.name.charAt(0).toUpperCase()}
                             </div>
+                        )}
+
+                        <div className="flex flex-col min-w-0">
+                            <span className="text-sm font-bold text-slate-900 dark:text-white truncate">
+                                {user.name}
+                            </span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400 truncate mb-2">
+                                @{user.email.split('@')[0]}
+                            </span>
+                            <button 
+                                onClick={() => {
+                                    navigate('/team');
+                                    setIsOpen(false);
+                                }}
+                                className="text-[11px] font-bold text-teal-600 dark:text-teal-400 hover:text-teal-700 dark:hover:text-teal-300 transition-colors text-left"
+                            >
+                                View your profile
+                            </button>
                         </div>
                     </div>
 
-                    <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-2 my-1" />
+                    {/* Menu Groups */}
+                    <div className="py-2 space-y-0.5">
+                        <div className="px-2">
+                            <button
+                                onClick={() => {
+                                    navigate('/admin');
+                                    setIsOpen(false);
+                                }}
+                                className="w-full h-10 px-3 rounded-xl text-left text-[13px] font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
+                            >
+                                <AppIcon name="settings" className="h-4 w-4 text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-200" />
+                                <span>Settings</span>
+                            </button>
+                        </div>
 
-                    {/* Menu Items */}
-                    <div className="p-1.5 space-y-0.5 relative">
-                        <button
-                            onClick={() => {
-                                navigate('/team');
-                                setIsOpen(false);
-                            }}
-                            className="w-full h-11 px-3 py-2 rounded-xl text-left text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
-                        >
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
-                                <AppIcon name="user" className="h-4 w-4" />
-                            </div>
-                            <span>My Profile</span>
-                        </button>
+                        <div className="h-px bg-slate-200/50 dark:bg-slate-800/50 my-2 mx-4" />
 
                         <button
                             onClick={() => {
@@ -147,63 +149,48 @@ export default function UserProfileDropdown() {
 
                         <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-1 my-1.5" />
 
-                        {/* Theme Switcher Section */}
+                        {/* Appearance Switcher */}
                         <div className="px-3 py-2">
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2 px-1">Appearance</p>
-                            <div className="grid grid-cols-3 gap-1 bg-slate-100 dark:bg-slate-800/50 p-1 rounded-xl">
-                                <button
-                                    onClick={() => setTheme('light')}
-                                    className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
-                                        theme === 'light' 
-                                            ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' 
-                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                                    }`}
-                                    title="Light Mode"
-                                >
-                                    <AppIcon name="sun" className="h-4 w-4" />
-                                    <span className="text-[9px] font-bold uppercase">Light</span>
-                                </button>
-                                <button
-                                    onClick={() => setTheme('dark')}
-                                    className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
-                                        theme === 'dark' 
-                                            ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' 
-                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                                    }`}
-                                    title="Dark Mode"
-                                >
-                                    <AppIcon name="moon" className="h-4 w-4" />
-                                    <span className="text-[9px] font-bold uppercase">Dark</span>
-                                </button>
-                                <button
-                                    onClick={() => setTheme('system')}
-                                    className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
-                                        theme === 'system' 
-                                            ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-sm' 
-                                            : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200'
-                                    }`}
-                                    title="System Mode"
-                                >
-                                    <AppIcon name="monitor" className="h-4 w-4" />
-                                    <span className="text-[9px] font-bold uppercase">System</span>
-                                </button>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-3 px-2 flex items-center gap-2">
+                                <AppIcon name="monitor" className="h-3 w-3" />
+                                Appearance
+                            </p>
+                            <div className="grid grid-cols-3 gap-1 bg-slate-100/50 dark:bg-slate-800/40 p-1 rounded-xl border border-slate-200/50 dark:border-slate-800/50">
+                                {[
+                                    { id: 'light', icon: 'sun', label: 'Light' },
+                                    { id: 'dark', icon: 'moon', label: 'Dark' },
+                                    { id: 'system', icon: 'monitor', label: 'OS' }
+                                ].map((opt) => (
+                                    <button
+                                        key={opt.id}
+                                        onClick={() => setTheme(opt.id as any)}
+                                        className={`flex flex-col items-center justify-center gap-1.5 py-2 rounded-lg transition-all ${
+                                            theme === opt.id 
+                                                ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-[0_2px_10px_rgba(0,0,0,0.05)]' 
+                                                : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
+                                        }`}
+                                    >
+                                        <AppIcon name={opt.icon as any} className="h-3.5 w-3.5" />
+                                        <span className="text-[9px] font-extrabold uppercase tracking-tighter">{opt.label}</span>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 
-                        <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-1 my-1.5" />
+                        <div className="h-px bg-slate-200/50 dark:bg-slate-800/50 my-2 mx-4" />
 
-                        <button
-                            onClick={() => {
-                                logout();
-                                setIsOpen(false);
-                            }}
-                            className="w-full h-11 px-3 py-2 rounded-xl text-left text-[13px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center gap-3 transition-all group"
-                        >
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-500 group-hover:bg-white dark:bg-rose-500/20 dark:text-rose-400 dark:group-hover:bg-rose-500/30 transition-colors shadow-sm">
-                                <AppIcon name="logout" className="h-4 w-4" />
-                            </div>
-                            <span>Sign Out</span>
-                        </button>
+                        <div className="px-2">
+                            <button
+                                onClick={() => {
+                                    logout();
+                                    setIsOpen(false);
+                                }}
+                                className="w-full h-10 px-3 rounded-xl text-left text-[13px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center gap-3 transition-all group"
+                            >
+                                <AppIcon name="logout" className="h-4 w-4 text-rose-400 group-hover:text-rose-600 dark:group-hover:text-rose-300" />
+                                <span>Sign Out</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
