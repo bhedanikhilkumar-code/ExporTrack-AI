@@ -11,15 +11,19 @@ export default function UserProfileDropdown() {
 
     // Close dropdown when clicking outside
     useEffect(() => {
-        function handleClickOutside(event: MouseEvent) {
+        function handleOutsideAction(event: MouseEvent | TouchEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsOpen(false);
             }
         }
 
         if (isOpen) {
-            document.addEventListener('mousedown', handleClickOutside);
-            return () => document.removeEventListener('mousedown', handleClickOutside);
+            document.addEventListener('mousedown', handleOutsideAction);
+            document.addEventListener('touchstart', handleOutsideAction);
+            return () => {
+                document.removeEventListener('mousedown', handleOutsideAction);
+                document.removeEventListener('touchstart', handleOutsideAction);
+            };
         }
     }, [isOpen]);
 
@@ -30,7 +34,7 @@ export default function UserProfileDropdown() {
             {/* Profile Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="focus-ring flex items-center gap-2 p-1 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group"
+                className="focus-ring flex items-center gap-2 p-1 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group relative z-10"
                 aria-haspopup="true"
                 aria-expanded={isOpen}
             >
@@ -42,7 +46,6 @@ export default function UserProfileDropdown() {
                         className="h-8 w-8 rounded-lg object-cover shadow-sm transition-transform group-hover:scale-105"
                         loading="lazy"
                         onError={(e) => {
-                            // Fallback if image fails to load
                             const img = e.target as HTMLImageElement;
                             img.style.display = 'none';
                         }}
@@ -75,25 +78,27 @@ export default function UserProfileDropdown() {
 
             {/* Dropdown Menu */}
             {isOpen && (
-                <div className="absolute right-0 mt-3 w-64 rounded-2xl border border-slate-200/60 bg-white/90 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/90 shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 p-1">
+                <div 
+                    className="fixed right-4 sm:absolute sm:right-0 mt-3 w-[calc(100vw-2rem)] sm:w-64 max-w-sm rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-900/95 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-[100] overflow-hidden animate-in fade-in zoom-in-95 slide-in-from-top-2 duration-200 p-1"
+                    onClick={(e) => e.stopPropagation()}
+                >
                     {/* Profile Info Section */}
-                    <div className="p-3 mb-1">
+                    <div className="p-4 mb-1">
                         <div className="flex items-center gap-3">
                             {/* Profile Picture */}
                             {user.profilePicture ? (
                                 <img
                                     src={user.profilePicture}
                                     alt={user.name}
-                                    className="h-10 w-10 rounded-xl object-cover shadow-sm"
+                                    className="h-12 w-12 rounded-xl object-cover shadow-sm"
                                     loading="lazy"
                                     onError={(e) => {
-                                        // Fallback if image fails to load
                                         const img = e.target as HTMLImageElement;
                                         img.style.display = 'none';
                                     }}
                                 />
                             ) : (
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 text-white font-black shadow-sm">
+                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 text-white text-lg font-black shadow-sm">
                                     {user.name.charAt(0).toUpperCase()}
                                 </div>
                             )}
@@ -113,16 +118,16 @@ export default function UserProfileDropdown() {
                     <div className="h-px bg-slate-200/60 dark:bg-slate-800/60 mx-2 my-1" />
 
                     {/* Menu Items */}
-                    <div className="p-1 space-y-0.5 relative">
+                    <div className="p-1.5 space-y-0.5 relative">
                         <button
                             onClick={() => {
                                 navigate('/team');
                                 setIsOpen(false);
                             }}
-                            className="w-full px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
+                            className="w-full h-11 px-3 py-2 rounded-xl text-left text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
                         >
-                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
-                                <AppIcon name="user" className="h-3.5 w-3.5" />
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
+                                <AppIcon name="user" className="h-4 w-4" />
                             </div>
                             <span>My Profile</span>
                         </button>
@@ -132,10 +137,10 @@ export default function UserProfileDropdown() {
                                 navigate('/admin');
                                 setIsOpen(false);
                             }}
-                            className="w-full px-3 py-2 rounded-lg text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
+                            className="w-full h-11 px-3 py-2 rounded-xl text-left text-[13px] font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/80 flex items-center gap-3 transition-all group"
                         >
-                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
-                                <AppIcon name="settings" className="h-3.5 w-3.5" />
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500 group-hover:bg-white dark:bg-slate-800 dark:text-slate-400 dark:group-hover:bg-slate-700 transition-colors shadow-sm">
+                                <AppIcon name="settings" className="h-4 w-4" />
                             </div>
                             <span>Settings</span>
                         </button>
@@ -147,10 +152,10 @@ export default function UserProfileDropdown() {
                                 logout();
                                 setIsOpen(false);
                             }}
-                            className="w-full px-3 py-2 rounded-lg text-left text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center gap-3 transition-all group"
+                            className="w-full h-11 px-3 py-2 rounded-xl text-left text-[13px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 flex items-center gap-3 transition-all group"
                         >
-                            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-rose-100 text-rose-500 group-hover:bg-white dark:bg-rose-500/20 dark:text-rose-400 dark:group-hover:bg-rose-500/30 transition-colors shadow-sm">
-                                <AppIcon name="logout" className="h-3.5 w-3.5" />
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-100 text-rose-500 group-hover:bg-white dark:bg-rose-500/20 dark:text-rose-400 dark:group-hover:bg-rose-500/30 transition-colors shadow-sm">
+                                <AppIcon name="logout" className="h-4 w-4" />
                             </div>
                             <span>Sign Out</span>
                         </button>
