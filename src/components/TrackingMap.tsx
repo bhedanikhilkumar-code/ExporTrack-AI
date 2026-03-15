@@ -16,15 +16,34 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadow,
 });
 
-// Custom animated marker for the current live location
+// Custom Truck marker for the current live location
 const liveMarkerIcon = new L.DivIcon({
   className: 'live-tracking-marker',
-  html: `<div class="relative flex h-6 w-6 items-center justify-center">
-            <span class="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
-            <span class="relative inline-flex h-4 w-4 rounded-full bg-teal-500 border-2 border-white shadow-sm"></span>
+  html: `<div class="relative flex h-10 w-10 items-center justify-center">
+            <div class="absolute inset-0 animate-ping rounded-full bg-teal-400/20"></div>
+            <div class="relative flex h-8 w-8 items-center justify-center rounded-xl bg-teal-600 shadow-xl border-2 border-white ring-4 ring-teal-500/20 text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                <rect x="1" y="3" width="15" height="13"></rect>
+                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+                <circle cx="5.5" cy="18.5" r="2.5"></circle>
+                <circle cx="18.5" cy="18.5" r="2.5"></circle>
+              </svg>
+            </div>
          </div>`,
-  iconSize: [24, 24],
-  iconAnchor: [12, 12]
+  iconSize: [40, 40],
+  iconAnchor: [20, 20]
+});
+
+// Hub marker (Origin/Destination)
+const hubMarkerIcon = (type: 'origin' | 'destination') => new L.DivIcon({
+  className: `hub-marker-${type}`,
+  html: `<div class="flex h-8 w-8 items-center justify-center rounded-full ${type === 'origin' ? 'bg-amber-500' : 'bg-emerald-500'} border-4 border-white shadow-lg text-white">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="h-3 w-3">
+              ${type === 'origin' ? '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>' : '<path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"></path>'}
+            </svg>
+         </div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 16]
 });
 
 // Regular marker for history points
@@ -122,6 +141,26 @@ export default function TrackingMap({ tracking, className = 'h-[400px] w-full ro
             opacity={0.9}
           />
         )}
+
+        {/* Origin Marker */}
+        <Marker position={originPosition} icon={hubMarkerIcon('origin')}>
+          <Popup className="tracking-popup">
+            <div className="text-xs">
+              <p className="font-bold text-amber-700 mb-1">Origin Point</p>
+              <p className="text-slate-600 font-medium">Warehouse Export Hub</p>
+            </div>
+          </Popup>
+        </Marker>
+
+        {/* Destination Marker */}
+        <Marker position={finalDestination} icon={hubMarkerIcon('destination')}>
+          <Popup className="tracking-popup">
+            <div className="text-xs">
+              <p className="font-bold text-emerald-700 mb-1">Final Destination</p>
+              <p className="text-slate-600 font-medium">{tracking.currentLocation.split(',')[1] || 'Primary Port'}</p>
+            </div>
+          </Popup>
+        </Marker>
 
         {/* History markers (excluding the current one) */}
         {tracking.trackingHistory.slice(1).map((loc, idx) => (

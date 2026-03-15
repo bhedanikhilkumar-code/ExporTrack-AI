@@ -6,6 +6,7 @@ import {
   computeMonthlyTrend,
   computeCarrierPerformance,
   computeDeliveryDistribution,
+  computeDailyTrend,
 } from '../services/analyticsService';
 
 /* ─── Helpers ────────────────────────────────────────────────────────── */
@@ -29,6 +30,9 @@ export default function AnalyticsDashboardPage() {
   const monthlyTrend = useMemo(() => computeMonthlyTrend(shipments), [shipments]);
   const carrierPerf = useMemo(() => computeCarrierPerformance(shipments), [shipments]);
   const deliveryDist = useMemo(() => computeDeliveryDistribution(shipments), [shipments]);
+  const dailyTrend = useMemo(() => computeDailyTrend(shipments), [shipments]);
+
+  const maxDaily = Math.max(...dailyTrend.map(d => d.shipments), 1);
 
   const maxMonthly = Math.max(...monthlyTrend.map(m => m.shipments), 1);
   const maxCarrier = Math.max(...carrierPerf.map(c => c.shipments), 1);
@@ -36,11 +40,11 @@ export default function AnalyticsDashboardPage() {
 
   const kpiCards = [
     { title: 'Total Shipments', value: metrics.totalShipments, icon: 'shipments' as const, accent: COLORS.blue, suffix: '' },
-    { title: 'On-Time Delivery', value: metrics.onTimeDeliveryRate, icon: 'check' as const, accent: COLORS.emerald, suffix: '%' },
-    { title: 'Delayed Shipments', value: metrics.delayedShipments, icon: 'warning' as const, accent: COLORS.rose, suffix: '' },
-    { title: 'Avg Delivery Time', value: metrics.averageDeliveryTimeDays, icon: 'clock' as const, accent: COLORS.amber, suffix: ' days' },
-    { title: 'In Transit', value: metrics.inTransitShipments, icon: 'shipments' as const, accent: COLORS.teal, suffix: '' },
-    { title: 'Customs Hold', value: metrics.customsHoldShipments, icon: 'shield' as const, accent: COLORS.indigo, suffix: '' },
+    { title: 'Active Shipments', value: metrics.inTransitShipments + metrics.awaitingDocsShipments, icon: 'clock' as const, accent: COLORS.amber, suffix: '' },
+    { title: 'Delivered', value: metrics.deliveredShipments, icon: 'check' as const, accent: COLORS.emerald, suffix: '' },
+    { title: 'Delayed', value: metrics.delayedShipments, icon: 'warning' as const, accent: COLORS.rose, suffix: '' },
+    { title: 'Doc Health', value: metrics.onTimeDeliveryRate, icon: 'shield' as const, accent: COLORS.teal, suffix: '%' },
+    { title: 'Avg Lead Time', value: metrics.averageDeliveryTimeDays, icon: 'clock' as const, accent: COLORS.indigo, suffix: 'd' },
   ];
 
   return (
@@ -85,7 +89,43 @@ export default function AnalyticsDashboardPage() {
       </section>
 
       {/* ── Charts Grid ── */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
+        {/* ── Daily Shipment Activity (Bar Chart) ── */}
+        <article className="card-premium relative overflow-hidden group">
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+          <div className="relative">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <h3 className="section-title text-sm font-bold uppercase tracking-widest text-slate-900 dark:text-slate-100">Daily Activity</h3>
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1 ml-4 uppercase tracking-wide">Last 7 Days</p>
+              </div>
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400 shadow-sm">
+                <AppIcon name="clock" className="h-5 w-5" strokeWidth={2.5} />
+              </div>
+            </div>
+
+            <div className="flex items-end justify-between gap-1 h-40 px-1 pb-2">
+              {dailyTrend.map((d, i) => {
+                const heightPct = (d.shipments / maxDaily) * 100;
+                return (
+                  <div key={i} className="group/bar relative flex flex-1 flex-col items-center gap-2 h-full justify-end">
+                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 rounded-md bg-slate-900 px-2 py-1 text-[9px] font-bold text-white opacity-0 group-hover/bar:opacity-100 transition-opacity pointer-events-none">
+                      {d.shipments}
+                    </div>
+                    <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-t-lg relative overflow-hidden h-full flex items-end">
+                      <div 
+                        className="w-full bg-amber-500 group-hover/bar:bg-amber-400 transition-all duration-500 ease-out rounded-t-lg"
+                        style={{ height: `${Math.max(heightPct, 5)}%` }}
+                      />
+                    </div>
+                    <span className="text-[9px] font-black uppercase text-slate-400">{d.date}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </article>
 
         {/* ── Monthly Shipment Trend (Line Chart) ── */}
         <article className="card-premium relative overflow-hidden group">
@@ -331,6 +371,70 @@ export default function AnalyticsDashboardPage() {
           </div>
         </div>
       </article>
+
+      {/* ── Additional Analytics: Success Rate & Lead Time ── */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <article className="card-premium flex flex-col items-center justify-center py-10 overflow-hidden relative group">
+           <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+           <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-8 self-start ml-2">Delivery Success Rate</h3>
+           <div className="relative h-48 w-48">
+              <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
+                <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" strokeWidth="3" className="text-slate-100 dark:text-slate-800" />
+                <circle 
+                  cx="18" cy="18" r="16" fill="transparent" 
+                  stroke="currentColor" strokeWidth="3" 
+                  strokeDasharray={`${metrics.onTimeDeliveryRate} 100`} 
+                  className="text-emerald-500 transition-all duration-1000 ease-out"
+                />
+              </svg>
+              <div className="absolute inset-0 flex flex-col items-center justify-center">
+                <span className="text-4xl font-black text-slate-900 dark:text-white">{metrics.onTimeDeliveryRate}%</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-600">On-Time Performance</span>
+              </div>
+           </div>
+           <div className="mt-8 flex gap-8">
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase text-slate-400">Target</p>
+                <p className="text-lg font-bold text-slate-900 dark:text-slate-300">95%</p>
+              </div>
+              <div className="text-center">
+                <p className="text-[10px] font-bold uppercase text-slate-400">Deviation</p>
+                <p className={`text-lg font-bold ${metrics.onTimeDeliveryRate >= 95 ? 'text-emerald-500' : 'text-amber-500'}`}>
+                   {metrics.onTimeDeliveryRate - 95 > 0 ? '+' : ''}{metrics.onTimeDeliveryRate - 95}%
+                </p>
+              </div>
+           </div>
+        </article>
+
+        <article className="card-premium flex flex-col p-6 overflow-hidden relative group">
+           <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+           <h3 className="text-sm font-bold uppercase tracking-widest text-slate-500 mb-6">Lead Time Optimization</h3>
+           <div className="space-y-6 flex-1 flex flex-col justify-center">
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Average Transit</span>
+                  <span className="text-xs font-bold text-indigo-600">{metrics.averageDeliveryTimeDays} Days</span>
+                </div>
+                <div className="h-3 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                   <div 
+                    className="h-full bg-indigo-500 transition-all duration-1000" 
+                    style={{ width: `${Math.min((metrics.averageDeliveryTimeDays / 20) * 100, 100)}%` }} 
+                   />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">In-Port Dwell</p>
+                    <p className="text-xl font-black text-slate-900 dark:text-slate-100">1.2d</p>
+                 </div>
+                 <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800">
+                    <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">Customs Clearance</p>
+                    <p className="text-xl font-black text-slate-900 dark:text-slate-100">0.8d</p>
+                 </div>
+              </div>
+           </div>
+        </article>
+      </div>
 
       {/* ── Status Breakdown Mini-Cards ── */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-4">

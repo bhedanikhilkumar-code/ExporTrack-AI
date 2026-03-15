@@ -13,19 +13,31 @@ interface ShipmentTimelineProps {
 
 export default function ShipmentTimeline({ events }: ShipmentTimelineProps) {
     const getEventIcon = (title: string) => {
-        if (title.includes('created')) return 'create';
-        if (title.includes('Verified')) return 'check';
-        if (title.includes('Rejected')) return 'cross';
-        if (title.includes('Uploaded')) return 'upload';
-        if (title.includes('note')) return 'notifications';
+        const t = title.toLowerCase();
+        if (t.includes('created')) return 'create';
+        if (t.includes('picked up')) return 'shipments';
+        if (t.includes('in transit')) return 'shipments';
+        if (t.includes('arrived at hub')) return 'shield';
+        if (t.includes('out for delivery')) return 'clock';
+        if (t.includes('delivered')) return 'check';
+        if (t.includes('verified')) return 'check';
+        if (t.includes('rejected')) return 'cross';
+        if (t.includes('uploaded')) return 'upload';
         return 'notifications';
     };
 
     const getEventColor = (title: string) => {
-        if (title.includes('Verified')) return { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' };
-        if (title.includes('Rejected')) return { bg: 'bg-rose-100', text: 'text-rose-700', dot: 'bg-rose-500' };
-        if (title.includes('created')) return { bg: 'bg-teal-100', text: 'text-teal-700', dot: 'bg-teal-500' };
-        if (title.includes('Uploaded')) return { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' };
+        const t = title.toLowerCase();
+        if (t.includes('verified') || t.includes('delivered')) 
+            return { bg: 'bg-emerald-100', text: 'text-emerald-700', dot: 'bg-emerald-500' };
+        if (t.includes('rejected') || t.includes('delayed')) 
+            return { bg: 'bg-rose-100', text: 'text-rose-700', dot: 'bg-rose-500' };
+        if (t.includes('created') || t.includes('picked up')) 
+            return { bg: 'bg-teal-100', text: 'text-teal-700', dot: 'bg-teal-500' };
+        if (t.includes('in transit') || t.includes('out for delivery')) 
+            return { bg: 'bg-blue-100', text: 'text-blue-700', dot: 'bg-blue-500' };
+        if (t.includes('arrived at hub')) 
+            return { bg: 'bg-indigo-100', text: 'text-indigo-700', dot: 'bg-indigo-500' };
         return { bg: 'bg-slate-100', text: 'text-slate-700', dot: 'bg-slate-500' };
     };
 
