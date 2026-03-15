@@ -8,6 +8,7 @@ import CommandPalette from './CommandPalette';
 import UserProfileDropdown from './UserProfileDropdown';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import MobileBottomNav from './MobileBottomNav';
+import MobileFAB from './MobileFAB';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -358,6 +359,7 @@ export default function AppLayout() {
       </div>
 
       <MobileBottomNav />
+      <MobileFAB />
 
       {/* Command Palette */}
       <CommandPalette
