@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Navigate, Outlet, Link, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from './AppIcon';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 
 const clientNavItems = [
   { to: '/client/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -12,6 +13,7 @@ export default function ClientLayout() {
   const { state: { isAuthenticated, user, theme }, logout, toggleTheme } = useAppContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
+  const isHeaderVisible = useScrollDirection();
 
   if (!isAuthenticated) return <Navigate to="/client/login" state={{ from: location }} replace />;
   if (user?.role !== 'Client') return <Navigate to="/dashboard" replace />;
@@ -76,7 +78,9 @@ export default function ClientLayout() {
 
       {/* Main Content */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
-        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/80 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/80 sm:px-6">
+        <header className={`sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/80 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/80 sm:px-6 transition-transform duration-300 ease-in-out ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}>
           <button 
             type="button"
             className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 dark:border-slate-700 sm:h-10 sm:w-10"

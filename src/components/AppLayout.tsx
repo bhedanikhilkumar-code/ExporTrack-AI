@@ -6,6 +6,7 @@ import StatusBadge from './StatusBadge';
 import NotificationPanel from './NotificationPanel';
 import CommandPalette from './CommandPalette';
 import UserProfileDropdown from './UserProfileDropdown';
+import { useScrollDirection } from '../hooks/useScrollDirection';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
@@ -39,6 +40,8 @@ export default function AppLayout() {
     state: { user, notifications, theme, shipments },
     toggleTheme
   } = useAppContext();
+
+  const isHeaderVisible = useScrollDirection();
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
   const currentNav = navItems.find((item) => location.pathname.startsWith(item.to));
@@ -181,7 +184,9 @@ export default function AppLayout() {
 
       <div className={`transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:pl-64' : 'md:pl-20'
         }`}>
-        <header className="sticky top-0 z-10 bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] transition-colors">
+        <header className={`sticky top-0 z-10 bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] transition-all duration-300 ease-in-out ${
+          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        }`}>
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8 h-16">
             {/* Left Section */}
             <div className="flex items-center gap-4 flex-1 min-w-0">
