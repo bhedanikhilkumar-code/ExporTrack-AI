@@ -91,25 +91,33 @@ export default function AiLogisticsAssistant() {
             {/* Header */}
             <div className="bg-slate-900 dark:bg-slate-950/80 p-4 flex items-center justify-between border-b border-slate-800/60 relative z-10">
                 <div className="flex items-center gap-3 relative">
-                    <div className="h-10 w-10 shrink-0 rounded-xl bg-teal-500/10 flex items-center justify-center border border-teal-500/20 shadow-sm relative overflow-hidden">
-                        <div className="absolute inset-0 bg-teal-400/20 animate-pulse" />
-                        <AppIcon name="ai-extract" className="h-5 w-5 text-teal-400 relative z-10" strokeWidth={2.5} />
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-teal-400/30 blur-lg rounded-full animate-pulse" />
+                        <div className="h-10 w-10 shrink-0 rounded-xl bg-slate-800 flex items-center justify-center border border-teal-500/30 shadow-[0_0_15px_-3px_rgba(20,184,166,0.3)] relative overflow-hidden">
+                            <div className="absolute inset-0 bg-teal-400/10 animate-pulse" />
+                            <AppIcon name="ai-extract" className="h-5 w-5 text-teal-400 relative z-10" strokeWidth={2.5} />
+                        </div>
                     </div>
                     <div className="flex flex-col justify-center">
-                        <h3 className="text-white text-sm font-bold tracking-tight">Ops Intelligence</h3>
+                        <div className="flex items-center gap-2">
+                           <h3 className="text-white text-sm font-black tracking-[0.05em] uppercase">ExporTrack AI</h3>
+                           <span className="px-1.5 py-0.5 rounded-md bg-teal-500/20 text-[8px] font-black text-teal-400 border border-teal-500/20 uppercase tracking-widest">v4.2</span>
+                        </div>
                         <div className="flex items-center gap-1.5 mt-0.5">
                             <span className="relative flex h-1.5 w-1.5">
                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
                                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-teal-500"></span>
                             </span>
-                            <p className="text-[9px] text-teal-400/90 font-bold uppercase tracking-widest">AI Engine Online</p>
+                            <p className="text-[9px] text-teal-400/90 font-bold uppercase tracking-widest">Neural Link Active</p>
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-1.5 opacity-50">
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-500"></span>
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-600"></span>
-                    <span className="h-1.5 w-1.5 rounded-full bg-slate-700"></span>
+                <div className="flex gap-1.5 opacity-30 group-hover:opacity-60 transition-opacity">
+                    <div className="flex gap-1">
+                        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite]"></span>
+                        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite_100ms]"></span>
+                        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite_200ms]"></span>
+                    </div>
                 </div>
             </div>
 

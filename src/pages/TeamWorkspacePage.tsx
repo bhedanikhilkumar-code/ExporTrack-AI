@@ -288,31 +288,45 @@ export default function TeamWorkspacePage() {
 
             {/* Permission Matrix Table */}
             <article className="card-premium overflow-hidden">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4">Permission Matrix</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full text-left min-w-[600px]">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">Workspace Permissions</h3>
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">Role-Based Access Control</p>
+                </div>
+                <div className="flex items-center gap-2 lg:hidden">
+                   <p className="text-[8px] font-black uppercase tracking-widest text-teal-600 animate-pulse">Swipe to view Matrix</p>
+                   <AppIcon name="arrow-right" className="h-3 w-3 text-teal-500" />
+                </div>
+              </div>
+
+              <div className="table-shell group/table relative">
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white dark:from-slate-900 to-transparent pointer-events-none opacity-0 group-hover/table:opacity-100 lg:hidden transition-opacity" />
+                <table className="data-table">
                   <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Permission</th>
+                    <tr>
+                      <th className="w-1/3">Permission Entity</th>
                       {WORKSPACE_ROLES.map(role => (
-                        <th key={role} className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 text-center">{role}</th>
+                        <th key={role} className="text-center">{role}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {ALL_PERMISSIONS.map(perm => (
-                      <tr key={perm} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                        <td className="px-4 py-3 text-xs font-medium text-slate-700 dark:text-slate-300">{PERMISSION_LABELS[perm]}</td>
+                      <tr key={perm} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                        <td className="px-4 py-3.5">
+                           <p className="text-xs font-bold text-slate-700 dark:text-slate-200">{PERMISSION_LABELS[perm]}</p>
+                           <p className="text-[8px] text-slate-400 uppercase tracking-tighter mt-0.5">{perm.replace(/_/g, ' ')}</p>
+                        </td>
                         {WORKSPACE_ROLES.map(role => (
                           <td key={role} className="px-4 py-3 text-center">
                             {hasPermission(role, perm) ? (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-                                <AppIcon name="check" className="h-3 w-3 text-emerald-600 dark:text-emerald-400" strokeWidth={3} />
-                              </span>
+                              <div className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-teal-500/10 dark:bg-teal-500/20 shadow-sm border border-teal-500/10">
+                                <AppIcon name="check" className="h-3.5 w-3.5 text-teal-600 dark:text-teal-400" strokeWidth={3} />
+                              </div>
                             ) : (
-                              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 dark:bg-slate-800">
+                              <div className="inline-flex h-7 w-7 items-center justify-center rounded-xl bg-slate-100 dark:bg-slate-800/50">
                                 <AppIcon name="cross" className="h-3 w-3 text-slate-300 dark:text-slate-600" />
-                              </span>
+                              </div>
                             )}
                           </td>
                         ))}

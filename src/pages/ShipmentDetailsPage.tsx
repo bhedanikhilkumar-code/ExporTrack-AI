@@ -370,64 +370,86 @@ export default function ShipmentDetailsPage() {
         {/* Left Span - AI and Docs */}
         <div className="lg:col-span-2 space-y-6">
           {/* AI Intelligence Spotlight */}
-          <article className="card-premium overflow-hidden border-none bg-slate-900 text-white dark:bg-teal-900/10">
-            <div className="flex flex-col gap-6">
+          <article className="card-premium overflow-hidden border-none bg-slate-900 text-white dark:bg-slate-950/40 relative group">
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            <div className="absolute -right-10 -top-10 h-40 w-40 bg-teal-500/10 blur-3xl rounded-full" />
+            
+            <div className="relative flex flex-col md:flex-row gap-8 items-center">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white/10 text-teal-400">
-                    <AppIcon name="ai-extract" className="h-4 w-4" />
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-teal-400/20 blur-md rounded-full animate-pulse" />
+                    <div className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-teal-400 border border-white/10 shadow-lg">
+                      <AppIcon name="ai-extract" className="h-5 w-5" strokeWidth={2.5} />
+                    </div>
                   </div>
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-teal-400">Neural Route Optimization</span>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-400">Neural Optimization</span>
+                    <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Route Engine v4.2</p>
+                  </div>
                 </div>
-                <h3 className="text-lg font-bold mb-3">Predicted Lane Performance</h3>
-                <p className="text-sm text-slate-400 leading-relaxed mb-6">
-                  Our neural engine has analyzed the Current transshipment hub performance and historical data for {shipment.destinationCountry}.
+                
+                <h3 className="text-2xl font-black mb-4 tracking-tight">Lane Intelligence Spotlight</h3>
+                <p className="text-sm text-slate-400 leading-relaxed mb-8 max-w-md">
+                  Our neural engine has analyzed the performance of the {shipment.destinationCountry} corridor. Diversion to alternate waypoints is currently recommended.
                 </p>
-                <div className="flex flex-wrap gap-4 sm:gap-6">
+                
+                <div className="flex flex-wrap gap-8">
                   <div className="flex flex-col">
-                    <span className="text-2xl font-bold">94%</span>
-                    <span className="text-[10px] uppercase font-bold text-slate-500">Stability</span>
+                    <span className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-1">Lane Stability</span>
+                    <span className="text-3xl font-black text-white">94<span className="text-teal-500">%</span></span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-2xl font-bold text-teal-400">-12h</span>
-                    <span className="text-[10px] uppercase font-bold text-slate-500">EtA Delta</span>
+                    <span className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-1">Target Savings</span>
+                    <span className="text-3xl font-black text-teal-400">12.5<span className="text-sm ml-0.5">hrs</span></span>
                   </div>
                 </div>
               </div>
-              <div className="shrink-0">
+              
+              <div className="w-full md:w-auto shrink-0 animate-in fade-in slide-in-from-right-4 duration-700">
                 <AiDelayPrediction shipmentId={shipment.id} />
               </div>
             </div>
           </article>
 
           {/* AI Predicted Delivery Card */}
-          <article className="card-premium border-l-4 border-l-emerald-500 bg-emerald-50/10 dark:bg-emerald-900/5">
+          <article className="card-premium border-l-4 border-l-emerald-500 bg-emerald-50/20 dark:bg-emerald-500/5 group hover:shadow-xl transition-all">
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
-              <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 shadow-sm">
-                  <AppIcon name="clock" className="h-6 w-6" />
+              <div className="flex items-center gap-5">
+                <div className="relative">
+                   <div className="absolute inset-0 bg-emerald-400/20 blur-lg rounded-full animate-pulse" />
+                   <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xl border border-emerald-500/20">
+                     <AppIcon name="clock" className="h-7 w-7" strokeWidth={2.5} />
+                   </div>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-white leading-tight">AI Predicted Delivery</h3>
-                  <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Machine Learning Analysis</p>
+                  <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">AI Predicted Arrival</h3>
+                  <div className="flex items-center gap-2 mt-1.5">
+                     <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest border border-emerald-500/10">Dynamic ETA</span>
+                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Logistic-LLM Engine</p>
+                  </div>
                 </div>
               </div>
               
-              <div className="flex flex-col sm:items-end text-center sm:text-right">
+              <div className="flex flex-col sm:items-end text-center sm:text-right bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-white dark:border-white/5 shadow-inner min-w-[200px]">
                 <div className="flex items-baseline gap-2 justify-center sm:justify-end">
-                  <span className="text-2xl font-black text-emerald-600 dark:text-emerald-400">
+                  <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
                     {shipment.status === 'Delivered' 
-                      ? 'Delivered' 
+                      ? 'COMPLETED' 
                       : shipment.estimatedDeliveryTime 
-                        ? new Date(shipment.estimatedDeliveryTime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-                        : 'Tomorrow 14:20'}
+                        ? new Date(shipment.estimatedDeliveryTime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric'})
+                        : 'MAR 22, 2026'}
                   </span>
+                  {shipment.status !== 'Delivered' && (
+                     <span className="text-sm font-black text-emerald-500">14:20</span>
+                  )}
                 </div>
-                <div className="mt-1 flex items-center justify-center sm:justify-end gap-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-                  Reliability: 
-                  <span className="text-indigo-500 bg-indigo-50 dark:bg-indigo-500/10 px-2 py-0.5 rounded-full">
-                    {shipment.id ? `${(shipment.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % 15) + 84}%` : '92%'}
-                  </span>
+                <div className="mt-2 flex items-center justify-center sm:justify-end gap-2.5">
+                  <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Confidence</span>
+                  <div className="flex h-1.5 w-16 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: '92%' }} />
+                  </div>
+                  <span className="text-[10px] font-black text-emerald-500">92%</span>
                 </div>
               </div>
             </div>

@@ -46,17 +46,24 @@ export default function AiDelayPrediction({ shipmentId }: AiDelayPredictionProps
   }, [shipmentId]);
 
     return (
-        <article className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden group shadow-sm transition-all hover:shadow-md h-full flex flex-col">
-            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        <article className="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 relative overflow-hidden group shadow-sm transition-all hover:shadow-md h-full flex flex-col animate-in">
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+            <div className="absolute -right-4 -top-4 h-24 w-24 bg-teal-500/10 dark:bg-teal-500/20 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
             <div className="relative flex flex-col h-full">
                 <div className="mb-5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-teal-600 dark:bg-teal-500/10 dark:text-teal-400 shadow-sm transition-transform group-hover:scale-105">
-                            <AppIcon name="ai-extract" className="h-5 w-5" strokeWidth={2.5} />
+                        <div className="relative">
+                            <div className="absolute inset-0 bg-teal-400/20 blur-md rounded-full animate-pulse" />
+                            <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-teal-400 dark:bg-teal-500/20 dark:text-teal-400 shadow-lg border border-teal-500/20 transition-transform group-hover:scale-105">
+                                <AppIcon name="ai-extract" className="h-5 w-5" strokeWidth={2.5} />
+                            </div>
                         </div>
-                        <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">Neural Prediction</span>
+                        <div>
+                            <span className="text-[10px] font-black uppercase tracking-[0.2em] text-teal-600 dark:text-teal-400">Intelligence</span>
+                            <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mt-0.5">Neural Predictor</p>
+                        </div>
                     </div>
-                    <span className={`rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest shadow-sm ${prediction.colorClass}`}>
+                    <span className={`rounded-lg px-2.5 py-1 text-[9px] font-black uppercase tracking-widest shadow-sm ring-1 ring-inset ring-black/5 dark:ring-white/10 ${prediction.colorClass}`}>
                         {prediction.risk} Risk
                     </span>
                 </div>

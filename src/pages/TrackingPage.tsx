@@ -141,49 +141,54 @@ export default function TrackingPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Map Section */}
           <div className="card-premium h-[450px] overflow-hidden relative p-0 border-0 shadow-xl group">
-               <div className="absolute top-4 left-4 z-10 flex flex-col gap-2">
+               <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-2 transition-all">
                   <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-2 pointer-events-auto">
                     <span className="flex h-2 w-2">
                        <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-teal-400 opacity-75"></span>
                        <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
                     </span>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-600 dark:text-slate-300">Live GPS Cluster</span>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-200">Live GPS Cluster</span>
                   </div>
-
+ 
                   {/* AI Route Strategy Badge */}
-                  {trackingData.optimizedRoute && (
-                    <div className="bg-slate-900/90 backdrop-blur-md p-3 rounded-xl shadow-lg border border-white/10 max-w-xs pointer-events-auto mt-2">
-                       <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                             <div className="flex h-5 w-5 items-center justify-center rounded bg-indigo-500/20 text-indigo-400">
-                                <AppIcon name="ai-extract" className="h-3 w-3" />
+                  {trackingData?.optimizedRoute && (
+                    <div className="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl p-3 sm:p-4 rounded-2xl shadow-2xl border border-white/10 w-[calc(100vw-2rem)] sm:max-w-xs pointer-events-auto mt-1 group/ai-panel animate-in fade-in slide-in-from-left-4">
+                       <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2.5">
+                             <div className="relative">
+                                <div className="absolute inset-0 bg-indigo-400/20 blur-md rounded-full animate-pulse" />
+                                <div className="relative flex h-6 w-6 items-center justify-center rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/20">
+                                   <AppIcon name="ai-extract" className="h-3.5 w-3.5" />
+                                </div>
                              </div>
-                             <span className="text-[9px] font-black uppercase tracking-widest text-indigo-400">AI Route Strategy</span>
+                             <span className="text-[10px] font-black uppercase tracking-[0.1em] text-indigo-400">AI Strategy</span>
                           </div>
                           <button 
                             onClick={() => setShowOptimizedRoute(!showOptimizedRoute)}
-                            className={`text-[8px] font-bold uppercase px-1.5 py-0.5 rounded border transition-colors ${
-                              showOptimizedRoute ? 'bg-indigo-500 border-indigo-500 text-white' : 'border-white/20 text-white/40 hover:text-white hover:border-white/40'
+                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-lg border transition-all ${
+                              showOptimizedRoute ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'border-white/20 text-white/40 hover:text-white hover:border-white/40'
                             }`}
                           >
-                            {showOptimizedRoute ? 'Visible' : 'Hidden'}
+                            {showOptimizedRoute ? 'Active' : 'Show'}
                           </button>
                        </div>
-                       <div className="flex items-center justify-between text-white gap-4 mb-3">
-                          <div className="flex flex-col">
-                             <span className="text-[8px] uppercase text-slate-500 font-bold">Time Saving</span>
-                             <span className="text-xs font-bold text-emerald-400">-{trackingData.optimizedRoute.savings?.time}</span>
+                       
+                       <div className="grid grid-cols-2 gap-4 text-white mb-4">
+                          <div className="flex flex-col bg-white/5 p-2 rounded-xl">
+                             <span className="text-[8px] uppercase text-slate-500 font-black tracking-widest">Time Saving</span>
+                             <span className="text-sm font-black text-emerald-400 mt-0.5">-{trackingData?.optimizedRoute.savings?.time}</span>
                           </div>
-                          <div className="flex flex-col">
-                             <span className="text-[8px] uppercase text-slate-500 font-bold">Dist Reduction</span>
-                             <span className="text-xs font-bold text-indigo-400">-{trackingData.optimizedRoute.savings?.distance}</span>
+                          <div className="flex flex-col bg-white/5 p-2 rounded-xl">
+                             <span className="text-[8px] uppercase text-slate-500 font-black tracking-widest">Efficiency</span>
+                             <span className="text-sm font-black text-indigo-400 mt-0.5">-{trackingData?.optimizedRoute.savings?.distance}</span>
                           </div>
                        </div>
+ 
                        <button 
                          onClick={handleApplyRoute}
-                         className="w-full py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20"
+                         className="w-full py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-lg shadow-indigo-500/30 active:scale-[0.98]"
                        >
-                         Apply Optimized Route
+                         Execute Strategy
                        </button>
                     </div>
                   )}
