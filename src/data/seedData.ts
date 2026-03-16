@@ -65,7 +65,7 @@ export const createSeedState = (): AppState => ({
       id: 'TM-003',
       name: 'DHRUV BHANVADIYA',
       email: 'dhruv@exportrack.ai',
-      role: 'Operations',
+      role: 'Manager',
       region: 'EU',
       activeCases: 9,
       lastActive: '2026-03-10T07:15:00.000Z'
