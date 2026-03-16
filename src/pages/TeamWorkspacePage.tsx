@@ -1,4 +1,4 @@
-import { useState, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
@@ -13,6 +13,8 @@ import {
   type WorkspaceRole,
   type Permission,
 } from '../utils/permissions';
+
+import { Skeleton, SkeletonLine, SkeletonKpiCard, SkeletonCard, SkeletonAvatar, SkeletonText } from '../components/SkeletonLoader';
 
 /* ─── All permissions for the matrix ─────────────────────────────────── */
 const ALL_PERMISSIONS: Permission[] = [
@@ -126,6 +128,7 @@ export default function TeamWorkspacePage() {
     deleteInvite
   } = useAppContext();
 
+  const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('Operations');
@@ -133,6 +136,11 @@ export default function TeamWorkspacePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
   const [activeTab, setActiveTab] = useState<'members' | 'roles' | 'activity' | 'invites'>('members');
+
+  useMemo(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const currentRole = user?.role ? toWorkspaceRole(user.role) : 'Viewer';
   const canManageUsers = hasPermission(currentRole, 'manage_users');
@@ -170,6 +178,43 @@ export default function TeamWorkspacePage() {
     count: teamMembers.filter(m => toWorkspaceRole(m.role) === role).length,
   }));
 
+  if (loading) {
+    return (
+      <main className="page-stack">
+        <header className="dashboard-grid-header">
+          <div className="space-y-2">
+            <SkeletonLine className="h-10 w-64" />
+            <SkeletonLine className="h-4 w-96" />
+          </div>
+        </header>
+        <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[...Array(4)].map((_, i) => <SkeletonKpiCard key={i} />)}
+        </section>
+        <div className="h-12 w-full max-w-lg mb-6">
+          <Skeleton className="h-full w-full" borderRadius="rounded-xl" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {[...Array(6)].map((_, i) => (
+            <div key={i} className="card-premium p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <SkeletonAvatar size="h-11 w-11" />
+                <div className="flex-1 space-y-2">
+                  <SkeletonText width="w-1/2" />
+                  <SkeletonText width="w-2/3" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-3">
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
+                <Skeleton className="h-16" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    );
+  }
+
   return (
     <>
       <style>{`
@@ -177,7 +222,7 @@ export default function TeamWorkspacePage() {
         .tw-animate { animation: tw-fade-in 0.4s cubic-bezier(.4,0,.2,1) both; }
       `}</style>
 
-      <main className="page-stack">
+      <main className="page-stack skeleton-fade-in">
         {/* ── Header ── */}
         <header className="dashboard-grid-header">
           <div>

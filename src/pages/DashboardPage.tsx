@@ -7,7 +7,7 @@ import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
 import ShipmentAnalytics from '../components/ShipmentAnalytics';
-import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard } from '../components/SkeletonLoader';
+import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard, SkeletonLine } from '../components/SkeletonLoader';
 
 /* ─── Sub-Components ─────────────────────────────────────────────────── */
 const DashboardKpiCard = memo(({ title, value, icon, accent, suffix, subtitle }: any) => (
@@ -53,20 +53,18 @@ export default function DashboardPage() {
       <main className="page-stack">
         <header className="dashboard-grid-header">
           <div className="space-y-2">
-            <div className="h-8 w-64 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-800" />
-            <div className="h-4 w-96 animate-pulse rounded bg-slate-100 dark:bg-slate-800/50" />
+            <SkeletonLine className="h-8 w-64" />
+            <SkeletonLine className="h-4 w-96" />
           </div>
         </header>
-        <section className="dashboard-grid-kpi animate-in slide-in-from-bottom-2 duration-500 fade-in">
+        <section className="dashboard-grid-kpi">
           {[...Array(5)].map((_, i) => <SkeletonKpiCard key={i} />)}
         </section>
-        <div className="dashboard-chart-container animate-in slide-in-from-bottom-4 duration-700 fade-in">
+        <div className="dashboard-chart-container">
           <SkeletonChart />
         </div>
         <div className="dashboard-grid-section">
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
+          <SkeletonCard count={3} />
         </div>
         <div className="dashboard-grid-table">
           <SkeletonTable />
@@ -97,7 +95,7 @@ export default function DashboardPage() {
     .slice(0, 10);
 
   return (
-    <main className="page-stack">
+    <main className="page-stack skeleton-fade-in">
       {/* ── Dashboard Header ── */}
       <header className="dashboard-grid-header">
         <div>

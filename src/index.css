@@ -450,9 +450,23 @@
 }
 
 .animate-shimmer {
-  background: linear-gradient(90deg, transparent 25%, rgb(255 255 255 / 0.1) 50%, transparent 75%);
+  background: linear-gradient(
+    90deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 80%
+  );
   background-size: 200% 100%;
-  animation: shimmer 2s ease-in-out infinite;
+  animation: shimmer 1.2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.skeleton-fade-in {
+  animation: skeleton-fade 0.5s ease-out forwards;
+}
+
+@keyframes skeleton-fade {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @keyframes glow-pulse {

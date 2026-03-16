@@ -1,4 +1,4 @@
-import { useMemo, memo } from 'react';
+import { useState, useMemo, memo } from 'react';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 import {
@@ -8,6 +8,7 @@ import {
   computeDeliveryDistribution,
   computeDailyTrend,
 } from '../services/analyticsService';
+import { SkeletonLine, SkeletonKpiCard, SkeletonChart } from '../components/SkeletonLoader';
 
 /* ─── Helpers ────────────────────────────────────────────────────────── */
 const COLORS = {
@@ -43,6 +44,12 @@ AnalyticsKpiCard.displayName = 'AnalyticsKpiCard';
 /* ─── Main Page ──────────────────────────────────────────────────────── */
 export default function AnalyticsDashboardPage() {
   const { state: { shipments } } = useAppContext();
+  const [loading, setLoading] = useState(true);
+
+  useMemo(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const metrics = useMemo(() => computeAnalytics(shipments), [shipments]);
   const monthlyTrend = useMemo(() => computeMonthlyTrend(shipments), [shipments]);
@@ -64,8 +71,29 @@ export default function AnalyticsDashboardPage() {
     { title: 'Avg Lead Time', value: metrics.averageDeliveryTimeDays, icon: 'clock' as const, accent: COLORS.indigo, suffix: 'd' },
   ], [metrics]);
 
+  if (loading) {
+    return (
+      <main className="page-stack">
+        <header className="dashboard-grid-header">
+          <div className="space-y-2">
+            <SkeletonLine className="h-10 w-64" />
+            <SkeletonLine className="h-4 w-96" />
+          </div>
+        </header>
+        <section className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
+          {[...Array(6)].map((_, i) => <SkeletonKpiCard key={i} />)}
+        </section>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          <SkeletonChart />
+          <SkeletonChart />
+          <SkeletonChart />
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="page-stack">
+    <main className="page-stack skeleton-fade-in">
       {/* ── Page Header ── */}
       <header className="dashboard-grid-header">
         <div>

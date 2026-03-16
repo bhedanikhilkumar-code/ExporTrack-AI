@@ -9,6 +9,7 @@ import AiDelayPrediction from '../components/AiDelayPrediction';
 import ShipmentTimeline from '../components/ShipmentTimeline';
 import ShipmentRiskAlert from '../components/ShipmentRiskAlert';
 import Modal from '../components/Modal';
+import { Skeleton, SkeletonText, SkeletonButton, SkeletonKpiCard, SkeletonTable, SkeletonDetailSection } from '../components/SkeletonLoader';
 
 export default function ShipmentDetailsPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
@@ -19,10 +20,16 @@ export default function ShipmentDetailsPage() {
     assignDriver
   } = useAppContext();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [internal, setInternal] = useState(false);
   const [isDriverModalOpen, setIsDriverModalOpen] = useState(false);
   const [driverForm, setDriverForm] = useState({ name: '', phone: '', vehicle: '' });
+
+  useMemo(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const shipment = shipments.find((item) => item.id === shipmentId);
 
@@ -64,6 +71,46 @@ export default function ShipmentDetailsPage() {
       }))
     ].sort((a, b) => b.time.localeCompare(a.time));
   }, [shipment]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <section className="card-premium py-8 px-6">
+          <div className="flex items-center justify-between gap-4">
+            {[...Array(7)].map((_, i) => (
+              <div key={i} className="flex flex-col items-center flex-1 gap-3">
+                <Skeleton className="h-8 w-8" borderRadius="rounded-full" />
+                <SkeletonText width="w-12" height="h-2" />
+              </div>
+            ))}
+          </div>
+        </section>
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <SkeletonText width="w-32" height="h-2" />
+            <SkeletonText width="w-64" height="h-8" />
+            <SkeletonText width="w-48" height="h-4" />
+          </div>
+          <div className="flex gap-3">
+            <SkeletonButton size="h-10 w-32" />
+            <SkeletonButton size="h-10 w-32" />
+          </div>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[...Array(4)].map((_, i) => <SkeletonKpiCard key={i} />)}
+        </div>
+        <div className="grid gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2 space-y-6">
+            <SkeletonDetailSection />
+            <SkeletonTable />
+          </div>
+          <div className="space-y-6">
+            <SkeletonDetailSection />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!shipment) {
     return (
@@ -150,7 +197,7 @@ export default function ShipmentDetailsPage() {
   };
 
   return (
-    <div className="space-y-6 animate-in">
+    <div className="space-y-6 animate-in skeleton-fade-in">
       {/* ── Journey Stepper ── */}
       <section className="card-premium py-8 px-6 overflow-x-auto">
         <div className="flex items-center justify-between min-w-[800px] px-4">

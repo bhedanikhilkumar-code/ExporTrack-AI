@@ -1,4 +1,4 @@
-import { useState, useMemo, memo } from 'react';
+import { useState, memo, useMemo } from 'react';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
@@ -14,6 +14,8 @@ const permissionMatrix = [
   { action: 'Financial Audits', Admin: true, Manager: true, Operations: false, Broker: false, Auditor: true, Customer: false }
 ] as const;
 
+import { SkeletonLine, SkeletonKpiCard, SkeletonCard, SkeletonAvatar, SkeletonText, SkeletonButton, SkeletonDetailSection } from '../components/SkeletonLoader';
+
 export default function ProfileTeamPage() {
   const {
     state: { user, teamMembers, shipments, invites },
@@ -23,11 +25,17 @@ export default function ProfileTeamPage() {
     deleteInvite
   } = useAppContext();
 
+  const [loading, setLoading] = useState(true);
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [isInviting, setIsInviting] = useState(false);
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('Operations');
+
+  useMemo(() => {
+    const timer = setTimeout(() => setLoading(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,8 +71,51 @@ export default function ProfileTeamPage() {
     };
   }), [teamMembers, shipments]);
 
+  if (loading) {
+    return (
+      <main className="page-stack">
+        <header className="dashboard-grid-header">
+          <div className="space-y-2">
+            <SkeletonLine className="h-10 w-64" />
+            <SkeletonLine className="h-4 w-96" />
+          </div>
+        </header>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1 space-y-6">
+            <div className="card-premium p-8 flex flex-col items-center gap-4">
+              <SkeletonAvatar size="h-20 w-20" />
+              <SkeletonText width="w-32" height="h-6" />
+              <SkeletonText width="w-48" height="h-3" />
+            </div>
+            <SkeletonCard />
+          </div>
+          <div className="lg:col-span-2 space-y-6">
+            <div className="card-premium p-6 space-y-6">
+              <div className="flex justify-between items-center">
+                <SkeletonText width="w-48" height="h-6" />
+                <SkeletonButton />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="card-premium p-4 flex items-center gap-4">
+                    <SkeletonAvatar size="h-12 w-12" />
+                    <div className="flex-1 space-y-2">
+                      <SkeletonText width="w-2/3" />
+                      <SkeletonText width="w-1/2" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <SkeletonDetailSection />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
-    <main className="page-stack animate-in fade-in duration-500">
+    <main className="page-stack animate-in fade-in duration-500 skeleton-fade-in">
       <header className="dashboard-grid-header">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>
