@@ -41,12 +41,12 @@ export default function SplashPage() {
       {/* Top Bar */}
       <header className="sticky top-0 z-30 border-b border-slate-100/50 dark:border-slate-800/50 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-10">
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="relative h-8 w-8 transition-transform duration-500 group-hover:rotate-[30deg]">
-              <img src="/logo.png" alt="Logo" className="h-full w-full object-contain filter dark:invert" />
-            </div>
+          <Link to="/" className="flex items-center gap-3">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
+              <img src="/logo.png" alt="Logo" className="h-full w-full object-cover" />
+            </span>
             <span className="text-xl font-bold tracking-tight text-black dark:text-white">
-              ExporTrack <span className="text-slate-500 font-medium">AI</span>
+              ExporTrack <span className="text-teal-600 dark:text-teal-400">AI</span>
             </span>
           </Link>
           <nav className="hidden items-center gap-10 text-sm font-semibold text-slate-500 dark:text-slate-400 md:flex">
@@ -71,7 +71,7 @@ export default function SplashPage() {
         {/* Background Gradient */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#f0fdf4]/50 via-white to-white dark:from-[#0d9488]/5 dark:via-[#020617] dark:to-[#020617]" />
         
-        <div className="relative z-10 mx-auto max-w-[1000px] animate-in fade-in slide-in-from-bottom-8 duration-1000">
+        <div className="relative z-10 mx-auto max-w-[1100px] animate-in fade-in slide-in-from-bottom-8 duration-1000">
           {/* Badge */}
           <div className="mb-8 inline-flex items-center rounded-xl border border-slate-100 bg-white dark:border-slate-800 dark:bg-slate-900/50 px-5 py-2 shadow-sm">
             <span className="text-[11px] font-bold uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500">
@@ -80,8 +80,9 @@ export default function SplashPage() {
           </div>
 
           {/* Headline */}
-          <h1 className="whitespace-nowrap text-3xl font-extrabold tracking-tight text-slate-700 dark:text-white sm:text-4xl md:text-5xl lg:text-5xl leading-tight">
-            Run modern operations like a command center for export documentation.
+          <h1 className="text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15]">
+            Run modern operations like a <br className="hidden md:block" />
+            <span className="text-[#0f172a] dark:text-teal-400">command center</span> for export documentation.
           </h1>
 
           {/* Body Text */}
