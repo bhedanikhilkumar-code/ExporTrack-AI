@@ -24,6 +24,7 @@ import PublicTrackingPage from './pages/PublicTrackingPage';
 import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage';
 import DocumentOcrPage from './pages/DocumentOcrPage';
 import TeamWorkspacePage from './pages/TeamWorkspacePage';
+import RippleEffect from './components/RippleEffect';
 
 // Client Portal Components
 import ClientLayout from './components/ClientLayout';
@@ -68,6 +69,7 @@ export default function App() {
 
   return (
     <>
+      <RippleEffect />
       <PWAUpdateBanner />
       <NotificationPermissionBanner />
       <Routes>
