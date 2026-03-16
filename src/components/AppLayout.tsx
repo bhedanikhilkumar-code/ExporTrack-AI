@@ -143,7 +143,7 @@ export default function AppLayout() {
           {sidebarExpanded ? (
             <div className="flex items-center gap-3">
               <div className="flex h-8 w-8 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
-                <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
+                <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
               </div>
               <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100 truncate">
                 ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span>
@@ -151,7 +151,7 @@ export default function AppLayout() {
             </div>
           ) : (
             <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
-              <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
+              <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
             </div>
           )}
         </div>

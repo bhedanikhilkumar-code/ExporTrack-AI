@@ -43,7 +43,7 @@ export default function SplashPage() {
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5 md:px-10">
           <Link to="/" className="flex items-center gap-3">
             <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
-              <img src="/logo.png" alt="Logo" className="h-full w-full object-cover" />
+              <img src="/logo.svg" alt="Logo" className="h-full w-full object-cover" />
             </span>
             <span className="text-xl font-bold tracking-tight text-black dark:text-white">
               ExporTrack <span className="text-teal-600 dark:text-teal-400">AI</span>

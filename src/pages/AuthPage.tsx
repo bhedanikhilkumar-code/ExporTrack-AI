@@ -201,7 +201,7 @@ export default function AuthPage() {
             <div className="relative">
               <div className="flex items-center gap-3 mb-8">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg overflow-hidden bg-white">
-                  <img src="/logo.png" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
+                  <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
                 </div>
                 <h1 className="text-2xl font-extrabold tracking-tight">ExporTrack<span className="text-teal-300">AI</span></h1>
               </div>
