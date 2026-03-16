@@ -81,8 +81,8 @@ export default function SplashPage() {
 
           {/* Headline */}
           <h1 className="text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15]">
-            Run modern operations like a <br className="hidden md:block" />
-            <span className="text-[#0f172a] dark:text-teal-400">command center</span> for export documentation.
+            Unified Command for <br className="hidden md:block" />
+            <span className="text-[#0f172a] dark:text-teal-400">Global Export Operations.</span>
           </h1>
 
           {/* Body Text */}
