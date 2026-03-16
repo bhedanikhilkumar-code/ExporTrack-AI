@@ -2,28 +2,44 @@ import { useState, useEffect, useRef } from 'react';
 
 /**
  * Custom hook to detect scroll direction and visibility for auto-hiding headers.
- * Optimized with requestAnimationFrame for smooth performance.
+ * Optimized with requestAnimationFrame for smooth performance and handles
+ * edge cases like iOS bounce and "at top" visibility.
  */
-export function useScrollDirection(threshold = 10, offset = 80) {
+export function useScrollDirection(threshold = 10, offset = 50) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
   useEffect(() => {
-    // Optimization: avoid event listener if not in browser
     if (typeof window === 'undefined') return;
 
     const updateScrollDirection = () => {
-      const scrollY = window.pageYOffset;
+      const scrollY = window.scrollY || window.pageYOffset;
 
-      // Ignore small movements
+      // Handle iOS bounce (negative scrollY)
+      if (scrollY < 0) {
+        setIsVisible(true);
+        lastScrollY.current = 0;
+        ticking.current = false;
+        return;
+      }
+
+      // At the top of the page, the header should ALWAYS be visible
+      if (scrollY < offset) {
+        setIsVisible(true);
+        lastScrollY.current = scrollY;
+        ticking.current = false;
+        return;
+      }
+
+      // Ignore small movements (threshold)
       if (Math.abs(scrollY - lastScrollY.current) < threshold) {
         ticking.current = false;
         return;
       }
 
-      // Scroll Down + passed certain offset -> Hide
-      if (scrollY > lastScrollY.current && scrollY > offset) {
+      // Scroll Down -> Hide
+      if (scrollY > lastScrollY.current) {
         setIsVisible(false);
       } 
       // Scroll Up -> Show
@@ -31,7 +47,7 @@ export function useScrollDirection(threshold = 10, offset = 80) {
         setIsVisible(true);
       }
 
-      lastScrollY.current = scrollY > 0 ? scrollY : 0;
+      lastScrollY.current = scrollY;
       ticking.current = false;
     };
 

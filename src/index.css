@@ -379,6 +379,14 @@
   .page-transition-enter {
     animation: fade-in-slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
+
+  .will-change-transform {
+    will-change: transform;
+  }
+
+  .duration-250 {
+    transition-duration: 250ms;
+  }
 }
 
 @keyframes fade-in-slide-up {

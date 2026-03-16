@@ -206,7 +206,7 @@ export default function AppLayout() {
 
       <div className={`transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:pl-64' : 'md:pl-20'
         }`}>
-        <header className={`sticky top-0 z-10 bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] transition-all duration-300 ease-in-out pt-[env(safe-area-inset-top)] ${
+        <header className={`sticky top-0 z-10 bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] transition-transform duration-250 ease-in-out will-change-transform pt-[env(safe-area-inset-top)] ${
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
         }`}>
           <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8 h-16">
