@@ -60,14 +60,14 @@ export default function KpiCard({ title, value, subtitle, accent, icon, suffix, 
     <article className="kpi-card group hover-premium cursor-default p-4 sm:p-5">
       <div className="flex flex-col gap-3 sm:gap-4">
         <div className="flex items-center justify-between">
-          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} transition-all duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg`}>
-            <AppIcon name={icon || icons[accent]} className={`h-5 w-5 ${colors.icon} transition-transform duration-300 group-hover:scale-110`} />
+          <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} spring-transition duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg ring-1 ring-inset ring-slate-900/5 dark:ring-white/10`}>
+            <AppIcon name={icon || icons[accent]} className={`h-5 w-5 ${colors.icon} spring-transition duration-300 group-hover:scale-110`} />
           </span>
           <div className="flex flex-col items-end gap-1">
-            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 group-hover:text-slate-500 transition-colors">{title}</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500 group-hover:text-slate-500 dark:group-hover:text-slate-300 transition-colors">{title}</span>
             <div className="flex items-baseline gap-1">
-              <p className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>{value}</p>
-              {suffix && <span className="text-xs font-bold text-slate-400">{suffix}</span>}
+              <p className="text-2xl font-extrabold tracking-tight tabular-nums text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>{value}</p>
+              {suffix && <span className="text-xs font-bold text-slate-400 tabular-nums">{suffix}</span>}
             </div>
           </div>
         </div>

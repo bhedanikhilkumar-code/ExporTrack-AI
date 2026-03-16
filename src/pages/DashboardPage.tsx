@@ -57,10 +57,10 @@ export default function DashboardPage() {
             <div className="h-4 w-96 animate-pulse rounded bg-slate-100 dark:bg-slate-800/50" />
           </div>
         </header>
-        <section className="dashboard-grid-kpi">
+        <section className="dashboard-grid-kpi animate-in slide-in-from-bottom-2 duration-500 fade-in">
           {[...Array(5)].map((_, i) => <SkeletonKpiCard key={i} />)}
         </section>
-        <div className="dashboard-chart-container">
+        <div className="dashboard-chart-container animate-in slide-in-from-bottom-4 duration-700 fade-in">
           <SkeletonChart />
         </div>
         <div className="dashboard-grid-section">
@@ -141,7 +141,7 @@ export default function DashboardPage() {
           <div className="mb-6 flex items-center justify-between">
             <div>
               <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Logistics Event Stream</h3>
-              <p className="text-[11px] text-slate-400 ml-4">Real-time system events and notifications</p>
+              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Real-time system events and notifications</p>
             </div>
             <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors group inline-flex items-center gap-1">
               View All
@@ -161,7 +161,7 @@ export default function DashboardPage() {
                 <div className="flex-1 pb-4">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
-                    <time className="text-[10px] font-medium text-slate-400">{item.time.split('T')[0]}</time>
+                    <time className="text-[10px] font-semibold tracking-wide text-slate-400 tabular-nums">{item.time.split('T')[0]}</time>
                   </div>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{item.detail}</p>
                 </div>
@@ -209,18 +209,18 @@ export default function DashboardPage() {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
               {recentShipments.map(s => (
-                <tr key={s.id} className="group table-row-premium hover:bg-slate-50/50 dark:hover:bg-slate-800/20">
-                  <td className="px-4 py-4">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white">{s.id}</span>
+                <tr key={s.id} className="group table-row-premium hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                  <td className="px-5 py-4">
+                    <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">{s.id}</span>
                   </td>
-                  <td className="px-4 py-4">
-                    <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{s.clientName}</span>
+                  <td className="px-5 py-4">
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{s.clientName}</span>
                   </td>
-                  <td className="px-4 py-4">
+                  <td className="px-5 py-4">
                     <StatusBadge value={s.status} />
                   </td>
-                  <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
+                  <td className="px-5 py-4 text-right">
+                    <div className="flex items-center justify-end gap-2.5">
                        <Link to={`/shipments/${s.id}/tracking`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 dark:border-teal-900/50 dark:bg-teal-900/20 dark:hover:bg-teal-900/40 transition-all font-bold group" title="Live Tracking">
                          <span className="relative flex h-3 w-3">
                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
