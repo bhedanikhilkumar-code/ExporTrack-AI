@@ -80,7 +80,7 @@ export default function SplashPage() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-800 dark:text-white sm:text-5xl md:text-6xl lg:text-7xl leading-[1.15]">
+          <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-4xl md:text-5xl lg:text-6xl leading-[1.2]">
             Unified Command for <br className="hidden md:block" />
             <span className="text-[#0f172a] dark:text-teal-400">Global Export Operations.</span>
           </h1>
