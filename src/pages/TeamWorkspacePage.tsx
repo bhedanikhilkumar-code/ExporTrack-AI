@@ -356,14 +356,14 @@ export default function TeamWorkspacePage() {
             <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-6">Team Activity Log</h3>
             <div className="space-y-4">
               {[
-                { user: 'Aarav Mehta', action: 'Changed role of Sofia Patel to Operations', time: '2 hours ago', type: 'role' },
-                { user: 'Emily Chen', action: 'Invited rohan.iyer@exportrack.ai as Staff', time: '5 hours ago', type: 'invite' },
-                { user: 'Nikhil Bheda', action: 'Created shipment EXP-2026-005', time: '1 day ago', type: 'shipment' },
-                { user: 'Aarav Mehta', action: 'Approved 3 documents for EXP-2026-002', time: '1 day ago', type: 'document' },
-                { user: 'Sofia Patel', action: 'Updated tracking for EXP-2026-003', time: '2 days ago', type: 'tracking' },
-                { user: 'Emily Chen', action: 'Removed viewer access for legacy account', time: '3 days ago', type: 'role' },
-                { user: 'Rohan Iyer', action: 'Uploaded 4 documents for EXP-2026-001', time: '3 days ago', type: 'document' },
-                { user: 'Nikhil Bheda', action: 'Updated workspace settings', time: '5 days ago', type: 'settings' },
+                { user: 'PRINCE DODIYA', action: 'Changed role of NEEL NADIYAPARA to Operations', time: '2 hours ago', type: 'role' },
+                { user: 'NIKHIL BHEDA', action: 'Invited dhruv@exportrack.ai as Staff', time: '5 hours ago', type: 'invite' },
+                { user: 'NIKHIL BHEDA', action: 'Created shipment EXP-2026-005', time: '1 day ago', type: 'shipment' },
+                { user: 'PRINCE DODIYA', action: 'Approved 3 documents for EXP-2026-002', time: '1 day ago', type: 'document' },
+                { user: 'NEEL NADIYAPARA', action: 'Updated tracking for EXP-2026-003', time: '2 days ago', type: 'tracking' },
+                { user: 'NIKHIL BHEDA', action: 'Removed viewer access for legacy account', time: '3 days ago', type: 'role' },
+                { user: 'DHRUV BHANVADIYA', action: 'Uploaded 4 documents for EXP-2026-001', time: '3 days ago', type: 'document' },
+                { user: 'PRINCE DODIYA', action: 'Updated workspace settings', time: '5 days ago', type: 'settings' },
               ].map((entry, idx) => (
                 <div key={idx} className="relative flex gap-4">
                   {idx !== 7 && (

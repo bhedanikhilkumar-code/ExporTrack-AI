@@ -44,18 +44,9 @@ export const createSeedState = (): AppState => ({
   theme: 'system',
   teamMembers: [
     {
-      id: 'TM-000',
-      name: 'Nikhil Bheda',
-      email: 'nikhil@bhedaexports.com',
-      role: 'Export Operations Manager',
-      region: 'South Asia',
-      activeCases: 14,
-      lastActive: '2026-03-11T08:53:00.000Z'
-    },
-    {
       id: 'TM-001',
-      name: 'Aarav Mehta',
-      email: 'aarav@exportrack.ai',
+      name: 'PRINCE DODIYA',
+      email: 'prince@exportrack.ai',
       role: 'Admin',
       region: 'North America',
       activeCases: 18,
@@ -63,8 +54,8 @@ export const createSeedState = (): AppState => ({
     },
     {
       id: 'TM-002',
-      name: 'Emily Chen',
-      email: 'emily.chen@exportrack.ai',
+      name: 'NIKHIL BHEDA',
+      email: 'nikhil@exportrack.ai',
       role: 'Manager',
       region: 'APAC',
       activeCases: 12,
@@ -72,8 +63,8 @@ export const createSeedState = (): AppState => ({
     },
     {
       id: 'TM-003',
-      name: 'Rohan Iyer',
-      email: 'rohan.iyer@exportrack.ai',
+      name: 'DHRUV BHANVADIYA',
+      email: 'dhruv@exportrack.ai',
       role: 'Operations',
       region: 'EU',
       activeCases: 9,
@@ -81,8 +72,8 @@ export const createSeedState = (): AppState => ({
     },
     {
       id: 'TM-004',
-      name: 'Sofia Patel',
-      email: 'sofia.patel@exportrack.ai',
+      name: 'NEEL NADIYAPARA',
+      email: 'neel.n@exportrack.ai',
       role: 'Operations',
       region: 'Middle East',
       activeCases: 7,
@@ -100,14 +91,14 @@ export const createSeedState = (): AppState => ({
       delayed: true,
       deadline: '2026-03-11',
       priority: 'High',
-      assignedTo: 'Emily Chen',
+      assignedTo: 'NIKHIL BHEDA',
       documents: [
-        doc('DOC-101', 'Invoice', 'invoice-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:20:00.000Z', 'Emily Chen'),
-        doc('DOC-102', 'Packing List', 'packing-list-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:25:00.000Z', 'Emily Chen'),
-        doc('DOC-103', 'Bill of Lading', 'bill-lading-exp-001.jpg', 'JPG', 'Pending', '2026-03-02T10:12:00.000Z', 'Rohan Iyer'),
-        doc('DOC-104', 'Shipping Bill', 'shipping-bill-exp-001.pdf', 'PDF', 'Verified', '2026-03-03T04:04:00.000Z', 'Sofia Patel'),
-        doc('DOC-105', 'Certificate of Origin', 'origin-cert-exp-001.png', 'PNG', 'Pending', '2026-03-03T04:12:00.000Z', 'Sofia Patel'),
-        doc('DOC-106', 'Insurance Papers', 'insurance-exp-001.pdf', 'PDF', 'Verified', '2026-03-03T04:20:00.000Z', 'Emily Chen'),
+        doc('DOC-101', 'Invoice', 'invoice-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:20:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-102', 'Packing List', 'packing-list-exp-001.pdf', 'PDF', 'Verified', '2026-03-02T09:25:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-103', 'Bill of Lading', 'bill-lading-exp-001.jpg', 'JPG', 'Pending', '2026-03-02T10:12:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-104', 'Shipping Bill', 'shipping-bill-exp-001.pdf', 'PDF', 'Verified', '2026-03-03T04:04:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-105', 'Certificate of Origin', 'origin-cert-exp-001.png', 'PNG', 'Pending', '2026-03-03T04:12:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-106', 'Insurance Papers', 'insurance-exp-001.pdf', 'PDF', 'Verified', '2026-03-03T04:20:00.000Z', 'NIKHIL BHEDA'),
         doc('DOC-107', 'Customs Files', 'Not uploaded', 'PDF', 'Missing', '2026-03-03T04:21:00.000Z', 'System')
       ],
       aiScan: [
@@ -117,7 +108,7 @@ export const createSeedState = (): AppState => ({
       comments: [
         {
           id: 'COM-001',
-          author: 'Emily Chen',
+          author: 'NIKHIL BHEDA',
           role: 'Manager',
           message: 'Client requested expedited customs filing. Prioritize customs files today.',
           createdAt: '2026-03-04T10:10:00.000Z',
@@ -125,7 +116,7 @@ export const createSeedState = (): AppState => ({
         },
         {
           id: 'COM-002',
-          author: 'Rohan Iyer',
+          author: 'DHRUV BHANVADIYA',
           role: 'Operations',
           message: 'Waiting for broker to share customs files before 14:00 UTC.',
           createdAt: '2026-03-04T10:30:00.000Z',
@@ -147,15 +138,15 @@ export const createSeedState = (): AppState => ({
       delayed: true,
       deadline: '2026-03-12',
       priority: 'Medium',
-      assignedTo: 'Aarav Mehta',
+      assignedTo: 'PRINCE DODIYA',
       documents: [
-        doc('DOC-201', 'Invoice', 'invoice-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:03:00.000Z', 'Aarav Mehta'),
-        doc('DOC-202', 'Packing List', 'packing-list-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:15:00.000Z', 'Aarav Mehta'),
-        doc('DOC-203', 'Bill of Lading', 'bl-exp-002.pdf', 'PDF', 'Rejected', '2026-02-28T06:22:00.000Z', 'Sofia Patel'),
-        doc('DOC-204', 'Shipping Bill', 'shipping-bill-exp-002.png', 'PNG', 'Verified', '2026-02-28T06:50:00.000Z', 'Sofia Patel'),
-        doc('DOC-205', 'Certificate of Origin', 'origin-cert-exp-002.pdf', 'PDF', 'Verified', '2026-02-28T06:55:00.000Z', 'Aarav Mehta'),
-        doc('DOC-206', 'Insurance Papers', 'insurance-exp-002.jpg', 'JPG', 'Pending', '2026-02-28T08:10:00.000Z', 'Emily Chen'),
-        doc('DOC-207', 'Customs Files', 'customs-exp-002.pdf', 'PDF', 'Pending', '2026-03-01T10:00:00.000Z', 'Emily Chen')
+        doc('DOC-201', 'Invoice', 'invoice-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:03:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-202', 'Packing List', 'packing-list-exp-002.pdf', 'PDF', 'Verified', '2026-02-27T08:15:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-203', 'Bill of Lading', 'bl-exp-002.pdf', 'PDF', 'Rejected', '2026-02-28T06:22:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-204', 'Shipping Bill', 'shipping-bill-exp-002.png', 'PNG', 'Verified', '2026-02-28T06:50:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-205', 'Certificate of Origin', 'origin-cert-exp-002.pdf', 'PDF', 'Verified', '2026-02-28T06:55:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-206', 'Insurance Papers', 'insurance-exp-002.jpg', 'JPG', 'Pending', '2026-02-28T08:10:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-207', 'Customs Files', 'customs-exp-002.pdf', 'PDF', 'Pending', '2026-03-01T10:00:00.000Z', 'NIKHIL BHEDA')
       ],
       aiScan: [scan('SCAN-003', 'Commercial Invoice', 'INV-UAE-33419', '2026-02-26', 'BlueWave Foods', 'USD 87,900.00', 'UAE', 92)],
       comments: [
@@ -176,21 +167,21 @@ export const createSeedState = (): AppState => ({
       delayed: false,
       deadline: '2026-03-15',
       priority: 'Medium',
-      assignedTo: 'Rohan Iyer',
+      assignedTo: 'DHRUV BHANVADIYA',
       documents: [
-        doc('DOC-301', 'Invoice', 'invoice-exp-003.pdf', 'PDF', 'Verified', '2026-03-05T07:02:00.000Z', 'Rohan Iyer'),
-        doc('DOC-302', 'Packing List', 'packing-list-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T07:40:00.000Z', 'Rohan Iyer'),
+        doc('DOC-301', 'Invoice', 'invoice-exp-003.pdf', 'PDF', 'Verified', '2026-03-05T07:02:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-302', 'Packing List', 'packing-list-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T07:40:00.000Z', 'DHRUV BHANVADIYA'),
         doc('DOC-303', 'Bill of Lading', 'Not uploaded', 'PDF', 'Missing', '2026-03-05T08:00:00.000Z', 'System'),
-        doc('DOC-304', 'Shipping Bill', 'shipping-bill-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T08:12:00.000Z', 'Sofia Patel'),
+        doc('DOC-304', 'Shipping Bill', 'shipping-bill-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T08:12:00.000Z', 'NEEL NADIYAPARA'),
         doc('DOC-305', 'Certificate of Origin', 'Not uploaded', 'PDF', 'Missing', '2026-03-05T08:30:00.000Z', 'System'),
-        doc('DOC-306', 'Insurance Papers', 'insurance-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T08:40:00.000Z', 'Emily Chen'),
+        doc('DOC-306', 'Insurance Papers', 'insurance-exp-003.pdf', 'PDF', 'Pending', '2026-03-05T08:40:00.000Z', 'NIKHIL BHEDA'),
         doc('DOC-307', 'Customs Files', 'Not uploaded', 'PDF', 'Missing', '2026-03-05T08:45:00.000Z', 'System')
       ],
       aiScan: [scan('SCAN-004', 'Commercial Invoice', 'INV-SE-10445', '2026-03-05', 'Nordic Auto Components', 'USD 214,380.00', 'Sweden', 96)],
       comments: [
         {
           id: 'COM-004',
-          author: 'Sofia Patel',
+          author: 'NEEL NADIYAPARA',
           role: 'Operations',
           message: 'Client sent partial docs. Following up for certificate and customs package.',
           createdAt: '2026-03-06T11:14:00.000Z',
@@ -208,15 +199,15 @@ export const createSeedState = (): AppState => ({
       delayed: false,
       deadline: '2026-02-28',
       priority: 'Low',
-      assignedTo: 'Aarav Mehta',
+      assignedTo: 'PRINCE DODIYA',
       documents: [
-        doc('DOC-401', 'Invoice', 'invoice-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:20:00.000Z', 'Emily Chen'),
-        doc('DOC-402', 'Packing List', 'packing-list-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:40:00.000Z', 'Emily Chen'),
-        doc('DOC-403', 'Bill of Lading', 'bill-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T10:12:00.000Z', 'Aarav Mehta'),
-        doc('DOC-404', 'Shipping Bill', 'shipping-bill-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T10:33:00.000Z', 'Aarav Mehta'),
-        doc('DOC-405', 'Certificate of Origin', 'origin-exp-004.png', 'PNG', 'Verified', '2026-02-22T10:45:00.000Z', 'Emily Chen'),
-        doc('DOC-406', 'Insurance Papers', 'insurance-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T10:58:00.000Z', 'Aarav Mehta'),
-        doc('DOC-407', 'Customs Files', 'customs-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T11:15:00.000Z', 'Aarav Mehta')
+        doc('DOC-401', 'Invoice', 'invoice-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:20:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-402', 'Packing List', 'packing-list-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T09:40:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-403', 'Bill of Lading', 'bill-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T10:12:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-404', 'Shipping Bill', 'shipping-bill-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T10:33:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-405', 'Certificate of Origin', 'origin-exp-004.png', 'PNG', 'Verified', '2026-02-22T10:45:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-406', 'Insurance Papers', 'insurance-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T10:58:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-407', 'Customs Files', 'customs-exp-004.pdf', 'PDF', 'Verified', '2026-02-22T11:15:00.000Z', 'PRINCE DODIYA')
       ],
       aiScan: [
         scan('SCAN-005', 'Commercial Invoice', 'INV-BR-90188', '2026-02-21', 'GreenMed Pharma', 'USD 64,020.00', 'Brazil', 98),
@@ -225,7 +216,7 @@ export const createSeedState = (): AppState => ({
       comments: [
         {
           id: 'COM-005',
-          author: 'Aarav Mehta',
+          author: 'PRINCE DODIYA',
           role: 'Admin',
           message: 'Closed with full compliance. Add this shipment to quality benchmark examples.',
           createdAt: '2026-03-07T09:00:00.000Z',
@@ -243,12 +234,12 @@ export const createSeedState = (): AppState => ({
       delayed: false,
       deadline: '2026-03-13',
       priority: 'High',
-      assignedTo: 'Sofia Patel',
+      assignedTo: 'NEEL NADIYAPARA',
       documents: [
-        doc('DOC-501', 'Invoice', 'invoice-exp-005.pdf', 'PDF', 'Pending', '2026-03-06T07:05:00.000Z', 'Sofia Patel'),
+        doc('DOC-501', 'Invoice', 'invoice-exp-005.pdf', 'PDF', 'Pending', '2026-03-06T07:05:00.000Z', 'NEEL NADIYAPARA'),
         doc('DOC-502', 'Packing List', 'Not uploaded', 'PDF', 'Missing', '2026-03-06T08:00:00.000Z', 'System'),
         doc('DOC-503', 'Bill of Lading', 'Not uploaded', 'PDF', 'Missing', '2026-03-06T08:00:00.000Z', 'System'),
-        doc('DOC-504', 'Shipping Bill', 'shipping-bill-exp-005.jpg', 'JPG', 'Pending', '2026-03-06T08:12:00.000Z', 'Sofia Patel'),
+        doc('DOC-504', 'Shipping Bill', 'shipping-bill-exp-005.jpg', 'JPG', 'Pending', '2026-03-06T08:12:00.000Z', 'NEEL NADIYAPARA'),
         doc('DOC-505', 'Certificate of Origin', 'Not uploaded', 'PDF', 'Missing', '2026-03-06T08:30:00.000Z', 'System'),
         doc('DOC-506', 'Insurance Papers', 'Not uploaded', 'PDF', 'Missing', '2026-03-06T08:45:00.000Z', 'System'),
         doc('DOC-507', 'Customs Files', 'Not uploaded', 'PDF', 'Missing', '2026-03-06T08:55:00.000Z', 'System')

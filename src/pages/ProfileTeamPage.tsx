@@ -236,7 +236,7 @@ export default function ProfileTeamPage() {
                       required 
                       value={inviteName}
                       onChange={(e) => setInviteName(e.target.value)}
-                      placeholder="e.g. Sofia Patel" 
+                      placeholder="e.g. NEEL NADIYAPARA" 
                       className="input-field py-4 h-12" 
                       disabled={isInviting}
                     />
