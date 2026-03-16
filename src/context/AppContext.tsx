@@ -143,19 +143,15 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     // Clean up invalid or demo sessions on app load
     if (initialState.isAuthenticated && initialState.user) {
       // Remove demo sessions - force re-login
+        // Log session restoration
       if (initialState.user.authProvider === 'demo') {
-        console.log('Demo session cleared on app load');
-        return {
-          ...initialState,
-          isAuthenticated: false,
-          user: null
-        };
+        console.log('Restoring Demo session');
       }
 
       // Validate Google sessions
       if (initialState.user.authProvider === 'google') {
-        const token = safeStorage.session.getItem('google_auth_token');
-        const userEmail = safeStorage.session.getItem('google_user_email');
+        const token = safeStorage.getItem('google_auth_token');
+        const userEmail = safeStorage.getItem('google_user_email');
 
         if (!token || !userEmail) {
           console.warn('Invalid Google session detected, logging out');
@@ -173,8 +169,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   // Restore user session on app load if authenticated
   useEffect(() => {
     if (state.isAuthenticated && state.user?.authProvider === 'google') {
-      const token = safeStorage.session.getItem('google_auth_token');
-      const userEmail = safeStorage.session.getItem('google_user_email');
+      const token = safeStorage.getItem('google_auth_token');
+      const userEmail = safeStorage.getItem('google_user_email');
 
       // Verify session is still valid
       if (!token || !userEmail) {
@@ -190,7 +186,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     safeStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [state]);
 
+  useEffect(() => {
     // Sync theme with document class
     if (typeof document !== 'undefined') {
       const applyTheme = (t: 'light' | 'dark' | 'system') => {
@@ -365,10 +363,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         }
       }));
 
-      // Store the token for future API calls (if needed)
-      safeStorage.session.setItem('google_auth_token', token);
-      safeStorage.session.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
-      safeStorage.session.setItem('google_user_email', userEmail);
+      // Store the token for future API calls (if needed) - Use localStorage for persistence
+      safeStorage.setItem('google_auth_token', token);
+      safeStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
+      safeStorage.setItem('google_user_email', userEmail);
 
       // Log successful authentication
       console.log('User authenticated with Google:', {
@@ -380,9 +378,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       console.error('Failed to login with Google token:', error);
 
       // Clear any partial session data on error
-      safeStorage.session.removeItem('google_auth_token');
-      safeStorage.session.removeItem('google_token_expiry');
-      safeStorage.session.removeItem('google_user_email');
+      safeStorage.removeItem('google_auth_token');
+      safeStorage.removeItem('google_token_expiry');
+      safeStorage.removeItem('google_user_email');
 
       throw new Error('Google authentication failed. Please try again.');
     }
@@ -390,9 +388,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     // Clear all authentication data
-    safeStorage.session.removeItem('google_auth_token');
-    safeStorage.session.removeItem('google_token_expiry');
-    safeStorage.session.removeItem('google_user_email');
+    safeStorage.removeItem('google_auth_token');
+    safeStorage.removeItem('google_token_expiry');
+    safeStorage.removeItem('google_user_email');
+    safeStorage.removeItem(STORAGE_KEY); // Also clear persisted state
 
     // Log logout
     console.log('User logged out');
