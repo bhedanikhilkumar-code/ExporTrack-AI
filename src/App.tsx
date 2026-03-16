@@ -78,11 +78,8 @@ export default function App() {
         <Route path="/splash" element={<Navigate to="/" replace />} />
         <Route path="/track/:trackingNumber" element={<PublicTrackingPage />} />
 
-        {/* Auth Route - Redirect to dashboard if already authenticated */}
-        <Route
-          path="/auth"
-          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
-        />
+        {/* Auth Route - Handled within AuthPage for authenticated state */}
+        <Route path="/auth" element={<AuthPage />} />
 
         {/* Client Portal Routes */}
         <Route path="/client/login" element={<ClientLoginPage />} />

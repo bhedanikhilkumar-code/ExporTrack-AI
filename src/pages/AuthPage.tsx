@@ -8,7 +8,8 @@ type Mode = 'login' | 'signup';
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { login, signup, loginWithGoogleToken } = useAppContext();
+  const { login, signup, loginWithGoogleToken, logout, state } = useAppContext();
+  const { isAuthenticated, user } = state;
   const [mode, setMode] = useState<Mode>('login');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -181,6 +182,41 @@ export default function AuthPage() {
       setIsLoading(false);
     }
   };
+
+  /* Existing logic for Google Sign-In and local login */
+
+  if (isAuthenticated && user) {
+    return (
+      <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-2xl text-center">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 dark:bg-teal-500/10 mb-6 font-bold text-teal-600">
+             {user.name.charAt(0)}
+          </div>
+          <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Already Signed In</h2>
+          <p className="mt-2 text-sm text-slate-500 mb-8 truncate">
+            {user.name} ({user.email})
+          </p>
+          <div className="space-y-4">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="btn-primary w-full py-3"
+            >
+              Go to Dashboard
+            </button>
+            <button
+              onClick={() => {
+                logout();
+                setMode('login');
+              }}
+              className="w-full text-sm font-bold text-slate-400 hover:text-slate-600 transition-colors"
+            >
+              Sign Out & Use Another Account
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const toggleMode = () => {
     setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
