@@ -79,7 +79,7 @@ export default function UserProfileDropdown() {
             {/* Dropdown Menu - Premium YouTube Style */}
             {isOpen && (
                 <div 
-                    className="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:top-full mt-3 w-auto sm:w-72 rounded-2xl border border-slate-200/50 bg-white/95 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/95 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_60px_rgba(0,0,0,0.5)] z-[100] overflow-hidden animate-profile-menu p-1.5"
+                    className="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:top-full mt-3 w-auto sm:w-72 rounded-2xl border border-slate-200/50 bg-white/95 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/95 shadow-dropdown z-[100] overflow-hidden animate-profile-menu p-1.5"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header Section */}

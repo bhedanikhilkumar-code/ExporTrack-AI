@@ -53,7 +53,7 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
             ref={panelRef}
             className="fixed inset-x-4 top-20 sm:absolute sm:top-full sm:right-0 sm:left-auto sm:inset-x-auto sm:mt-3 sm:w-96 w-auto max-w-[calc(100vw-2rem)] z-50 animate-in fade-in slide-in-from-top-2 duration-200"
         >
-            <div className="rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-2xl dark:border-slate-800/60 dark:bg-slate-900/95 overflow-hidden flex flex-col">
+            <div className="rounded-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-dropdown dark:border-slate-800/60 dark:bg-slate-900/95 overflow-hidden flex flex-col">
                 {/* Header */}
                 <div className="border-b border-slate-200/60 px-4 py-3 dark:border-slate-800/60 bg-slate-50/50 dark:bg-slate-900/50">
                     <div className="flex items-center justify-between">

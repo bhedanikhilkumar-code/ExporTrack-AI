@@ -157,6 +157,14 @@
     box-shadow: 0 20px 40px -12px rgb(0 0 0 / 0.6), 0 8px 16px -8px rgb(0 0 0 / 0.4), inset 0 1px 0 0 rgb(255 255 255 / 0.06);
   }
 
+  .shadow-dropdown {
+    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+  }
+
+  .dark .shadow-dropdown {
+    box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  }
+
   /* ── Surface Glow ── */
   .surface-glow {
     @apply relative after:absolute after:inset-0 after:-z-10 after:rounded-[inherit] after:bg-gradient-to-tr after:from-teal-500/5 after:to-blue-500/5 after:blur-xl after:content-[''];
