@@ -46,7 +46,7 @@ export const createSeedState = (): AppState => ({
     {
       id: 'TM-001',
       name: 'PRINCE DODIYA',
-      email: 'prince@exportrack.ai',
+      email: 'prince.dodiya@exportrack.ai',
       role: 'Admin',
       region: 'North America',
       activeCases: 18,
@@ -55,7 +55,7 @@ export const createSeedState = (): AppState => ({
     {
       id: 'TM-002',
       name: 'NIKHIL BHEDA',
-      email: 'nikhil@exportrack.ai',
+      email: 'nikhil.bheda@exportrack.ai',
       role: 'Manager',
       region: 'APAC',
       activeCases: 12,
@@ -64,7 +64,7 @@ export const createSeedState = (): AppState => ({
     {
       id: 'TM-003',
       name: 'DHRUV BHANVADIYA',
-      email: 'dhruv@exportrack.ai',
+      email: 'dhruv.bhanvadiya@exportrack.ai',
       role: 'Manager',
       region: 'EU',
       activeCases: 9,
@@ -73,7 +73,7 @@ export const createSeedState = (): AppState => ({
     {
       id: 'TM-004',
       name: 'NEEL NADIYAPARA',
-      email: 'neel.n@exportrack.ai',
+      email: 'neel.nadiyapara@exportrack.ai',
       role: 'Operations',
       region: 'Middle East',
       activeCases: 7,

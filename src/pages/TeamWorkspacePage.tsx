@@ -357,7 +357,7 @@ export default function TeamWorkspacePage() {
             <div className="space-y-4">
               {[
                 { user: 'PRINCE DODIYA', action: 'Changed role of NEEL NADIYAPARA to Operations', time: '2 hours ago', type: 'role' },
-                { user: 'NIKHIL BHEDA', action: 'Invited dhruv@exportrack.ai as Staff', time: '5 hours ago', type: 'invite' },
+                { user: 'NIKHIL BHEDA', action: 'Invited dhruv.bhanvadiya@exportrack.ai as Staff', time: '5 hours ago', type: 'invite' },
                 { user: 'NIKHIL BHEDA', action: 'Created shipment EXP-2026-005', time: '1 day ago', type: 'shipment' },
                 { user: 'PRINCE DODIYA', action: 'Approved 3 documents for EXP-2026-002', time: '1 day ago', type: 'document' },
                 { user: 'NEEL NADIYAPARA', action: 'Updated tracking for EXP-2026-003', time: '2 days ago', type: 'tracking' },
