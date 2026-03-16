@@ -23,49 +23,41 @@ export default function AuthPage() {
   // Initialize Google Sign-In
   useEffect(() => {
     let mounted = true;
+    let attempts = 0;
 
     const initializeGoogleSDK = async () => {
       try {
-        // Check environment
-        console.log('🔍 Initializing Google Sign-In...');
-        console.log('Client ID:', import.meta.env.VITE_GOOGLE_CLIENT_ID ? 'SET ✅' : 'MISSING ❌');
+        console.log('🔍 Initializing Google Sign-In (Attempts:', attempts, ')...');
+        
+        // Wait for SDK and Button element
+        while (attempts < 50) {
+          if (!mounted) return;
 
-        // Wait for globalThis.google to be available
-        let attempts = 0;
-        while (!(globalThis as any).google && attempts < 50) {
-          // Check if script already loaded
-          if (!document.querySelector('script[src*="gsi/client"]')) {
-            const script = document.createElement('script');
-            script.src = 'https://accounts.google.com/gsi/client';
-            script.async = true;
-            script.defer = true;
-            script.onload = () => {
-              console.log('✅ Google SDK script loaded');
-            };
-            document.head.appendChild(script);
+          const sdkReady = (window as any).google?.accounts?.id;
+          const buttonReady = document.getElementById('google-signin-button');
+
+          if (sdkReady && buttonReady) {
+            console.log('✅ Google SDK and Button Element ready');
+            initializeGoogleSignIn();
+            return;
           }
-          await new Promise(resolve => setTimeout(resolve, 100));
+
+          await new Promise(resolve => setTimeout(resolve, 200));
           attempts++;
         }
 
-        if (!(globalThis as any).google) {
-          throw new Error('Google SDK failed to load');
-        }
-
-        console.log('✅ Google SDK ready');
         if (mounted) {
-          initializeGoogleSignIn();
+          throw new Error('Google Sign-In failed to load (timeout)');
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error('❌ SDK initialization error:', err);
         if (mounted) {
-          setGoogleError('Google Sign-In service is unavailable. Please try again.');
+          setGoogleError(err.message || 'Google Sign-In is temporarily unavailable');
         }
       }
     };
 
-    // Start initialization
-    setTimeout(initializeGoogleSDK, 500);
+    initializeGoogleSDK();
 
     return () => {
       mounted = false;
@@ -74,48 +66,37 @@ export default function AuthPage() {
 
   const initializeGoogleSignIn = () => {
     try {
-      if (!(globalThis as any).google) {
-        throw new Error('Google SDK not loaded - globalThis.google not found');
-      }
-
       const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
       if (!clientId) {
-        throw new Error('VITE_GOOGLE_CLIENT_ID is missing. Check your .env file or Vercel environment variables.');
+        throw new Error('Google Client ID is missing. Please check configuration.');
       }
 
-      console.log('📝 Initializing with Client ID:', clientId.substring(0, 15) + '...');
-
       // Initialize Google Accounts
-      (globalThis as any).google.accounts.id.initialize({
+      (window as any).google.accounts.id.initialize({
         client_id: clientId,
         callback: handleGoogleCallback,
         auto_select: false,
         itp_support: true,
       });
 
-      console.log('✅ Google initialized');
-
       // Render button
       const buttonElement = document.getElementById('google-signin-button');
-      if (!buttonElement) {
-        throw new Error('Button element not found');
+      if (buttonElement) {
+        (window as any).google.accounts.id.renderButton(
+          buttonElement,
+          {
+            theme: 'outline',
+            size: 'large',
+            width: '100%',
+            text: 'signin_with',
+            locale: 'en'
+          }
+        );
+        console.log('✅ Google button rendered');
+        setGoogleInitialized(true);
+        setGoogleError('');
       }
-
-      (globalThis as any).google.accounts.id.renderButton(
-        buttonElement,
-        {
-          theme: 'outline',
-          size: 'large',
-          width: '100%',
-          text: 'signin_with',
-          locale: 'en'
-        }
-      );
-
-      console.log('✅ Google button rendered');
-      setGoogleInitialized(true);
-      setGoogleError('');
     } catch (err: any) {
       console.error('❌ Google initialization failed:', err.message);
       setGoogleError(err.message || 'Failed to initialize Google Sign-In');
@@ -126,20 +107,12 @@ export default function AuthPage() {
   const handleGoogleCallback = (response: any) => {
     try {
       console.log('🔔 Google callback received');
+      if (!response.credential) throw new Error('No credential in response');
 
-      if (!response.credential) {
-        throw new Error('No credential in response');
-      }
-
-      console.log('✅ Got credential, logging in...');
       setIsGoogleLoading(true);
-
-      // Call context login function
       loginWithGoogleToken(response.credential);
 
-      // Redirect after a short delay
       setTimeout(() => {
-        console.log('➡️ Redirecting to dashboard...');
         navigate('/dashboard', { replace: true });
       }, 500);
     } catch (err: any) {
@@ -410,7 +383,7 @@ export default function AuthPage() {
                 */}
                 <div 
                   id="google-signin-button" 
-                  className={`w-full flex justify-center ${googleError || !googleInitialized ? 'hidden' : ''}`}
+                  className={`w-full flex justify-center transition-opacity duration-300 ${googleError || !googleInitialized ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}
                 ></div>
               </div>
 
