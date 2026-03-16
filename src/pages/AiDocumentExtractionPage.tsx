@@ -1,5 +1,8 @@
-import { ChangeEvent, DragEvent, useRef, useState } from 'react';
+import { ChangeEvent, DragEvent, useRef, useState, memo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import AppIcon from '../components/AppIcon';
+import { useAppContext } from '../context/AppContext';
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
 type DocType = 'Bill of Lading' | 'Commercial Invoice' | 'Packing List';
@@ -7,8 +10,12 @@ type DocStatus = 'Verified' | 'Pending Review' | 'Flagged';
 type Stage = 'idle' | 'uploading' | 'scanning' | 'done';
 
 interface ExtractedData {
-  exporter: string;
-  importer: string;
+  invoice_number: string;
+  exporter_name: string;
+  importer_name: string;
+  total_amount: string;
+  invoice_date: string;
+  product_details: string;
   shipmentId: string;
   destinationCountry: string;
   containerNumber: string;
@@ -21,8 +28,12 @@ interface ExtractedData {
 /* ─── Mock extractor ─────────────────────────────────────────────────── */
 const MOCK_DATA: Record<DocType, ExtractedData> = {
   'Bill of Lading': {
-    exporter: 'Apex Retail Imports',
-    importer: 'Global Trade GmbH',
+    invoice_number: 'BL-99-XJ-12',
+    exporter_name: 'Apex Retail Imports',
+    importer_name: 'Global Trade GmbH',
+    total_amount: '$42,500.00',
+    invoice_date: '2026-03-10',
+    product_details: 'Premium Electronics Hub x 40 Units',
     shipmentId: 'EXP-2026-001',
     destinationCountry: 'Germany',
     containerNumber: 'MSCU1234567',
@@ -32,8 +43,12 @@ const MOCK_DATA: Record<DocType, ExtractedData> = {
     extractedAt: new Date().toISOString(),
   },
   'Commercial Invoice': {
-    exporter: 'Sunrise Manufacturing Co.',
-    importer: 'Pacific Rim Traders LLC',
+    invoice_number: 'INV-2026-014',
+    exporter_name: 'Sunrise Manufacturing Co.',
+    importer_name: 'Pacific Rim Traders LLC',
+    total_amount: '$12,840.50',
+    invoice_date: '2026-03-12',
+    product_details: 'Industrial Grade Solar Panels',
     shipmentId: 'SHP-20260312-INV',
     destinationCountry: 'United States',
     containerNumber: 'MSCU4812960-2',
@@ -43,8 +58,12 @@ const MOCK_DATA: Record<DocType, ExtractedData> = {
     extractedAt: new Date().toISOString(),
   },
   'Packing List': {
-    exporter: 'Delta Logistics (India)',
-    importer: 'Eurotrade Sprl',
+    invoice_number: 'PKL-33451',
+    exporter_name: 'Delta Logistics (India)',
+    importer_name: 'Eurotrade Sprl',
+    total_amount: 'N/A',
+    invoice_date: '2026-03-11',
+    product_details: 'Mixed Textiles - 120 Cartons',
     shipmentId: 'SHP-20260312-PKL',
     destinationCountry: 'Belgium',
     containerNumber: 'HLCU7294013-9',
@@ -55,115 +74,56 @@ const MOCK_DATA: Record<DocType, ExtractedData> = {
   },
 };
 
-/* ─── Helpers ────────────────────────────────────────────────────────── */
-function statusColor(status: DocStatus) {
-  if (status === 'Verified')
-    return { dot: '#10b981', bg: '#ecfdf5', text: '#065f46', border: '#a7f3d0' };
-  if (status === 'Pending Review')
-    return { dot: '#f59e0b', bg: '#fffbeb', text: '#78350f', border: '#fde68a' };
-  return { dot: '#ef4444', bg: '#fef2f2', text: '#7f1d1d', border: '#fecaca' };
-}
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-}
-
 /* ─── Sub-components ─────────────────────────────────────────────────── */
-function ConfidenceBar({ value }: { value: number }) {
-  const color = value >= 90 ? '#10b981' : value >= 75 ? '#f59e0b' : '#ef4444';
+const ConfidenceBar = memo(({ value }: { value: number }) => {
+  const isHigh = value >= 90;
+  const isMed = value >= 75;
+  const colorClass = isHigh ? 'bg-emerald-500' : isMed ? 'bg-amber-500' : 'bg-rose-500';
+  const textClass = isHigh ? 'text-emerald-500' : isMed ? 'text-amber-500' : 'text-rose-500';
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-      <div
-        style={{
-          flex: 1,
-          height: '6px',
-          borderRadius: '9999px',
-          background: '#e2e8f0',
-          overflow: 'hidden',
-        }}
-      >
+    <div className="flex items-center gap-3">
+      <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-slate-800 overflow-hidden">
         <div
-          style={{
-            height: '100%',
-            width: `${value}%`,
-            background: color,
-            borderRadius: '9999px',
-            transition: 'width 1s cubic-bezier(.4,0,.2,1)',
-          }}
+          className={`h-full ${colorClass} transition-all duration-1000 ease-out`}
+          style={{ width: `${value}%` }}
         />
       </div>
-      <span style={{ fontSize: '13px', fontWeight: 700, color, minWidth: '36px', textAlign: 'right' }}>
+      <span className={`text-xs font-black min-w-[36px] text-right ${textClass}`}>
         {value}%
       </span>
     </div>
   );
-}
+});
+ConfidenceBar.displayName = 'ConfidenceBar';
 
-function FieldRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+const FieldRow = memo(({ label, value, mono }: { label: string; value: string; mono?: boolean }) => (
+  <div className="py-4 border-b border-slate-100 dark:border-slate-800/50 group/row hover:bg-slate-50/30 dark:hover:bg-slate-900/30 transition-colors px-2 -mx-2 rounded-lg">
+    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-1">
+      {label}
+    </span>
+    <span className={`text-sm font-bold text-slate-900 dark:text-slate-100 ${mono ? 'font-mono tracking-wider' : ''}`}>
+      {value}
+    </span>
+  </div>
+));
+FieldRow.displayName = 'FieldRow';
+
+const StatusBadge = memo(({ status }: { status: DocStatus }) => {
+  const styles: Record<DocStatus, string> = {
+    Verified: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400',
+    'Pending Review': 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400',
+    Flagged: 'bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400'
+  };
+
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '2px',
-        padding: '14px 0',
-        borderBottom: '1px solid #f1f5f9',
-      }}
-    >
-      <span
-        style={{
-          fontSize: '10px',
-          fontWeight: 600,
-          letterSpacing: '0.12em',
-          textTransform: 'uppercase',
-          color: '#94a3b8',
-        }}
-      >
-        {label}
-      </span>
-      <span
-        style={{
-          fontSize: '15px',
-          fontWeight: 600,
-          color: '#0f172a',
-          fontFamily: mono ? '"JetBrains Mono", "Fira Code", monospace' : 'inherit',
-          letterSpacing: mono ? '0.04em' : 'normal',
-        }}
-      >
-        {value}
-      </span>
+    <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${styles[status]}`}>
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {status}
     </div>
   );
-}
-
-/* Refactored inline styles into reusable CSS classes */
-const styles = {
-  pulsingDot: {
-    width: '17px',
-    height: '17px',
-    fill: 'none',
-    stroke: 'white',
-    strokeWidth: 1.8,
-    strokeLinecap: 'round' as const,
-    strokeLinejoin: 'round' as const,
-  },
-  statusBadge: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '6px',
-    padding: '5px 12px',
-    borderRadius: '9999px',
-  },
-};
-
-function PulsingDot() {
-  return (
-    <svg viewBox="0 0 24 24" style={styles.pulsingDot}>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M3 12h2m14 0h2M12 3v2m0 14v2m-6.36-4.64 1.42 1.42M17.95 6.05l1.41 1.41M6.05 6.05 4.63 7.47M17.95 17.95l1.41-1.41" />
-    </svg>
-  );
-}
+});
+StatusBadge.displayName = 'StatusBadge';
 
 /* ─── Main Page ──────────────────────────────────────────────────────── */
 export default function AiDocumentExtractionPage() {
@@ -200,6 +160,26 @@ export default function AiDocumentExtractionPage() {
     if (file) runExtraction(file.name);
   };
 
+  const navigate = useNavigate();
+  const { state: { shipments } } = useAppContext();
+
+  const handleCommit = () => {
+    if (!extracted) return;
+    
+    // Redirect to create shipment with extracted data as state
+    navigate('/shipments/create', { 
+      state: { 
+        prefill: {
+          clientName: extracted.importer_name,
+          destinationCountry: extracted.destinationCountry,
+          containerNumber: extracted.containerNumber,
+          // We can pack more data into state if needed
+        },
+        message: `Extracted data from ${fileName} has been pre-filled.`
+      } 
+    });
+  };
+
   const reset = () => {
     setStage('idle');
     setFileName(null);
@@ -207,456 +187,218 @@ export default function AiDocumentExtractionPage() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  const sc = extracted ? statusColor(extracted.documentStatus) : null;
-
   return (
-    <>
-      {/* Keyframe injection */}
-      <style>{`
-        @keyframes pulse-ring {
-          0%   { box-shadow: 0 0 0 0 rgba(20,184,166,0.55); }
-          70%  { box-shadow: 0 0 0 8px rgba(20,184,166,0); }
-          100% { box-shadow: 0 0 0 0 rgba(20,184,166,0); }
-        }
-        @keyframes scan-sweep {
-          0%   { top: 0; opacity: 0.9; }
-          50%  { opacity: 0.5; }
-          100% { top: calc(100% - 2px); opacity: 0.9; }
-        }
-        @keyframes fade-in-up {
-          from { opacity: 0; transform: translateY(18px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes shimmer {
-          0%   { background-position: -400px 0; }
-          100% { background-position: 400px 0; }
-        }
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-        .ai-card-animate { animation: fade-in-up 0.5s cubic-bezier(.4,0,.2,1) both; }
-        .shimmer-line {
-          background: linear-gradient(90deg, #e2e8f0 25%, #f8fafc 50%, #e2e8f0 75%);
-          background-size: 400px 100%;
-          animation: shimmer 1.4s infinite linear;
-          border-radius: 6px;
-        }
-      `}</style>
+    <main className="page-stack animate-in fade-in duration-500">
+      <PageHeader
+        title="AI Document Extraction"
+        subtitle="Upload a logistics document for instant AI-powered field extraction and verification."
+      />
 
-      <div className="page-stack">
-        <PageHeader
-          title="AI Document Extraction"
-          subtitle="Upload a logistics document for instant AI-powered field extraction and verification."
-        />
-
-        <div style={{ display: 'grid', gap: '24px', gridTemplateColumns: 'repeat(auto-fit,minmax(min(100%, 320px),1fr))' }}>
-
-          {/* ── Upload Panel ── */}
-          <section className="card-panel" style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-            {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-              <div
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '10px',
-                  background: 'linear-gradient(135deg,#0d9488,#112c45)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px' }}>
-                  <path d="M4 16v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2M12 12V4m0 0-4 4m4-4 4 4" />
-                </svg>
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+        {/* ── Upload Panel ── */}
+        <div className="space-y-6">
+          <section className="card-premium relative group overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+            
+            <div className="flex items-center gap-4 mb-8">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-teal-500 to-slate-900 text-white shadow-xl">
+                <AppIcon name="upload" className="h-6 w-6" strokeWidth={2.5} />
               </div>
               <div>
-                <h2 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>Upload Document</h2>
-                <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>Supports PDF, JPG, PNG</p>
+                <h2 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Upload Manifest</h2>
+                <p className="text-xs font-bold text-slate-400 tracking-widest uppercase">Intelligent OCR Capture</p>
               </div>
             </div>
 
-            {/* Document type selector */}
-            <div>
-              <label htmlFor="ai-doc-type" className="input-label">Document Type</label>
-              <select
-                id="ai-doc-type"
-                value={docType}
-                onChange={(e) => setDocType(e.target.value as DocType)}
-                className="input-field"
-                disabled={stage === 'uploading' || stage === 'scanning'}
-              >
-                <option>Bill of Lading</option>
-                <option>Commercial Invoice</option>
-                <option>Packing List</option>
-              </select>
-            </div>
-
-            {/* Drop zone */}
-            <div
-              id="ai-drop-zone"
-              onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-              onDragLeave={() => setIsDragOver(false)}
-              onDrop={handleDrop}
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                border: `2px dashed ${isDragOver ? '#0d9488' : '#cbd5e1'}`,
-                borderRadius: '14px',
-                background: isDragOver ? 'rgba(20,184,166,0.06)' : '#f8fafc',
-                padding: '36px 20px',
-                textAlign: 'center',
-                cursor: 'pointer',
-                transition: 'all 0.2s',
-                position: 'relative',
-                overflow: 'hidden',
-              }}
-            >
-              {/* Animated scan line when scanning */}
-              {stage === 'scanning' && (
-                <div
-                  style={{
-                    position: 'absolute',
-                    left: 0,
-                    right: 0,
-                    height: '2px',
-                    background: 'linear-gradient(90deg, transparent, #14b8a6, transparent)',
-                    animation: 'scan-sweep 1.4s ease-in-out infinite',
-                  }}
-                />
-              )}
-
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
-                <div
-                  style={{
-                    width: '52px',
-                    height: '52px',
-                    borderRadius: '14px',
-                    background: 'linear-gradient(135deg, rgba(13,148,136,0.12), rgba(17,44,69,0.1))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#0d9488" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" style={{ width: '26px', height: '26px' }}>
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                    <polyline points="14 2 14 8 20 8" />
-                    <line x1="12" y1="18" x2="12" y2="12" />
-                    <line x1="9" y1="15" x2="15" y2="15" />
-                  </svg>
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontSize: '14px', fontWeight: 600, color: '#1e293b' }}>
-                    {isDragOver ? 'Release to upload' : 'Drop your document here'}
-                  </p>
-                  <p style={{ margin: '4px 0 0', fontSize: '12px', color: '#94a3b8' }}>
-                    or <span style={{ color: '#0d9488', fontWeight: 600 }}>click to browse</span>
-                  </p>
+            <div className="space-y-6">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400 block mb-3">Document Category</label>
+                <div className="grid grid-cols-3 gap-3">
+                  {(['Bill of Lading', 'Commercial Invoice', 'Packing List'] as DocType[]).map(type => (
+                    <button
+                      key={type}
+                      onClick={() => setDocType(type)}
+                      disabled={stage === 'uploading' || stage === 'scanning'}
+                      className={`px-3 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border ${
+                        docType === type
+                          ? 'bg-slate-900 text-white border-slate-900 dark:bg-teal-500/20 dark:text-teal-400 dark:border-teal-500/40 shadow-lg'
+                          : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'
+                      }`}
+                    >
+                      {type.split(' ').map(w => w[0]).join('')} <span className="hidden sm:inline-block ml-1">{type}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                id="ai-file-input"
-                accept=".pdf,image/png,image/jpeg"
-                onChange={handleFileChange}
-                style={{ display: 'none' }}
-              />
-            </div>
-
-            {/* Status strip */}
-            {stage !== 'idle' && (
               <div
-                style={{
-                  borderRadius: '12px',
-                  padding: '14px 16px',
-                  background: stage === 'done' ? '#ecfdf5' : 'rgba(20,184,166,0.08)',
-                  border: `1px solid ${stage === 'done' ? '#a7f3d0' : 'rgba(20,184,166,0.25)'}`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                }}
+                onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+                onDragLeave={() => setIsDragOver(false)}
+                onDrop={handleDrop}
+                onClick={() => fileInputRef.current?.click()}
+                className={`relative border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all ${
+                  isDragOver
+                    ? 'border-teal-500 bg-teal-50/50 dark:bg-teal-900/10'
+                    : 'border-slate-200 bg-slate-50/50 dark:border-slate-800 dark:bg-slate-950/30 hover:border-teal-400'
+                }`}
               >
-                {stage !== 'done' ? (
-                  <svg
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="#0d9488"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    style={{ width: '18px', height: '18px', animation: 'spin-slow 1s linear infinite', flexShrink: 0 }}
-                  >
-                    <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                  </svg>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#10b981" strokeWidth={2.2} strokeLinecap="round" strokeLinejoin="round" style={{ width: '18px', height: '18px', flexShrink: 0 }}>
-                    <path d="M5 12.5 10 17l9-10" />
-                  </svg>
+                {stage === 'scanning' && (
+                  <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-teal-500 to-transparent animate-[scan_2s_ease-in-out_infinite]" />
                 )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: 0, fontSize: '13px', fontWeight: 600, color: stage === 'done' ? '#065f46' : '#0f172a' }}>
-                    {stage === 'uploading' && 'Uploading document…'}
-                    {stage === 'scanning' && 'AI scanning in progress…'}
-                    {stage === 'done' && 'Extraction complete!'}
-                  </p>
-                  {fileName && (
-                    <p style={{ margin: '2px 0 0', fontSize: '11px', color: '#64748b', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {fileName}
+                
+                <div className="flex flex-col items-center gap-4">
+                  <div className="h-16 w-16 rounded-2xl bg-teal-500/10 text-teal-600 dark:bg-teal-500/20 dark:text-teal-400 flex items-center justify-center shadow-inner">
+                    <AppIcon name="file" className="h-8 w-8" strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-black text-slate-900 dark:text-white">
+                      {isDragOver ? 'Release to upload' : 'Drop your document here'}
                     </p>
+                    <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">
+                      or <span className="text-teal-600">click to browse</span>
+                    </p>
+                  </div>
+                </div>
+                <input ref={fileInputRef} type="file" className="hidden" accept=".pdf,image/png,image/jpeg" onChange={handleFileChange} />
+              </div>
+
+              {stage !== 'idle' && (
+                <div className={`flex items-center gap-4 p-4 rounded-2xl border animate-in slide-in-from-top-2 duration-300 ${
+                  stage === 'done' ? 'bg-emerald-50/50 border-emerald-200 dark:bg-emerald-950/20 dark:border-emerald-900/50' : 'bg-slate-50 border-slate-200 dark:bg-slate-900 dark:border-slate-800'
+                }`}>
+                  <div className="relative">
+                    {stage === 'done' ? (
+                      <div className="h-8 w-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center">
+                        <AppIcon name="check" className="h-4 w-4" strokeWidth={3} />
+                      </div>
+                    ) : (
+                      <div className="h-8 w-8 rounded-lg border-2 border-slate-200 border-t-teal-500 animate-spin" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-black text-slate-900 dark:text-white">
+                      {stage === 'uploading' && 'Uploading Source...'}
+                      {stage === 'scanning' && 'Neural OCR Extraction...'}
+                      {stage === 'done' && 'Extraction Verified'}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-500 truncate mt-0.5">{fileName}</p>
+                  </div>
+                  {stage === 'done' && (
+                    <button onClick={reset} className="text-[10px] font-black text-teal-600 hover:text-teal-500 uppercase tracking-widest">Reset</button>
                   )}
                 </div>
-                {stage === 'done' && (
-                  <button
-                    type="button"
-                    onClick={(e) => { e.stopPropagation(); reset(); }}
-                    style={{ fontSize: '11px', fontWeight: 600, color: '#0d9488', background: 'none', border: 'none', cursor: 'pointer', padding: '2px 4px', flexShrink: 0 }}
-                  >
-                    Reset
-                  </button>
-                )}
-              </div>
-            )}
-
-            {/* Scanning skeleton */}
-            {stage === 'scanning' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                {[80, 55, 70, 50, 65].map((w, i) => (
-                  <div key={i} className="shimmer-line" style={{ height: '12px', width: `${w}%` }} />
-                ))}
-              </div>
-            )}
+              )}
+            </div>
           </section>
 
-          {/* ── AI Extraction Result Panel ── */}
-          <section>
-            {!extracted && stage !== 'scanning' && (
-              <div
-                className="card-panel"
-                style={{
-                  height: '100%',
-                  minHeight: '320px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '14px',
-                  opacity: 0.6,
-                }}
-              >
-                <div
-                  style={{
-                    width: '64px',
-                    height: '64px',
-                    borderRadius: '18px',
-                    background: 'linear-gradient(135deg,rgba(13,148,136,0.1),rgba(17,44,69,0.08))',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <svg viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" style={{ width: '32px', height: '32px' }}>
-                    <rect x="3" y="3" width="18" height="18" rx="3" />
-                    <path d="M9 9h1m5 0h1M9 12h6M9 15h4" />
-                  </svg>
-                </div>
-                <p style={{ margin: 0, fontSize: '14px', color: '#94a3b8', textAlign: 'center' }}>
-                  Upload a document to see<br />AI extracted data here
-                </p>
-              </div>
-            )}
-
-            {stage === 'scanning' && (
-              <div className="card-panel" style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                  <PulsingDot />
-                  <span style={{ fontSize: '13px', fontWeight: 600, color: '#0d9488' }}>AI scanning document…</span>
-                </div>
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                    <div className="shimmer-line" style={{ height: '10px', width: '40%' }} />
-                    <div className="shimmer-line" style={{ height: '14px', width: `${60 + i * 6}%` }} />
+          {/* Guidelines */}
+          <section className="card-premium">
+            <h3 className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 mb-6">Extraction Engine Workflow</h3>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { step: '01', title: 'Upload', desc: 'Secure document ingress', icon: 'upload' },
+                { step: '02', title: 'Neural L1', desc: 'OCR Layout Analysis', icon: 'ai-extract' },
+                { step: '03', title: 'Data L2', desc: 'Semantic Field Mapping', icon: 'file' },
+                { step: '04', title: 'Verify', desc: 'Compliance Validation', icon: 'shield' },
+              ].map(item => (
+                <div key={item.step} className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 group hover:border-teal-500/30 transition-all">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span className="text-[10px] font-black text-teal-600 border border-teal-500/20 px-1.5 py-0.5 rounded-lg">{item.step}</span>
+                    <span className="text-xs font-black text-slate-900 dark:text-white">{item.title}</span>
                   </div>
-                ))}
-              </div>
-            )}
+                  <p className="text-[10px] font-bold text-slate-500">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
 
-            {extracted && stage === 'done' && sc && (
-              <article
-                className="card-panel ai-card-animate"
-                style={{ display: 'flex', flexDirection: 'column', gap: 0 }}
-              >
-                {/* Card header */}
-                <div
-                  style={{
-                    margin: '-24px -24px 0',
-                    padding: '18px 24px',
-                    background: 'linear-gradient(135deg,#0f172a 0%,#112c45 55%,#0d9488 100%)',
-                    borderRadius: '16px 16px 0 0',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '12px',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <div
-                      style={{
-                        width: '34px',
-                        height: '34px',
-                        borderRadius: '9px',
-                        background: 'rgba(255,255,255,0.15)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        backdropFilter: 'blur(4px)',
-                      }}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" style={{ width: '17px', height: '17px' }}>
-                        <circle cx="12" cy="12" r="3" />
-                        <path d="M3 12h2m14 0h2M12 3v2m0 14v2m-6.36-4.64 1.42 1.42M17.95 6.05l1.41 1.41M6.05 6.05 4.63 7.47M17.95 17.95l1.41-1.41" />
-                      </svg>
+        {/* ── Result Panel ── */}
+        <div className="space-y-6">
+          {!extracted && stage !== 'scanning' && (
+            <div className="card-premium h-full min-h-[460px] flex flex-col items-center justify-center opacity-40 group hover:opacity-100 transition-opacity">
+               <div className="h-20 w-20 rounded-3xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-300 dark:text-slate-800 mb-6 group-hover:scale-110 transition-transform">
+                 <AppIcon name="ai-extract" className="h-10 w-10" />
+               </div>
+               <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400 text-center max-w-[200px] leading-relaxed">
+                  Initiate upload to populate neural fields
+               </p>
+            </div>
+          )}
+
+          {stage === 'scanning' && (
+            <div className="card-premium h-full min-h-[460px] space-y-8 animate-pulse">
+               <div className="flex items-center gap-3">
+                  <div className="h-3 w-3 rounded-full bg-teal-500" />
+                  <span className="text-xs font-black text-teal-600 uppercase tracking-widest">Scanning Document Structures...</span>
+               </div>
+               <div className="space-y-6">
+                  {[...Array(6)].map((_, i) => (
+                    <div key={i} className="space-y-3">
+                      <div className="h-2 w-24 bg-slate-100 dark:bg-slate-800 rounded" />
+                      <div className="h-4 w-full bg-slate-50 dark:bg-slate-900 rounded" />
+                    </div>
+                  ))}
+               </div>
+            </div>
+          )}
+
+          {extracted && stage === 'done' && (
+            <article className="card-premium p-0 overflow-hidden animate-in fade-in slide-in-from-right-4 duration-500 shadow-2xl">
+              <header className="bg-slate-900 dark:bg-black p-6 pb-20 relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-teal-500 to-indigo-600 opacity-20" />
+                <div className="absolute right-0 top-0 p-8">
+                   <div className="relative">
+                      <div className="absolute inset-0 bg-teal-400/20 blur-2xl rounded-full" />
+                      <AppIcon name="ai-extract" className="h-24 w-24 text-teal-400/10 relative" strokeWidth={1} />
+                   </div>
+                </div>
+                
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="h-12 w-12 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/10">
+                      <AppIcon name="ai-extract" className="h-6 w-6 text-teal-400" />
                     </div>
                     <div>
-                      <p style={{ margin: 0, fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.55)', fontWeight: 600 }}>
-                        AI Extracted Data
-                      </p>
-                      <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: 'white' }}>
-                        {extracted.docType}
-                      </p>
+                      <p className="text-[10px] font-black uppercase tracking-[0.3em] text-teal-400">Neural Sync</p>
+                      <h3 className="text-xl font-black text-white">{extracted.docType}</h3>
                     </div>
                   </div>
-
-                  {/* Status badge */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px',
-                      padding: '5px 12px',
-                      borderRadius: '9999px',
-                      background: sc.bg,
-                      border: `1px solid ${sc.border}`,
-                    }}
-                  >
-                    <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: sc.dot, flexShrink: 0 }} />
-                    <span style={{ fontSize: '12px', fontWeight: 700, color: sc.text }}>
-                      {extracted.documentStatus}
-                    </span>
-                  </div>
+                  <StatusBadge status={extracted.documentStatus} />
                 </div>
+              </header>
 
-                {/* Confidence bar */}
-                <div
-                  style={{
-                    margin: '0 -24px',
-                    padding: '14px 24px',
-                    background: 'linear-gradient(90deg,rgba(13,148,136,0.06),rgba(17,44,69,0.04))',
-                    borderBottom: '1px solid #f1f5f9',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#64748b' }}>
-                      AI Confidence
-                    </span>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>
-                      Extracted at {formatTime(extracted.extractedAt)}
-                    </span>
+              <div className="p-6 pt-0 relative -mt-12 group/content">
+                <div className="card-premium border-slate-200/60 dark:border-white/5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-2xl mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Engine Confidence</span>
+                    <span className="text-[10px] font-bold text-slate-500">v4.2 Analysis</span>
                   </div>
                   <ConfidenceBar value={extracted.confidence} />
                 </div>
 
-                {/* Fields */}
-                <div style={{ marginTop: '4px' }}>
-                  <FieldRow label="Exporter" value={extracted.exporter} />
-                  <FieldRow label="Importer" value={extracted.importer} />
-                  <FieldRow label="Shipment ID" value={extracted.shipmentId} mono />
-                  <FieldRow label="Destination Country" value={extracted.destinationCountry} />
-                  <FieldRow label="Container Number" value={extracted.containerNumber} mono />
-                  <div style={{ paddingTop: '14px' }}>
-                    <span style={{ fontSize: '10px', fontWeight: 600, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94a3b8' }}>
-                      Document Status
-                    </span>
-                    <div style={{ marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span
-                        style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '5px 14px',
-                          borderRadius: '9999px',
-                          background: sc.bg,
-                          border: `1px solid ${sc.border}`,
-                          fontSize: '13px',
-                          fontWeight: 700,
-                          color: sc.text,
-                        }}
-                      >
-                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: sc.dot }} />
-                        {extracted.documentStatus}
-                      </span>
-                    </div>
-                  </div>
+                <div className="space-y-1">
+                  <FieldRow label="Invoice / Reference" value={extracted.invoice_number} mono />
+                  <FieldRow label="Exporter" value={extracted.exporter_name} />
+                  <FieldRow label="Importer" value={extracted.importer_name} />
+                  <FieldRow label="Amount" value={extracted.total_amount} />
+                  <FieldRow label="Date" value={extracted.invoice_date} />
+                  <FieldRow label="Product Details" value={extracted.product_details} />
                 </div>
 
-                {/* Actions */}
-                <div style={{ display: 'flex', gap: '10px', marginTop: '20px', flexWrap: 'wrap' }}>
-                  <button
-                    type="button"
-                    onClick={() => window.alert('Exporting extracted data as JSON…')}
-                    className="btn-primary"
-                    style={{ flex: 1, minWidth: '120px', justifyContent: 'center' }}
-                  >
-                    Export Data
+                <footer className="mt-8 flex gap-3">
+                  <button onClick={handleCommit} className="btn-primary flex-1 py-4 justify-center shadow-lg shadow-teal-500/20">
+                     Commit to Pipeline
                   </button>
-                  <button
-                    type="button"
-                    onClick={reset}
-                    className="btn-secondary"
-                    style={{ flex: 1, minWidth: '120px', justifyContent: 'center' }}
-                  >
-                    Upload Another
+                  <button onClick={reset} className="btn-secondary px-6 py-4">
+                     Back
                   </button>
-                </div>
-              </article>
-            )}
-          </section>
-        </div>
-
-        {/* ── How it works strip ── */}
-        <section className="card-panel">
-          <h3 className="card-title" style={{ fontSize: '15px', marginBottom: '16px' }}>How AI Extraction Works</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(180px,1fr))', gap: '16px' }}>
-            {[
-              { step: '01', title: 'Upload', desc: 'Drop a PDF, JPG or PNG logistics document' },
-              { step: '02', title: 'OCR Scan', desc: 'AI reads and parses all text regions' },
-              { step: '03', title: 'Field Mapping', desc: 'Smart extraction maps data to fields' },
-              { step: '04', title: 'Verify', desc: 'Confidence score flags anomalies instantly' },
-            ].map(({ step, title, desc }) => (
-              <div
-                key={step}
-                style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  background: 'linear-gradient(135deg,rgba(13,148,136,0.05),rgba(17,44,69,0.04))',
-                  border: '1px solid rgba(13,148,136,0.12)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '6px',
-                }}
-              >
-                <span style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#0d9488' }}>
-                  Step {step}
-                </span>
-                <span style={{ fontSize: '14px', fontWeight: 700, color: '#0f172a' }}>{title}</span>
-                <span style={{ fontSize: '12px', color: '#64748b', lineHeight: '1.5' }}>{desc}</span>
+                </footer>
               </div>
-            ))}
-          </div>
-        </section>
+            </article>
+          )}
+        </div>
       </div>
-    </>
+    </main>
   );
 }

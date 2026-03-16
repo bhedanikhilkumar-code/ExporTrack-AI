@@ -74,7 +74,7 @@ export const createSeedState = (): AppState => ({
       id: 'TM-003',
       name: 'Rohan Iyer',
       email: 'rohan.iyer@exportrack.ai',
-      role: 'Staff',
+      role: 'Operations',
       region: 'EU',
       activeCases: 9,
       lastActive: '2026-03-10T07:15:00.000Z'
@@ -83,7 +83,7 @@ export const createSeedState = (): AppState => ({
       id: 'TM-004',
       name: 'Sofia Patel',
       email: 'sofia.patel@exportrack.ai',
-      role: 'Staff',
+      role: 'Operations',
       region: 'Middle East',
       activeCases: 7,
       lastActive: '2026-03-10T06:55:00.000Z'
@@ -126,7 +126,7 @@ export const createSeedState = (): AppState => ({
         {
           id: 'COM-002',
           author: 'Rohan Iyer',
-          role: 'Staff',
+          role: 'Operations',
           message: 'Waiting for broker to share customs files before 14:00 UTC.',
           createdAt: '2026-03-04T10:30:00.000Z',
           internal: false
@@ -191,7 +191,7 @@ export const createSeedState = (): AppState => ({
         {
           id: 'COM-004',
           author: 'Sofia Patel',
-          role: 'Staff',
+          role: 'Operations',
           message: 'Client sent partial docs. Following up for certificate and customs package.',
           createdAt: '2026-03-06T11:14:00.000Z',
           internal: false

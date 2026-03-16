@@ -1,5 +1,5 @@
 import { useMemo, useState, useEffect, memo } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
@@ -17,7 +17,9 @@ DashboardKpiCard.displayName = 'DashboardKpiCard';
 
 export default function DashboardPage() {
   const {
-    state: { shipments, notifications }
+    state: { shipments, notifications },
+    getAnalytics,
+    hasPermission
   } = useAppContext();
 
   const [loading, setLoading] = useState(true);
@@ -28,51 +30,23 @@ export default function DashboardPage() {
     return () => clearTimeout(timer);
   }, []);
 
-  const allDocuments = shipments.flatMap((shipment) => shipment.documents);
-  const totalShipments = shipments.length;
-  const activeShipments = shipments.filter((shipment) => shipment.status !== 'Delivered').length;
-  const delayedShipments = shipments.filter((shipment) => shipment.delayed).length;
-  const pendingDocs = allDocuments.filter((doc) => doc.status === 'Pending').length;
-  const verifiedDocs = allDocuments.filter((doc) => doc.status === 'Verified').length;
-  const rejectedOrMissing = allDocuments.filter((doc) => doc.status === 'Rejected' || doc.status === 'Missing').length;
-  const unreadAlerts = notifications.filter((n) => !n.read).length;
-  const complianceRate = allDocuments.length ? Math.round((verifiedDocs / allDocuments.length) * 100) : 0;
+  const analyticsData = useMemo(() => getAnalytics(), [shipments, getAnalytics]);
 
-  const recentShipments = [...shipments].sort((a, b) => (b.shipmentDate || '').localeCompare(a.shipmentDate || '')).slice(0, 7);
-  const priorityAlerts = [...notifications].filter((n) => !n.read).sort((a, b) => (b.createdAt || '').localeCompare(a.createdAt || '')).slice(0, 5);
+  const {
+    unreadAlerts,
+    recentShipments,
+  } = useMemo(() => {
+    const unread = notifications.filter((n) => !n.read).length;
+    const recent = [...shipments].sort((a, b) => (b.shipmentDate || '').localeCompare(a.shipmentDate || '')).slice(0, 7);
+
+    return {
+      unreadAlerts: unread,
+      recentShipments: recent,
+    };
+  }, [shipments, notifications]);
 
   const now = new Date();
   const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-
-  const countryDist = useMemo(() => {
-    const counts: Record<string, number> = {};
-    shipments.forEach((s) => {
-      counts[s.destinationCountry] = (counts[s.destinationCountry] || 0) + 1;
-    });
-    return Object.entries(counts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 5);
-  }, [shipments]);
-
-  const docStats = useMemo(() => {
-    const total = allDocuments.length || 1;
-    return [
-      { label: 'Verified', value: verifiedDocs, color: '#0d9488', pct: (verifiedDocs / total) * 100 },
-      { label: 'Pending', value: pendingDocs, color: '#f59e0b', pct: (pendingDocs / total) * 100 },
-      { label: 'Blocked', value: rejectedOrMissing, color: '#e11d48', pct: (rejectedOrMissing / total) * 100 }
-    ];
-  }, [allDocuments.length, verifiedDocs, pendingDocs, rejectedOrMissing]);
-
-  const monthlyActivity = useMemo(() => {
-    const activity: Record<string, number> = {};
-    shipments.forEach((s) => {
-      const month = (s.shipmentDate || '').slice(0, 7); // YYYY-MM
-      activity[month] = (activity[month] || 0) + 1;
-    });
-    return Object.entries(activity)
-      .sort((a, b) => a[0].localeCompare(b[0]))
-      .slice(-6);
-  }, [shipments]);
 
   if (loading) {
     return (
@@ -111,15 +85,6 @@ export default function DashboardPage() {
         type: 'Document'
       }))
     ),
-    ...shipments.flatMap((shipment) =>
-      shipment.comments.slice(0, 1).map((comment) => ({
-        id: `ACT-COM-${comment.id}`,
-        time: comment.createdAt,
-        title: `${shipment.id} • ${comment.author}`,
-        detail: comment.message,
-        type: 'Collaboration'
-      }))
-    ),
     ...notifications.slice(0, 4).map((alert) => ({
       id: `ACT-NT-${alert.id}`,
       time: alert.createdAt,
@@ -136,9 +101,9 @@ export default function DashboardPage() {
       {/* ── Dashboard Header ── */}
       <header className="dashboard-grid-header">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>Operations Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>Enterprise Logistics Hub</h1>
           <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
-            Welcome back. Here's what's happening with your shipments today.
+            Advanced analytics and AI-powered logistics insights.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
@@ -146,124 +111,57 @@ export default function DashboardPage() {
             <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500 shadow-[0_0_6px_rgb(13_148_136/0.4)]" />
             <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
           </div>
-          <Link to="/shipments/create" className="btn-primary inline-flex items-center gap-2">
-            <AppIcon name="create" className="h-4 w-4" />
-            New Shipment
-          </Link>
+          {hasPermission('create_shipments') && (
+            <Link to="/shipments/create" className="btn-primary inline-flex items-center gap-2">
+              <AppIcon name="create" className="h-4 w-4" />
+              New Shipment
+            </Link>
+          )}
         </div>
       </header>
 
       {/* ── KPI Section ── */}
       <section className="dashboard-grid-kpi">
-        <DashboardKpiCard title="Total Shipments" value={totalShipments} subtitle="Across all lanes" accent="slate" icon="shipments" suffix="" trend={{ value: '+12.5%', isPositive: true }} />
-        <DashboardKpiCard title="Active Shipments" value={activeShipments} subtitle="Currently in transit" accent="teal" icon="clock" suffix="" trend={{ value: '+4.2%', isPositive: true }} />
-        <DashboardKpiCard title="Pending Docs" value={pendingDocs} subtitle="Awaiting review" accent="amber" icon="shield" suffix="" trend={{ value: '-1.5%', isPositive: true }} />
-        <DashboardKpiCard title="Compliance Rate" value={complianceRate} subtitle="Verified documents" accent="indigo" icon="check" suffix="%" trend={{ value: '+0.8%', isPositive: true }} />
-        <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Requires attention" accent="rose" icon="warning" suffix="" trend={{ value: '+2', isPositive: false }} />
+        <DashboardKpiCard title="Total Volume" value={analyticsData.totalShipments} subtitle="Shipments processed" accent="indigo" icon="shipments" />
+        <DashboardKpiCard title="On-Time Rate" value={analyticsData.onTimeDeliveryRate} subtitle="Compliance benchmark" accent="teal" icon="check" suffix="%" />
+        <DashboardKpiCard title="Delayed Units" value={analyticsData.delayedShipments} subtitle="Requires attention" accent="rose" icon="warning" />
+        <DashboardKpiCard title="Avg. Lead Time" value={analyticsData.averageDeliveryTime} subtitle="Global average" accent="amber" icon="clock" suffix="d" />
+        <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread notifications" accent="slate" icon="bell" />
       </section>
 
       {/* ── Analytics Dashboard ── */}
-      <ShipmentAnalytics
-        monthlyData={monthlyActivity.map(([month, count]) => ({
-          month: new Date(month + '-01').toLocaleDateString('en-US', { month: 'short' }),
-          value: count
-        }))}
-        totalShipments={totalShipments}
-        activeShipments={activeShipments}
-        complianceRate={complianceRate}
-        delayedShipments={delayedShipments}
-      />
+      <ShipmentAnalytics data={analyticsData} />
 
       <div className="dashboard-grid-section">
-        {/* Verification Status */}
-        <article className="card-premium">
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Document Health</h3>
-            <AppIcon name="shield" className="h-4 w-4 text-slate-400" />
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="relative mb-8 h-48 w-48">
-              <svg viewBox="0 0 36 36" className="h-full w-full -rotate-90">
-                <circle cx="18" cy="18" r="16" fill="transparent" stroke="currentColor" strokeWidth="2.5" className="text-slate-100 dark:text-slate-800" />
-                {docStats.reduce(({ offset, elements }, stat) => {
-                  const element = (
-                    <circle key={stat.label} cx="18" cy="18" r="16" fill="transparent" stroke={stat.color} strokeWidth="3" strokeDasharray={`${stat.pct} 100`} strokeDashoffset={-offset} className="transition-all duration-1000" />
-                  );
-                  return { offset: offset + stat.pct, elements: [...elements, element] };
-                }, { offset: 0, elements: [] as React.ReactNode[] }).elements}
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-3xl font-bold text-slate-900 dark:text-white">{complianceRate}%</span>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Compliant</span>
-              </div>
-            </div>
-            <div className="grid w-full grid-cols-3 gap-2">
-              {docStats.map(stat => (
-                <div key={stat.label} className="rounded-lg bg-slate-50 p-3 text-center dark:bg-slate-800/30">
-                  <div className="mx-auto mb-2 h-1.5 w-6 rounded-full" style={{ backgroundColor: stat.color }} />
-                  <p className="text-[10px] font-bold uppercase text-slate-400">{stat.label}</p>
-                  <p className="text-lg font-bold text-slate-900 dark:text-slate-200">{stat.value}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </article>
-
-        {/* Lane Distribution */}
-        <article className="card-premium">
-          <div className="mb-6 flex items-center justify-between">
-            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Top Lanes</h3>
-            <AppIcon name="shipments" className="h-4 w-4 text-slate-400" />
-          </div>
-          <div className="space-y-5">
-            {countryDist.map(([country, count]) => (
-              <div key={country} className="group">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{country}</span>
-                  <span className="text-[11px] font-bold text-slate-500">{count} Shipments</span>
-                </div>
-                <div className="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
-                  <div
-                    className="h-full bg-teal-500 transition-all duration-1000 group-hover:bg-teal-400"
-                    style={{ width: `${(count / totalShipments) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </article>
-
         {/* AI Logistics Assistant */}
         <AiLogisticsAssistant />
-      </div>
-
-      <div className="dashboard-grid-wide">
+        
         {/* Recent Activity */}
-        <article className="card-premium xl:col-span-2">
+        <article className="card-premium lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
             <div>
-              <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Live Logistics Feed</h3>
-              <p className="text-[11px] text-slate-400 ml-4">Real-time collaboration and document events</p>
+              <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Logistics Event Stream</h3>
+              <p className="text-[11px] text-slate-400 ml-4">Real-time system events and notifications</p>
             </div>
             <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors group inline-flex items-center gap-1">
-              View All Pipeline
+              View All
               <AppIcon name="chevron-right" className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
             </Link>
           </div>
           <div className="space-y-4">
-            {activityTimeline.slice(0, 6).map((item, idx) => (
+            {activityTimeline.slice(0, 5).map((item, idx) => (
               <div key={item.id} className="relative flex gap-4">
-                {idx !== 5 && (
+                {idx !== 4 && (
                   <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
                 )}
-                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${item.type === 'Document' ? 'bg-indigo-500' : item.type === 'Alert' ? 'bg-rose-500' : 'bg-teal-500'
+                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${item.type === 'Document' ? 'bg-indigo-500' : 'bg-rose-500'
                   }`}>
-                  <AppIcon name={item.type === 'Document' ? 'upload' : item.type === 'Alert' ? 'bell' : 'team'} className="h-3.5 w-3.5" />
+                  <AppIcon name={item.type === 'Document' ? 'upload' : 'bell'} className="h-3.5 w-3.5" />
                 </div>
                 <div className="flex-1 pb-4">
                   <div className="flex items-center justify-between gap-2">
                     <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
-                    <time className="text-[10px] font-medium text-slate-400">{item.time}</time>
+                    <time className="text-[10px] font-medium text-slate-400">{item.time.split('T')[0]}</time>
                   </div>
                   <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{item.detail}</p>
                 </div>
@@ -271,7 +169,9 @@ export default function DashboardPage() {
             ))}
           </div>
         </article>
+      </div>
 
+      <div className="dashboard-grid-wide">
         {/* AI Predictions Spotlight */}
         <div className="card-premium">
           <div className="mb-6 flex items-start gap-3">
@@ -279,25 +179,14 @@ export default function DashboardPage() {
               <AppIcon name="ai-extract" className="h-5 w-5" />
             </div>
             <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Predictive Intelligence</h3>
-              <p className="text-[11px] font-medium text-slate-500">Neural Risk Assessment</p>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Neural Risk Analysis</h3>
+              <p className="text-[11px] font-medium text-slate-500">Predictive Delay Modeling</p>
             </div>
           </div>
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
               <AiDelayPrediction key={s.id} shipmentId={s.id} />
             ))}
-            <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-900/50 border border-dashed border-slate-200 dark:border-slate-800">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Stability</span>
-                <span className="text-[10px] font-bold text-teal-500">OPTIMAL</span>
-              </div>
-              <div className="flex gap-1">
-                {[...Array(12)].map((_, i) => (
-                  <div key={i} className={`h-4 flex-1 rounded-sm ${i > 8 ? 'bg-slate-200 dark:bg-slate-800' : 'bg-teal-500/40 animate-pulse'}`} />
-                ))}
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -305,22 +194,8 @@ export default function DashboardPage() {
       {/* ── Recent Shipments Table ── */}
       <article className="dashboard-grid-table card-premium overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Recent Shipments</h3>
-          <button
-            onClick={() => {
-              const csvContent = ['ID,Client,Date,Status'];
-              recentShipments.forEach(s => {
-                csvContent.push(`"${s.id}","${s.clientName}","${s.shipmentDate}","${s.status}"`);
-              });
-              const element = document.createElement('a');
-              element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(csvContent.join('\n')));
-              element.setAttribute('download', `shipments-${new Date().toISOString().split('T')[0]}.csv`);
-              element.style.display = 'none';
-              document.body.appendChild(element);
-              element.click();
-              document.body.removeChild(element);
-            }}
-            className="btn-secondary btn-sm">Export Report</button>
+          <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Pipeline Monitoring</h3>
+          <button className="btn-secondary btn-sm">Export Global Report</button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
@@ -328,7 +203,6 @@ export default function DashboardPage() {
               <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Client</th>
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Logistics Detail</th>
                 <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
                 <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
               </tr>
@@ -341,12 +215,6 @@ export default function DashboardPage() {
                   </td>
                   <td className="px-4 py-4">
                     <span className="text-xs font-medium text-slate-600 dark:text-slate-400">{s.clientName}</span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <div className="flex flex-col">
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{s.driverName || 'Unassigned'}</span>
-                      <span className="text-[10px] text-slate-400">{s.vehicleNumber || 'No vehicle'}</span>
-                    </div>
                   </td>
                   <td className="px-4 py-4">
                     <StatusBadge value={s.status} />

@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
+import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import { REQUIRED_DOCUMENT_TYPES } from '../types';
 
@@ -132,37 +133,82 @@ export default function SearchFilterPage() {
         </div>
       </section>
 
-      <section className="card-panel">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="card-title text-base md:text-lg">Results ({filteredShipments.length})</h3>
-          <p className="text-xs uppercase tracking-wide text-slate-500">Seeded records</p>
+      <section className="space-y-6">
+        <div className="flex items-center justify-between px-2">
+           <div>
+              <h3 className="text-sm font-black uppercase tracking-[0.2em] text-slate-400">Search Results</h3>
+              <p className="text-[11px] font-medium text-slate-500 mt-1">{filteredShipments.length} records found matching your criteria</p>
+           </div>
         </div>
-        <div className="space-y-3">
-          {filteredShipments.map((shipment) => {
-            const matchingDocCount = docType ? shipment.documents.filter((doc) => doc.type === docType).length : shipment.documents.length;
-            return (
-              <article key={shipment.id} className="card-muted p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <p className="text-sm font-semibold text-navy-800 dark:text-white">{shipment.id}</p>
-                    <p className="text-sm text-slate-700 dark:text-slate-300">
-                      {shipment.clientName} • {shipment.destinationCountry}
-                    </p>
-                    <p className="text-xs text-slate-500">
-                      Date: {shipment.shipmentDate} • Container: {shipment.containerNumber}
-                    </p>
-                    <p className="mt-1 text-xs text-slate-500">Matching docs: {matchingDocCount}</p>
+        
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
+          {filteredShipments.map((shipment) => (
+            <Link 
+              to={`/shipments/${shipment.id}`} 
+              key={shipment.id} 
+              className="card-premium group block hover:no-underline"
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="h-12 w-12 rounded-2xl bg-slate-900 dark:bg-teal-500/10 flex items-center justify-center text-teal-400">
+                    <AppIcon name="shipments" className="h-6 w-6" />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <StatusBadge value={shipment.status} />
-                    <Link to={`/shipments/${shipment.id}`} className="btn-secondary btn-xs">
-                      Open
-                    </Link>
+                  <div>
+                    <div className="flex items-center gap-2">
+                       <h4 className="text-base font-extrabold text-slate-900 dark:text-white tracking-tight">{shipment.id}</h4>
+                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-500">{shipment.containerNumber}</span>
+                    </div>
+                    <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mt-0.5">
+                      {shipment.clientName}
+                    </p>
+                    <div className="flex items-center gap-3 mt-1.5">
+                       <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                          <AppIcon name="clock" className="h-3 w-3" />
+                          {shipment.shipmentDate}
+                       </div>
+                       <div className="h-1 w-1 rounded-full bg-slate-200 dark:bg-slate-700" />
+                       <div className="flex items-center gap-1 text-[11px] font-medium text-slate-500">
+                          <AppIcon name="search" className="h-3 w-3" />
+                          {shipment.destinationCountry}
+                       </div>
+                    </div>
                   </div>
                 </div>
-              </article>
-            );
-          })}
+                
+                <div className="flex items-center justify-between md:justify-end gap-6 pt-4 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800/50">
+                   <div className="flex flex-col items-end">
+                      <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Status</p>
+                      <StatusBadge value={shipment.status} />
+                   </div>
+                   <div className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:border-teal-500 group-hover:text-teal-500 transition-all">
+                      <AppIcon name="chevron-right" className="h-4 w-4" />
+                   </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+          
+          {filteredShipments.length === 0 && (
+            <div className="py-20 text-center card-premium border-dashed">
+               <div className="mx-auto h-16 w-16 rounded-3xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center text-slate-300 dark:text-slate-700 mb-4">
+                  <AppIcon name="search" className="h-8 w-8" strokeWidth={1} />
+               </div>
+               <h3 className="text-lg font-bold text-slate-900 dark:text-white">No shipments found</h3>
+               <p className="text-sm text-slate-500 mt-2">Try adjusting your filters to find what you're looking for.</p>
+               <button 
+                 onClick={() => {
+                   setShipmentId('');
+                   setClientName('');
+                   setDestination('');
+                   setShipmentDate('');
+                   setDocType('');
+                 }}
+                 className="btn-secondary mt-6"
+               >
+                 Reset Search
+               </button>
+            </div>
+          )}
         </div>
       </section>
     </div>

@@ -1,10 +1,11 @@
-import { FormEvent, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { FormEvent, useMemo, useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
+import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import { ShipmentStatus } from '../types';
 
-const statuses: ShipmentStatus[] = ['Awaiting Documents', 'In Transit', 'Under Verification', 'Customs Hold', 'Delivered'];
+const statuses: ShipmentStatus[] = ['Shipment Created', 'In Transit', 'Under Verification', 'Customs Hold', 'Delivered', 'Delayed'];
 
 export default function CreateShipmentPage() {
   const navigate = useNavigate();
@@ -13,15 +14,28 @@ export default function CreateShipmentPage() {
     state: { teamMembers }
   } = useAppContext();
 
+  const location = useLocation();
+  const prefill = location.state?.prefill;
+  const message = location.state?.message;
+
   const assigneeOptions = useMemo(() => teamMembers.map((member) => member.name), [teamMembers]);
 
   const [shipmentId, setShipmentId] = useState(`EXP-${new Date().getFullYear()}-${Math.floor(Math.random() * 900 + 100)}`);
-  const [clientName, setClientName] = useState('');
-  const [destinationCountry, setDestinationCountry] = useState('');
+  const [clientName, setClientName] = useState(prefill?.clientName ?? '');
+  const [destinationCountry, setDestinationCountry] = useState(prefill?.destinationCountry ?? '');
   const [shipmentDate, setShipmentDate] = useState(new Date().toISOString().slice(0, 10));
-  const [containerNumber, setContainerNumber] = useState('');
-  const [status, setStatus] = useState<ShipmentStatus>('Awaiting Documents');
+  const [containerNumber, setContainerNumber] = useState(prefill?.containerNumber ?? '');
+  const [status, setStatus] = useState<ShipmentStatus>('Shipment Created');
   const [assignedTo, setAssignedTo] = useState(assigneeOptions[0] ?? 'Ops Team');
+
+  // If prefill changed (though unlikely for this page), update state
+  useEffect(() => {
+    if (prefill) {
+      if (prefill.clientName) setClientName(prefill.clientName);
+      if (prefill.destinationCountry) setDestinationCountry(prefill.destinationCountry);
+      if (prefill.containerNumber) setContainerNumber(prefill.containerNumber);
+    }
+  }, [prefill]);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -40,6 +54,16 @@ export default function CreateShipmentPage() {
   return (
     <div className="page-stack">
       <PageHeader title="Create Shipment" subtitle="Register a new shipment, assign owner, and initialize its verification workflow." />
+      
+      {message && (
+        <div className="mb-6 p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-center gap-3 animate-in fade-in slide-in-from-top-4 duration-500">
+           <div className="h-8 w-8 rounded-lg bg-teal-500 flex items-center justify-center text-white">
+             <AppIcon name="ai-extract" className="h-4 w-4" />
+           </div>
+           <p className="text-xs font-bold text-teal-700 dark:text-teal-400">{message}</p>
+        </div>
+      )}
+
       <section className="card-panel">
         <form className="grid gap-4 md:grid-cols-2" onSubmit={handleSubmit}>
           <div>

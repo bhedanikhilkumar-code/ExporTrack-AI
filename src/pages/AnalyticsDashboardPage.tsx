@@ -50,20 +50,19 @@ export default function AnalyticsDashboardPage() {
   const deliveryDist = useMemo(() => computeDeliveryDistribution(shipments), [shipments]);
   const dailyTrend = useMemo(() => computeDailyTrend(shipments), [shipments]);
 
-  const maxDaily = Math.max(...dailyTrend.map(d => d.shipments), 1);
+  const maxDaily = useMemo(() => Math.max(...dailyTrend.map(d => d.shipments), 1), [dailyTrend]);
+  const maxMonthly = useMemo(() => Math.max(...monthlyTrend.map(m => m.shipments), 1), [monthlyTrend]);
+  const maxCarrier = useMemo(() => Math.max(...carrierPerf.map(c => c.shipments), 1), [carrierPerf]);
+  const maxDist = useMemo(() => Math.max(...deliveryDist.map(d => d.count), 1), [deliveryDist]);
 
-  const maxMonthly = Math.max(...monthlyTrend.map(m => m.shipments), 1);
-  const maxCarrier = Math.max(...carrierPerf.map(c => c.shipments), 1);
-  const maxDist = Math.max(...deliveryDist.map(d => d.count), 1);
-
-  const kpiCards = [
+  const kpiCards = useMemo(() => [
     { title: 'Total Shipments', value: metrics.totalShipments, icon: 'shipments' as const, accent: COLORS.blue, suffix: '' },
     { title: 'Active Shipments', value: metrics.inTransitShipments + metrics.awaitingDocsShipments, icon: 'clock' as const, accent: COLORS.amber, suffix: '' },
     { title: 'Delivered', value: metrics.deliveredShipments, icon: 'check' as const, accent: COLORS.emerald, suffix: '' },
     { title: 'Delayed', value: metrics.delayedShipments, icon: 'warning' as const, accent: COLORS.rose, suffix: '' },
     { title: 'Doc Health', value: metrics.onTimeDeliveryRate, icon: 'shield' as const, accent: COLORS.teal, suffix: '%' },
     { title: 'Avg Lead Time', value: metrics.averageDeliveryTimeDays, icon: 'clock' as const, accent: COLORS.indigo, suffix: 'd' },
-  ];
+  ], [metrics]);
 
   return (
     <main className="page-stack">

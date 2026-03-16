@@ -256,7 +256,7 @@ export default function ShipmentDetailsPage() {
             }}
             className="btn-secondary btn-sm sm:btn-base border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-400 dark:hover:bg-indigo-900/40"
           >
-            <AppIcon name="dashboard" className="mr-1 sm:mr-2 h-4 w-4" />
+            <AppIcon name="link" className="mr-1 sm:mr-2 h-4 w-4" />
             <span className="hidden sm:inline">Copy </span>Link
           </button>
           {currentStageIndex < statusStages.length - 1 && (

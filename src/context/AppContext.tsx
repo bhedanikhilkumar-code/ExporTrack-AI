@@ -1,6 +1,7 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
 import { createSeedState } from '../data/seedData';
 import {
+  AnalyticsMetrics,
   AppState,
   CreateShipmentInput,
   DocStatus,
@@ -39,8 +40,10 @@ interface AppContextValue {
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
-  triggerDelayAlert: (shipmentId: string, daysDelayed: number, reason?: string) => void;
+  triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
   applyOptimizedRoute: (shipmentId: string) => void;
+  getAnalytics: () => AnalyticsMetrics;
+  hasPermission: (action: string) => boolean;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -254,7 +257,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       user: {
         name: displayName,
         email,
-        role: knownMember?.role ?? (knownClient ? 'Client' : (prev.user?.role ?? 'Staff')),
+        role: (knownMember?.role as Role) ?? (knownClient ? 'Customer' : 'Operations'),
         authProvider: 'email'
       }
     }));
@@ -283,7 +286,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       user: {
         name: name.trim() || 'New User',
         email,
-        role: 'Staff',
+        role: 'Operations',
         authProvider: 'email'
       }
     }));
@@ -300,7 +303,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     const demoUser = {
       name: 'Demo User',
       email: 'demo@exportrack.ai',
-      role: 'Staff' as const
+      role: 'Admin' as Role
     };
 
     setState((prev) => ({
@@ -348,7 +351,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         user: {
           name: userName,
           email: userEmail,
-          role: knownMember?.role ?? prev.user?.role ?? 'Staff',
+          role: knownMember?.role ?? prev.user?.role ?? 'Operations',
           authProvider: 'google',
           profilePicture: profilePicture
         }
@@ -419,7 +422,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         {
           id: createId('COM'),
           author: state.user?.name ?? 'System',
-          role: state.user?.role ?? 'Staff',
+          role: state.user?.role ?? 'Operations',
           message: 'Shipment record created. Awaiting first document upload.',
           createdAt: now,
           internal: true
@@ -561,7 +564,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
               {
                 id: createId('COM'),
                 author: prev.user?.name ?? 'Unknown',
-                role: prev.user?.role ?? 'Staff',
+                role: prev.user?.role ?? 'Operations',
                 message: message,
                 createdAt: new Date().toISOString(),
                 internal: internal,
@@ -596,7 +599,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
-  const triggerDelayAlert = (shipmentId: string, daysDelayed: number, reason?: string) => {
+  const triggerDelayAlert = (shipmentId: string, daysDelayed: number) => {
     setState((prev) => {
       // Check if we already have a delay alert for this shipment to avoid spam
       const alreadyHasAlert = prev.notifications.some(
@@ -623,7 +626,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         'Deadline', // Changed to Deadline as per NotificationService logic
         'High',
         `Delay Detected: ${shipment.clientName}`,
-        `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. ${reason || 'Network re-routing advised.'}`,
+        `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. Network re-routing advised.`,
         new Date().toISOString()
       );
 
@@ -686,7 +689,52 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       markNotificationRead,
       markAllNotificationsRead,
       triggerDelayAlert,
-      applyOptimizedRoute
+      applyOptimizedRoute,
+      getAnalytics: () => {
+        const total = state.shipments.length;
+        const verifiedDocs = state.shipments.flatMap(s => s.documents).filter(d => d.status === 'Verified').length;
+        const totalDocs = state.shipments.flatMap(s => s.documents).length || 1;
+        const onTimeRate = Math.round((verifiedDocs / totalDocs) * 100);
+        const delayed = state.shipments.filter(s => s.delayed).length;
+        
+        return {
+          totalShipments: total,
+          onTimeDeliveryRate: onTimeRate,
+          delayedShipments: delayed,
+          averageDeliveryTime: 4.8,
+          monthlyShipmentTrend: [
+            { month: 'Oct', count: 45 },
+            { month: 'Nov', count: 52 },
+            { month: 'Dec', count: 48 },
+            { month: 'Jan', count: 61 },
+            { month: 'Feb', count: 55 },
+            { month: 'Mar', count: total }
+          ],
+          carrierPerformance: [
+            { carrier: 'Maersk', rating: 4.8, shipments: 24 },
+            { carrier: 'MSC', rating: 4.5, shipments: 18 },
+            { carrier: 'Hapag-Lloyd', rating: 4.2, shipments: 12 },
+            { carrier: 'CMA CGM', rating: 3.9, shipments: 8 }
+          ],
+          deliveryTimeDistribution: [
+            { range: '0-2 days', count: 12 },
+            { range: '3-5 days', count: 35 },
+            { range: '6-10 days', count: 18 },
+            { range: '10+ days', count: 5 }
+          ]
+        };
+      },
+      hasPermission: (action: string) => {
+        const role = state.user?.role || 'Viewer';
+        const permissions: Record<string, Role[]> = {
+          'manage_users': ['Admin'],
+          'edit_shipments': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
+          'access_analytics': ['Admin', 'Manager', 'Viewer', 'Export Operations Manager'],
+          'create_shipments': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
+          'update_tracking': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
+        };
+        return permissions[action]?.includes(role) || false;
+      }
     }),
     [state]
   );

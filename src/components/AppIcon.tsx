@@ -38,7 +38,13 @@ interface AppIconProps {
   | 'monitor'
   | 'plus'
   | 'home'
-  | 'users';
+  | 'world'
+  | 'globe'
+  | 'link'
+  | 'truck'
+  | 'users'
+  | 'star'
+  | 'activity';
   className?: string;
   strokeWidth?: number;
   'aria-hidden'?: boolean;
@@ -83,7 +89,13 @@ const iconMap: Record<AppIconProps['name'], string> = {
   monitor: 'M2 3h20v14H2V3Zm6 18h8m-4-4v4',
   plus: 'M12 5v14M5 12h14',
   home: 'M3 9.5 12 3l9 6.5V20a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5Z',
+  world: 'M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12a10 10 0 1 0 20 0 10 10 0 1 0-20 0z',
+  globe: 'M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8zM12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10zM2 12h20',
+  link: 'M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71',
+  truck: 'M1 3h15v13H1V3zm15 8h4l3 3v2h-7v-5zM5 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4zm14 0a2 2 0 1 0 0-4 2 2 0 0 0 0 4z',
   users: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm14 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
+  star: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
+  activity: 'M22 12h-4l-3 9L9 3l-3 9H2',
 };
 
 export default function AppIcon({ name, className, strokeWidth, 'aria-hidden': ariaHidden }: AppIconProps) {

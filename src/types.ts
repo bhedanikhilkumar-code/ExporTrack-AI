@@ -20,8 +20,20 @@ export type ShipmentStatus =
   | 'Out For Delivery'
   | 'Delivered'
   | 'Under Verification'
-  | 'Customs Hold';
-export type Role = 'Admin' | 'Manager' | 'Staff' | 'Export Operations Manager' | 'Client';
+  | 'Customs Hold'
+  | 'Delayed';
+
+export type Role = 'Admin' | 'Manager' | 'Operations' | 'Viewer' | 'Export Operations Manager' | 'Client';
+
+export interface AnalyticsMetrics {
+  totalShipments: number;
+  onTimeDeliveryRate: number;
+  delayedShipments: number;
+  averageDeliveryTime: number; // in days
+  monthlyShipmentTrend: { month: string; count: number }[];
+  carrierPerformance: { carrier: string; rating: number; shipments: number }[];
+  deliveryTimeDistribution: { range: string; count: number }[];
+}
 
 export interface ShipmentDocument {
   id: string;

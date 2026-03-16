@@ -13,18 +13,13 @@ import MobileSidebar from './MobileSidebar';
 
 const navItems = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { to: '/analytics', label: 'Analytics', icon: 'bar-chart' },
+  { to: '/analytics', label: 'Analytics', icon: 'bar-chart', action: 'access_analytics' },
   { to: '/shipments', label: 'Shipments', icon: 'shipments' },
-  { to: '/shipments/create', label: 'Create Shipment', icon: 'create' },
-  { to: '/documents/upload', label: 'Upload Docs', icon: 'upload' },
-  { to: '/document-ocr', label: 'Document OCR', icon: 'ai-extract' },
-  { to: '/ai-extraction', label: 'AI Extraction', icon: 'ai-extract' },
-  { to: '/ai-validator', label: 'AI Validator', icon: 'verification' },
-  { to: '/ai-compliance', label: 'AI Compliance', icon: 'shield' },
-  { to: '/verification', label: 'Verification', icon: 'verification' },
-  { to: '/notifications', label: 'Notifications', icon: 'notifications' },
-  { to: '/team-workspace', label: 'Team Workspace', icon: 'users' },
-  { to: '/team', label: 'Team', icon: 'team' }
+  { to: '/shipments/create', label: 'Create Shipment', icon: 'create', action: 'create_shipments' },
+  { to: '/ai-extraction', label: 'AI Document OCR', icon: 'ai-extract', action: 'edit_shipments' },
+  { to: '/verification', label: 'Compliance Audit', icon: 'verification', action: 'update_tracking' },
+  { to: '/notifications', label: 'Inbox', icon: 'notifications' },
+  { to: '/team', label: 'Team Workspace', icon: 'users' }
 ] as const;
 
 export default function AppLayout() {
@@ -41,13 +36,18 @@ export default function AppLayout() {
 
   const {
     state: { user, notifications, theme, shipments },
-    toggleTheme
+    toggleTheme,
+    hasPermission
   } = useAppContext();
+
+  const filteredNavItems = useMemo(() => {
+    return navItems.filter(item => !('action' in item) || hasPermission(item.action as string));
+  }, [user, hasPermission]);
 
   const isHeaderVisible = useScrollDirection();
 
   const unreadCount = notifications.filter((notification) => !notification.read).length;
-  const currentNav = navItems.find((item) => location.pathname.startsWith(item.to));
+  const currentNav = filteredNavItems.find((item) => location.pathname.startsWith(item.to));
 
   // Global Search Logic
   const filteredResults = useMemo(() => {
@@ -147,7 +147,7 @@ export default function AppLayout() {
           <div className="mb-4 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400/70">
             {sidebarExpanded && "Main Menu"}
           </div>
-          {navItems.map((item) => (
+          {filteredNavItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
@@ -159,7 +159,7 @@ export default function AppLayout() {
               }
               title={!sidebarExpanded ? item.label : ''}
             >
-              <AppIcon name={item.icon} className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${!sidebarExpanded ? 'mx-auto' : ''}`} />
+              <AppIcon name={item.icon as any} className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${!sidebarExpanded ? 'mx-auto' : ''}`} />
               {sidebarExpanded && (
                 <span className="min-w-0 flex-1 truncate font-bold">
                   {item.label}
@@ -310,7 +310,7 @@ export default function AppLayout() {
         <MobileSidebar 
           isOpen={menuOpen} 
           onClose={() => setMenuOpen(false)} 
-          navItems={navItems} 
+          navItems={filteredNavItems} 
         />
 
         <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 md:px-8 md:pb-8 md:py-8">
