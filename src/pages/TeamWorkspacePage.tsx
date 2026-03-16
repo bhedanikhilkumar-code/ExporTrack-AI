@@ -119,17 +119,20 @@ const MemberCard = memo(({ member, colors, wsRole, isOnline, isSelected, onClick
 /* ─── Component ──────────────────────────────────────────────────────── */
 export default function TeamWorkspacePage() {
   const {
-    state: { user, teamMembers, shipments },
+    state: { user, teamMembers, shipments, invites },
     switchRole,
+    inviteTeamMember,
+    updateMemberRole,
+    deleteInvite
   } = useAppContext();
 
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteRole, setInviteRole] = useState<WorkspaceRole>('Viewer');
+  const [inviteRole, setInviteRole] = useState<Role>('Operations');
   const [inviteName, setInviteName] = useState('');
-  const [inviteSent, setInviteSent] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedMember, setSelectedMember] = useState<TeamMember | null>(null);
-  const [activeTab, setActiveTab] = useState<'members' | 'roles' | 'activity'>('members');
+  const [activeTab, setActiveTab] = useState<'members' | 'roles' | 'activity' | 'invites'>('members');
 
   const currentRole = user?.role ? toWorkspaceRole(user.role) : 'Viewer';
   const canManageUsers = hasPermission(currentRole, 'manage_users');
@@ -142,16 +145,24 @@ export default function TeamWorkspacePage() {
     return { ...member, assignedCount: assigned.length, pendingDocs: pending };
   });
 
-  const handleInvite = () => {
-    if (!inviteEmail.trim()) return;
-    setInviteSent(true);
-    setTimeout(() => {
+  const handleInvite = async () => {
+    if (!inviteEmail.trim() || !inviteName.trim()) return;
+    setIsSubmitting(true);
+    try {
+      await inviteTeamMember({
+        name: inviteName,
+        email: inviteEmail,
+        role: inviteRole,
+      });
       setShowInviteModal(false);
       setInviteEmail('');
       setInviteName('');
-      setInviteRole('Viewer');
-      setInviteSent(false);
-    }, 2000);
+      setInviteRole('Operations');
+    } catch (err: any) {
+      alert(err.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const roleDistribution = WORKSPACE_ROLES.map(role => ({
@@ -213,15 +224,15 @@ export default function TeamWorkspacePage() {
         </section>
 
         {/* ── Tabs ── */}
-        <div className="flex items-center gap-1 bg-slate-100/50 dark:bg-slate-900/50 rounded-xl p-1 w-fit border border-slate-200/60 dark:border-slate-800/60">
-          {(['members', 'roles', 'activity'] as const).map(tab => (
+        <div className="flex p-1 rounded-xl bg-slate-100/50 dark:bg-slate-800/50 border border-slate-200/50 dark:border-slate-800/50 mb-6 w-full max-w-lg">
+          {(['members', 'invites', 'roles', 'activity'] as const).map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all capitalize ${
-                activeTab === tab
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300'
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-black uppercase tracking-widest transition-all ${
+                activeTab === tab 
+                  ? 'bg-white text-slate-900 shadow-sm dark:bg-slate-900 dark:text-white' 
+                  : 'text-slate-400 hover:text-slate-600 dark:hover:text-slate-300'
               }`}
             >
               {tab === 'members' ? 'Team Members' : tab === 'roles' ? 'Role Matrix' : 'Activity Log'}
@@ -390,6 +401,69 @@ export default function TeamWorkspacePage() {
             </div>
           </article>
         )}
+
+        {/* ── Invites Tab ── */}
+        {activeTab === 'invites' && (
+          <div className="space-y-4 animate-in fade-in duration-500">
+            <div className="flex items-center justify-between mb-2 px-1">
+              <h3 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Pending Invitations</h3>
+              <span className="bg-slate-100 dark:bg-slate-800 text-slate-500 px-2 py-0.5 rounded text-[10px] font-bold">{invites.length} Sent</span>
+            </div>
+            
+            {invites.length === 0 ? (
+              <div className="card-premium py-12 text-center opacity-60">
+                <AppIcon name="share" className="mx-auto h-8 w-8 text-slate-300 mb-3" />
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">No active invitations</p>
+              </div>
+            ) : (
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {invites.map(invite => (
+                  <article key={invite.id} className="card-premium relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button 
+                        onClick={() => deleteInvite(invite.id)}
+                        className="h-7 w-7 rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-sm"
+                        title="Revoke Invitation"
+                      >
+                        <AppIcon name="x" className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400 uppercase">
+                        {invite.name.slice(0, 2)}
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-900 dark:text-white truncate max-w-[150px]">{invite.name}</p>
+                        <p className="text-[10px] text-slate-500 truncate max-w-[150px]">{invite.email}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mt-auto pt-2 border-t border-slate-50 dark:border-slate-800/50">
+                      <div className={`px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-[0.15em] ${ROLE_COLORS[toWorkspaceRole(invite.role)].bg} ${ROLE_COLORS[toWorkspaceRole(invite.role)].text}`}>
+                        {invite.role}
+                      </div>
+                      <span className="text-[9px] font-bold text-slate-400 italic">
+                        Sent {new Date(invite.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </article>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ── Activities & Roles tabs (Keeping minimal for continuation) ── */}
+        {activeTab === 'roles' && (
+           <article className="card-premium py-16 text-center opacity-50">
+              <AppIcon name="shield" className="mx-auto h-10 w-10 text-slate-300 mb-4" />
+              <p className="text-xs font-extrabold text-slate-500 uppercase tracking-widest leading-loose">
+                Permission Management System<br/>
+                <span className="text-[10px] font-bold opacity-70">Coming in v1.2 Enterprise Edition</span>
+              </p>
+           </article>
+        )}
       </main>
 
       {/* ── Invite Modal ── */}
@@ -407,13 +481,11 @@ export default function TeamWorkspacePage() {
               </button>
             </div>
 
-            {inviteSent ? (
-              <div className="text-center py-8 tw-animate">
-                <div className="mx-auto h-14 w-14 rounded-2xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center mb-4">
-                  <AppIcon name="check" className="h-7 w-7 text-emerald-600" strokeWidth={2.5} />
-                </div>
-                <p className="text-sm font-bold text-slate-900 dark:text-white">Invitation Sent!</p>
-                <p className="text-xs text-slate-500 mt-1">An email has been sent to {inviteEmail}</p>
+            {isSubmitting ? (
+              <div className="text-center py-8 tw-animate flex flex-col items-center">
+                <div className="h-12 w-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mb-4" />
+                <p className="text-sm font-bold text-slate-900 dark:text-white">Processing Invitation...</p>
+                <p className="text-xs text-slate-500 mt-1">Establishing secure connection to mail server</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -442,10 +514,11 @@ export default function TeamWorkspacePage() {
                   <div className="grid grid-cols-2 gap-2">
                     {WORKSPACE_ROLES.map(role => {
                       const colors = ROLE_COLORS[role];
+                      const roleValue = role as Role; // Typecast for the button
                       return (
                         <button
                           key={role}
-                          onClick={() => setInviteRole(role)}
+                          onClick={() => setInviteRole(roleValue)}
                           className={`px-3 py-2.5 rounded-xl text-xs font-bold transition-all border ${
                             inviteRole === role
                               ? `${colors.bg} ${colors.text} ${colors.border} shadow-md`
@@ -457,7 +530,7 @@ export default function TeamWorkspacePage() {
                       );
                     })}
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-2">{ROLE_DESCRIPTIONS[inviteRole]}</p>
+                  <p className="text-[10px] text-slate-400 mt-2">{ROLE_DESCRIPTIONS[toWorkspaceRole(inviteRole)]}</p>
                 </div>
                 <div className="flex gap-3 pt-2">
                   <button onClick={handleInvite} className="btn-primary flex-1 justify-center">

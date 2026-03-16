@@ -11,15 +11,27 @@ import MobileBottomNav from './MobileBottomNav';
 import MobileFAB from './MobileFAB';
 import MobileSidebar from './MobileSidebar';
 
-const navItems = [
+interface NavItem {
+  to: string;
+  label: string;
+  icon: string;
+  badge?: boolean;
+}
+
+const navItems: NavItem[] = [
   { to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
-  { to: '/analytics', label: 'Analytics', icon: 'bar-chart', action: 'access_analytics' },
+  { to: '/analytics', label: 'Analytics', icon: 'bar-chart' },
   { to: '/shipments', label: 'Shipments', icon: 'shipments' },
-  { to: '/shipments/create', label: 'Create Shipment', icon: 'create', action: 'create_shipments' },
-  { to: '/ai-extraction', label: 'AI Document OCR', icon: 'ai-extract', action: 'edit_shipments' },
-  { to: '/verification', label: 'Compliance Audit', icon: 'verification', action: 'update_tracking' },
-  { to: '/notifications', label: 'Inbox', icon: 'notifications' },
-  { to: '/team', label: 'Team Workspace', icon: 'users' }
+  { to: '/shipments/create', label: 'Create Shipment', icon: 'create' },
+  { to: '/documents/upload', label: 'Upload Docs', icon: 'upload' },
+  { to: '/document-ocr', label: 'Document OCR', icon: 'ai-extract' },
+  { to: '/ai-extraction', label: 'AI Extraction', icon: 'ai-extract' },
+  { to: '/ai-validator', label: 'AI Validator', icon: 'verification' },
+  { to: '/ai-compliance', label: 'AI Compliance', icon: 'shield' },
+  { to: '/verification', label: 'Verification', icon: 'verification' },
+  { to: '/notifications', label: 'Notifications', icon: 'notifications', badge: true },
+  { to: '/team-workspace', label: 'Team Workspace', icon: 'users' },
+  { to: '/team', label: 'Team', icon: 'team' },
 ] as const;
 
 export default function AppLayout() {
@@ -35,10 +47,13 @@ export default function AppLayout() {
   const notificationRef = useRef<HTMLDivElement>(null);
 
   const {
-    state: { user, notifications, theme, shipments },
+    state: { user, theme, notifications, shipments },
     toggleTheme,
+    logout,
     hasPermission
   } = useAppContext();
+
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const filteredNavItems = useMemo(() => {
     return navItems.filter(item => !('action' in item) || hasPermission(item.action as string));
@@ -46,7 +61,6 @@ export default function AppLayout() {
 
   const isHeaderVisible = useScrollDirection();
 
-  const unreadCount = notifications.filter((notification) => !notification.read).length;
   const currentNav = filteredNavItems.find((item) => location.pathname.startsWith(item.to));
 
   // Global Search Logic
@@ -161,8 +175,13 @@ export default function AppLayout() {
             >
               <AppIcon name={item.icon as any} className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${!sidebarExpanded ? 'mx-auto' : ''}`} />
               {sidebarExpanded && (
-                <span className="min-w-0 flex-1 truncate font-bold">
-                  {item.label}
+                <span className="min-w-0 flex-1 truncate font-bold flex items-center justify-between">
+                  <span className="flex-1 text-left">{item.label}</span>
+                  {item.badge && unreadCount > 0 && (
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white shadow-sm">
+                      {unreadCount}
+                    </span>
+                  )}
                 </span>
               )}
             </NavLink>
@@ -283,12 +302,12 @@ export default function AppLayout() {
                 <button
                   type="button"
                   onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
-                  className="flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm relative"
+                  className="flex items-center gap-2 h-9 px-4 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all shadow-sm group"
                   aria-label="Notifications"
                 >
-                  <AppIcon name="bell" className="h-4 w-4" />
+                  <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 transition-colors">Alerts</span>
                   {unreadCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-rose-600 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-950 shadow-md animate-in zoom-in">
+                    <span className="flex h-5 px-2 items-center justify-center rounded-lg bg-rose-500 text-[10px] font-black text-white shadow-sm ring-1 ring-rose-600/20">
                       {unreadCount}
                     </span>
                   )}
