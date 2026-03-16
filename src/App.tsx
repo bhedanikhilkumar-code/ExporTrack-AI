@@ -1,5 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
+import NotificationPermissionBanner from './components/NotificationPermissionBanner';
+import PWAUpdateBanner from './components/PWAUpdateBanner';
 import { useAppContext } from './context/AppContext';
 import AdminPage from './pages/AdminPage';
 import AiScanResultsPage from './pages/AiScanResultsPage';
@@ -65,56 +67,60 @@ export default function App() {
   } = useAppContext();
 
   return (
-    <Routes>
-      {/* Public Routes */}
-      <Route path="/" element={<SplashPage />} />
-      <Route path="/splash" element={<Navigate to="/" replace />} />
-      <Route path="/track/:trackingNumber" element={<PublicTrackingPage />} />
+    <>
+      <PWAUpdateBanner />
+      <NotificationPermissionBanner />
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<SplashPage />} />
+        <Route path="/splash" element={<Navigate to="/" replace />} />
+        <Route path="/track/:trackingNumber" element={<PublicTrackingPage />} />
 
-      {/* Auth Route - Redirect to dashboard if already authenticated */}
-      <Route
-        path="/auth"
-        element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
-      />
+        {/* Auth Route - Redirect to dashboard if already authenticated */}
+        <Route
+          path="/auth"
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <AuthPage />}
+        />
 
-      {/* Client Portal Routes */}
-      <Route path="/client/login" element={<ClientLoginPage />} />
-      <Route element={<ClientLayout />}>
-        <Route path="/client/dashboard" element={<ClientDashboardPage />} />
-        <Route path="/client/shipments" element={<ClientShipmentsPage />} />
-        <Route path="/client/shipments/:id" element={<ClientShipmentDetailsPage />} />
-      </Route>
+        {/* Client Portal Routes */}
+        <Route path="/client/login" element={<ClientLoginPage />} />
+        <Route element={<ClientLayout />}>
+          <Route path="/client/dashboard" element={<ClientDashboardPage />} />
+          <Route path="/client/shipments" element={<ClientShipmentsPage />} />
+          <Route path="/client/shipments/:id" element={<ClientShipmentDetailsPage />} />
+        </Route>
 
-      {/* Protected Admin/Staff Routes */}
-      <Route element={<ProtectedLayout />}>
-        <Route path="/dashboard" element={<DashboardPage />} />
+        {/* Protected Admin/Staff Routes */}
+        <Route element={<ProtectedLayout />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
 
-        <Route path="/shipments" element={<SearchFilterPage />} />
-        <Route path="/shipments/create" element={<CreateShipmentPage />} />
-        <Route path="/shipments/new" element={<Navigate to="/shipments/create" replace />} />
-        <Route path="/shipments/:shipmentId" element={<ShipmentDetailsPage />} />
-        <Route path="/shipments/:shipmentId/upload" element={<UploadDocumentsPage />} />
-        <Route path="/shipments/:shipmentId/ai-scan" element={<AiScanResultsPage />} />
-        <Route path="/shipments/:shipmentId/checklist" element={<VerificationChecklistPage />} />
-        <Route path="/shipments/:shipmentId/tracking" element={<TrackingPage />} />
+          <Route path="/shipments" element={<SearchFilterPage />} />
+          <Route path="/shipments/create" element={<CreateShipmentPage />} />
+          <Route path="/shipments/new" element={<Navigate to="/shipments/create" replace />} />
+          <Route path="/shipments/:shipmentId" element={<ShipmentDetailsPage />} />
+          <Route path="/shipments/:shipmentId/upload" element={<UploadDocumentsPage />} />
+          <Route path="/shipments/:shipmentId/ai-scan" element={<AiScanResultsPage />} />
+          <Route path="/shipments/:shipmentId/checklist" element={<VerificationChecklistPage />} />
+          <Route path="/shipments/:shipmentId/tracking" element={<TrackingPage />} />
 
-        <Route path="/documents/upload" element={<FirstShipmentRedirect kind="upload" />} />
-        <Route path="/ai-extraction" element={<AiDocumentExtractionPage />} />
-        <Route path="/ai-validator" element={<AiDocumentValidatorPage />} />
-        <Route path="/ai-compliance" element={<AiComplianceCopilotPage />} />
-        <Route path="/verification" element={<FirstShipmentRedirect kind="verification" />} />
+          <Route path="/documents/upload" element={<FirstShipmentRedirect kind="upload" />} />
+          <Route path="/ai-extraction" element={<AiDocumentExtractionPage />} />
+          <Route path="/ai-validator" element={<AiDocumentValidatorPage />} />
+          <Route path="/ai-compliance" element={<AiComplianceCopilotPage />} />
+          <Route path="/verification" element={<FirstShipmentRedirect kind="verification" />} />
 
-        <Route path="/notifications" element={<NotificationsPage />} />
-        <Route path="/team" element={<ProfileTeamPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/analytics" element={<AnalyticsDashboardPage />} />
-        <Route path="/document-ocr" element={<DocumentOcrPage />} />
-        <Route path="/team-workspace" element={<TeamWorkspacePage />} />
-        <Route path="/search" element={<Navigate to="/shipments" replace />} />
-      </Route>
+          <Route path="/notifications" element={<NotificationsPage />} />
+          <Route path="/team" element={<ProfileTeamPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/analytics" element={<AnalyticsDashboardPage />} />
+          <Route path="/document-ocr" element={<DocumentOcrPage />} />
+          <Route path="/team-workspace" element={<TeamWorkspacePage />} />
+          <Route path="/search" element={<Navigate to="/shipments" replace />} />
+        </Route>
 
-      {/* 404 Not Found */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+        {/* 404 Not Found */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </>
   );
 }

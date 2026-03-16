@@ -26,8 +26,32 @@
     --shadow-premium: 0 4px 6px -1px rgb(0 0 0 / 0.03), 0 2px 4px -2px rgb(0 0 0 / 0.03);
     --shadow-elevated: 0 20px 40px -12px rgb(0 0 0 / 0.1), 0 8px 16px -8px rgb(0 0 0 / 0.06);
     --shadow-float: 0 25px 50px -12px rgb(0 0 0 / 0.15);
-    --shadow-glow-teal: 0 0 20px -5px rgb(13 148 136 / 0.15);
+    --safe-area-inset-top: env(safe-area-inset-top, 0px);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    --header-height: 64px;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+
+  * {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-color: #0f172a; /* Consistent background */
+  }
+
+  /* Fix for 100vh on mobile browsers */
+  .min-h-screen {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
   }
 
   .dark {
@@ -798,4 +822,71 @@
   height: 100%;
   border-radius: 4px;
   background: linear-gradient(180deg, #0d9488, #14b8a6);
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* PWA STANDALONE MODE                                            */
+/* ══════════════════════════════════════════════════════════════ */
+
+/* When installed as PWA — adjust for missing browser chrome */
+@media (display-mode: standalone) {
+  body {
+    /* Account for safe area on notched devices */
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    /* Prevent pull-to-refresh in standalone */
+    overscroll-behavior-y: contain;
+  }
+
+  /* Give the top header extra padding so it sits below the notch */
+  .app-header,
+  header[role="banner"] {
+    padding-top: calc(0.5rem + env(safe-area-inset-top, 0px));
+  }
+
+  /* Bottom nav safe area */
+  .mobile-bottom-nav,
+  nav[role="navigation"] {
+    padding-bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Smoother touch scrolling in standalone */
+  .page-stack {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════ */
+/* PWA PAGE TRANSITIONS                                           */
+/* ══════════════════════════════════════════════════════════════ */
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* iOS rubber-band prevention for PWA */
+@supports (-webkit-touch-callout: none) {
+  @media (display-mode: standalone) {
+    html {
+      height: 100%;
+      overflow: hidden;
+    }
+    body {
+      height: 100%;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
 }
