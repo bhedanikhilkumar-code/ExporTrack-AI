@@ -108,6 +108,24 @@ export interface TeamMember {
   lastActive: string;
 }
 
+export interface TeamInvite {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  workspaceId: string;
+  token: string;
+  status: 'Pending' | 'Accepted' | 'Expired';
+  createdAt: string;
+}
+
+export interface InviteTeamMemberInput {
+  name: string;
+  email: string;
+  role: Role;
+  workspaceId?: string;
+}
+
 export interface Client {
   id: string;
   name: string;
@@ -133,6 +151,7 @@ export interface AppState {
   teamMembers: TeamMember[];
   clients: Client[];
   theme: 'light' | 'dark' | 'system';
+  invites: TeamInvite[];
 }
 
 export interface CreateShipmentInput {

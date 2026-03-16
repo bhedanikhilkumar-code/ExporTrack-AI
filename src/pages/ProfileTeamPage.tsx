@@ -16,20 +16,45 @@ const permissionMatrix = [
 
 export default function ProfileTeamPage() {
   const {
-    state: { user, teamMembers, shipments },
+    state: { user, teamMembers, shipments, invites },
     switchRole,
-    hasPermission
+    hasPermission,
+    inviteTeamMember,
+    updateMemberRole,
+    deleteInvite
   } = useAppContext();
 
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('Operations');
 
-  const handleInvite = (e: React.FormEvent) => {
+  const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    window.alert(`Invitation sent to ${inviteEmail} as ${inviteRole}`);
-    setShowInviteModal(false);
-    setInviteEmail('');
+    if (!inviteName.trim() || !inviteEmail.trim() || !inviteRole) {
+      window.alert('Please fill in all fields.');
+      return;
+    }
+
+    try {
+      setIsInviting(true);
+      await inviteTeamMember({
+        name: inviteName,
+        email: inviteEmail,
+        role: inviteRole
+      });
+      
+      window.alert(`Success! Invitation sent to ${inviteName}.`);
+      setShowInviteModal(false);
+      setInviteName('');
+      setInviteEmail('');
+      setInviteRole('Operations');
+    } catch (error: any) {
+      window.alert(`Error: ${error.message || 'Failed to send invitation'}`);
+    } finally {
+      setIsInviting(false);
+    }
   };
 
   const memberStats = teamMembers.map((member) => {
@@ -103,7 +128,22 @@ export default function ProfileTeamPage() {
                     <p className="text-sm font-semibold text-slate-800">{member.name}</p>
                     <p className="text-xs text-slate-500">{member.email}</p>
                   </div>
-                  <StatusBadge value={member.role} />
+                  {hasPermission('manage_users') ? (
+                    <select
+                      value={member.role}
+                      onChange={(e) => updateMemberRole(member.id, e.target.value as Role)}
+                      className="text-[10px] font-bold uppercase bg-white border border-slate-200 rounded px-2 py-1 outline-none focus:border-teal-500"
+                    >
+                      <option value="Admin">Admin</option>
+                      <option value="Manager">Manager</option>
+                      <option value="Operations">Operations</option>
+                      <option value="Broker">Broker</option>
+                      <option value="Auditor">Auditor</option>
+                      <option value="Customer">Customer</option>
+                    </select>
+                  ) : (
+                    <StatusBadge value={member.role} />
+                  )}
                 </div>
                 <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                   <div className="rounded-lg bg-white p-2">
@@ -126,6 +166,38 @@ export default function ProfileTeamPage() {
             ))}
           </div>
         </article>
+
+        <article className="card-panel">
+          <h3 className="card-title text-base md:text-lg mb-6">Active Invitations</h3>
+          <div className="space-y-3">
+            {invites.length === 0 ? (
+              <div className="p-8 text-center border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl text-slate-400">
+                <p className="text-xs font-medium">No pending invitations</p>
+              </div>
+            ) : (
+              invites.map((invite) => (
+                <div key={invite.id} className="flex items-center justify-between p-3 card-muted animate-in slide-in-from-right-2 duration-300">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{invite.name}</p>
+                    <p className="text-[10px] text-slate-500 truncate">{invite.email} • {invite.role}</p>
+                  </div>
+                  <div className="flex items-center gap-3 ml-4">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-teal-600 bg-teal-50 px-2 py-0.5 rounded">Pending</span>
+                    {hasPermission('manage_users') && (
+                      <button 
+                        onClick={() => deleteInvite(invite.id)}
+                        className="text-slate-400 hover:text-rose-500 transition-colors"
+                        title="Revoke Invitation"
+                      >
+                        <AppIcon name="x" className="h-4 w-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </article>
       </section>
 
       {/* Invite Modal */}
@@ -140,6 +212,18 @@ export default function ProfileTeamPage() {
               </div>
               <form onSubmit={handleInvite} className="space-y-4">
                  <div>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Full Name</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={inviteName}
+                      onChange={(e) => setInviteName(e.target.value)}
+                      placeholder="Enter teammate name" 
+                      className="input-field" 
+                      disabled={isInviting}
+                    />
+                 </div>
+                 <div>
                     <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Email Address</label>
                     <input 
                       type="email" 
@@ -148,6 +232,7 @@ export default function ProfileTeamPage() {
                       onChange={(e) => setInviteEmail(e.target.value)}
                       placeholder="teammate@exportrack.ai" 
                       className="input-field" 
+                      disabled={isInviting}
                     />
                  </div>
                  <div>
@@ -156,6 +241,7 @@ export default function ProfileTeamPage() {
                       value={inviteRole}
                       onChange={(e) => setInviteRole(e.target.value as Role)}
                       className="input-field"
+                      disabled={isInviting}
                     >
                        <option value="Admin">Admin</option>
                        <option value="Manager">Manager</option>
@@ -165,8 +251,26 @@ export default function ProfileTeamPage() {
                     </select>
                  </div>
                  <div className="pt-4 flex gap-3">
-                    <button type="submit" className="btn-primary flex-1 py-3 justify-center">Send Invitation</button>
-                    <button type="button" onClick={() => setShowInviteModal(false)} className="btn-secondary px-6">Cancel</button>
+                    <button 
+                      type="submit" 
+                      className={`btn-primary flex-1 py-3 justify-center ${isInviting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                      disabled={isInviting}
+                    >
+                      {isInviting ? (
+                        <div className="flex items-center gap-2">
+                          <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                          Sending...
+                        </div>
+                      ) : 'Send Invitation'}
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={() => setShowInviteModal(false)} 
+                      className="btn-secondary px-6"
+                      disabled={isInviting}
+                    >
+                      Cancel
+                    </button>
                  </div>
               </form>
            </div>

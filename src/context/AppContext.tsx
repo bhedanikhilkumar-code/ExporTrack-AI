@@ -12,7 +12,9 @@ import {
   Shipment,
   ShipmentDocument,
   UploadDocumentInput,
-  ShipmentStatus
+  ShipmentStatus,
+  InviteTeamMemberInput,
+  TeamInvite
 } from '../types';
 import { decodeJWT } from '../utils/googleAuth';
 import { safeStorage } from '../utils/storage';
@@ -44,6 +46,9 @@ interface AppContextValue {
   applyOptimizedRoute: (shipmentId: string) => void;
   getAnalytics: () => AnalyticsMetrics;
   hasPermission: (action: string) => boolean;
+  inviteTeamMember: (input: InviteTeamMemberInput) => Promise<void>;
+  updateMemberRole: (memberId: string, role: Role) => void;
+  deleteInvite: (inviteId: string) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -59,7 +64,10 @@ const loadState = (): AppState => {
     if (!raw) {
       return createSeedState();
     }
-    return JSON.parse(raw) as AppState;
+    return {
+      ...JSON.parse(raw),
+      invites: (JSON.parse(raw) as AppState).invites ?? []
+    } as AppState;
   } catch (error) {
     console.warn('[AppContext] Failed to load state, using seed data:', error);
     return createSeedState();
@@ -667,7 +675,80 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       };
     });
   };
+  
+  const inviteTeamMember = async (input: InviteTeamMemberInput) => {
+    // Check for duplicates
+    const existingMember = state.teamMembers.find(m => m.email.toLowerCase() === input.email.toLowerCase());
+    const existingInvite = state.invites.find(i => i.email.toLowerCase() === input.email.toLowerCase() && i.status === 'Pending');
+    
+    if (existingMember) {
+      throw new Error('This user is already a member of the workspace.');
+    }
+    
+    if (existingInvite) {
+      throw new Error('An active invitation for this email already exists.');
+    }
+    
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const inviteId = createId('INV');
+    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    const newInvite: TeamInvite = {
+      id: inviteId,
+      name: input.name,
+      email: input.email,
+      role: input.role,
+      workspaceId: input.workspaceId ?? 'default-workspace',
+      token,
+      status: 'Pending',
+      createdAt: new Date().toISOString()
+    };
+    
+    setState(prev => ({
+      ...prev,
+      invites: [newInvite, ...prev.invites]
+    }));
+    
+    // Mock Email Dispatch
+    console.log('Sending Invitation Email...', {
+      to: newInvite.email,
+      name: newInvite.name,
+      role: newInvite.role,
+      link: `https://exportrack.ai/invite/${newInvite.token}`
+    });
+    
+    // Add internal notification
+    const addNotif = (t: any) => {
+      setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
+    };
+    
+    const notification = buildNotification(
+      'SYSTEM',
+      'Deadline',
+      'Low',
+      'Invitation Sent',
+      `Team invitation sent to ${newInvite.name} (${newInvite.email}) as ${newInvite.role}.`,
+      new Date().toISOString()
+    );
+    addNotif(notification);
+  };
 
+  const updateMemberRole = (memberId: string, role: Role) => {
+    setState(prev => ({
+      ...prev,
+      teamMembers: prev.teamMembers.map(m => m.id === memberId ? { ...m, role } : m)
+    }));
+  };
+
+  const deleteInvite = (inviteId: string) => {
+    setState(prev => ({
+      ...prev,
+      invites: prev.invites.filter(i => i.id !== inviteId)
+    }));
+  };
+  
   const value = useMemo<AppContextValue>(
     () => ({
       state,
@@ -734,7 +815,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           'update_tracking': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
         };
         return permissions[action]?.includes(role) || false;
-      }
+      },
+      inviteTeamMember,
+      updateMemberRole,
+      deleteInvite
     }),
     [state]
   );
