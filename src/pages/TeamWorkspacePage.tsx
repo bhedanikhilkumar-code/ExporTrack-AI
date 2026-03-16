@@ -45,7 +45,7 @@ const MemberCard = memo(({ member, colors, wsRole, isOnline, isSelected, onClick
     <div className="flex items-start justify-between gap-3 mb-4">
       <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="h-11 w-11 rounded-xl bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-sm font-extrabold text-slate-600 dark:text-slate-300">
+          <div className="h-11 w-11 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-sm font-extrabold text-slate-600 dark:text-slate-300">
             {member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
           </div>
           <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
@@ -430,7 +430,7 @@ export default function TeamWorkspacePage() {
                     </div>
                     
                     <div className="flex items-center gap-3 mb-4">
-                      <div className="h-10 w-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400 uppercase">
+                      <div className="h-10 w-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400 uppercase">
                         {invite.name.slice(0, 2)}
                       </div>
                       <div>

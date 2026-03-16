@@ -162,7 +162,7 @@ export default function AuthPage() {
     return (
       <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 items-center justify-center p-6">
         <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-2xl text-center">
-          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-teal-50 dark:bg-teal-500/10 mb-6 font-bold text-teal-600">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 dark:bg-teal-500/10 mb-6 font-bold text-teal-600">
              {user.name.charAt(0)}
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Already Signed In</h2>

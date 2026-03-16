@@ -88,8 +88,8 @@ export default function ProfileTeamPage() {
           <article className="card-premium overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-r from-teal-500 to-indigo-600 opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative pt-12 text-center">
-               <div className="mx-auto h-20 w-20 rounded-3xl bg-white dark:bg-slate-900 shadow-xl flex items-center justify-center border-4 border-white dark:border-slate-800 transition-transform group-hover:scale-110">
-                  <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-xl font-black text-white">
+               <div className="mx-auto h-20 w-20 rounded-full bg-white dark:bg-slate-900 shadow-xl flex items-center justify-center border-4 border-white dark:border-slate-800 transition-transform group-hover:scale-110">
+                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-xl font-black text-white">
                     {user?.name?.slice(0, 2).toUpperCase()}
                   </div>
                </div>
@@ -158,7 +158,7 @@ export default function ProfileTeamPage() {
                    <div key={member.id} className="relative p-5 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 hover:border-teal-500/50 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-black/40 transition-all duration-300 group/member">
                       <div className="flex items-center gap-4">
                          <div className="relative">
-                            <div className="h-12 w-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400 uppercase group-hover/member:bg-teal-500/10 group-hover/member:text-teal-600 transition-colors">
+                            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400 uppercase group-hover/member:bg-teal-500/10 group-hover/member:text-teal-600 transition-colors">
                                {member.name.slice(0, 2)}
                             </div>
                             <div className={`absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${member.status === 'online' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />

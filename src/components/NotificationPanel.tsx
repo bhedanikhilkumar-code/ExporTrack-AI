@@ -62,7 +62,7 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                 Notifications
                             </h3>
                             {unreadNotifications.length > 0 && (
-                                <span className="inline-flex h-5 px-1.5 min-w-[20px] items-center justify-center rounded-lg bg-teal-500 text-[10px] font-black text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
+                                <span className="inline-flex h-5 px-1.5 min-w-[20px] items-center justify-center rounded-full bg-teal-500 text-[10px] font-black text-white shadow-sm ring-2 ring-white dark:ring-slate-900">
                                     {unreadNotifications.length}
                                 </span>
                             )}
@@ -97,7 +97,7 @@ export default function NotificationPanel({ notifications, isOpen, onClose }: No
                                     >
                                         <div className="flex gap-3">
                                             {/* Icon / Avatar */}
-                                            <div className={`flex-shrink-0 mt-0.5 h-9 w-9 rounded-xl flex items-center justify-center shadow-sm ${colors.badge.replace('text-', 'bg-').replace('bg-', 'text-').split(' ').slice(0, 2).join(' ')} ${colors.badge.split(' ').slice(2).join(' ')}`}>
+                                            <div className={`flex-shrink-0 mt-0.5 h-9 w-9 rounded-full flex items-center justify-center shadow-sm ${colors.badge.replace('text-', 'bg-').replace('bg-', 'text-').split(' ').slice(0, 2).join(' ')} ${colors.badge.split(' ').slice(2).join(' ')}`}>
                                                 <AppIcon
                                                     name={
                                                         notification.title.includes('Created')

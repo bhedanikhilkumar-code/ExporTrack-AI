@@ -34,7 +34,7 @@ export default function UserProfileDropdown() {
             {/* Profile Button */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="focus-ring flex items-center gap-2 p-1 rounded-xl border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group relative z-10"
+                className="focus-ring flex items-center gap-2 p-1 rounded-full border border-transparent hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group relative z-10"
                 aria-haspopup="true"
                 aria-expanded={isOpen}
             >
@@ -43,7 +43,7 @@ export default function UserProfileDropdown() {
                     <img
                         src={user.profilePicture}
                         alt={user.name}
-                        className="h-8 w-8 rounded-lg object-cover shadow-sm transition-transform group-hover:scale-105"
+                        className="h-8 w-8 rounded-full object-cover shadow-sm transition-transform group-hover:scale-105"
                         loading="lazy"
                         onError={(e) => {
                             const img = e.target as HTMLImageElement;
@@ -51,7 +51,7 @@ export default function UserProfileDropdown() {
                         }}
                     />
                 ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-teal-500 to-blue-600 text-white text-xs font-black shadow-sm transition-transform group-hover:scale-105">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-600 text-white text-xs font-black shadow-sm transition-transform group-hover:scale-105">
                         {user.name.charAt(0).toUpperCase()}
                     </div>
                 )}
