@@ -283,9 +283,9 @@ export default function TrackingPage() {
                <AppIcon name="clock" className="h-4 w-4 text-slate-400" />
              </div>
              <div className="space-y-5">
-               {(trackingData.milestones || []).map((milestone: any, idx: number) => (
+               {(trackingData?.milestones || []).map((milestone: any, idx: number) => (
                  <div key={idx} className="relative flex gap-4">
-                    {idx !== (trackingData.milestones || []).length - 1 && (
+                    {idx !== (trackingData?.milestones || []).length - 1 && (
                       <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
                     )}
                     <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-4 border-white dark:border-slate-900 shadow-sm ${milestone.completed ? 'bg-teal-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>

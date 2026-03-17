@@ -85,7 +85,7 @@ const RecenterMap = ({ lat, lng }: { lat: number, lng: number }) => {
 };
 
 interface TrackingMapProps {
-  tracking: ShipmentTracking;
+  tracking?: ShipmentTracking | null;
   className?: string;
   showOptimizedRoute?: boolean;
 }

@@ -10,7 +10,7 @@ export default defineConfig({
             includeAssets: ['logo.png', 'pwa-icons/*.png'],
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'pwa-icons/*.png'],
-                maximumFileSizeToCacheInBytes: 6 * 1024 * 1024,
+                maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

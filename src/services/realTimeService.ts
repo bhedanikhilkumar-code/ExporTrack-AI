@@ -10,7 +10,7 @@ type TelemetryCallback = (telemetry: DriverTelemetry) => void;
 
 class RealTimeService {
   private listeners: Map<string, TelemetryCallback[]> = new Map();
-  private intervals: Map<string, NodeJS.Timeout> = new Map();
+  private intervals: Map<string, any> = new Map();
 
   /**
    * Subscribe to live driver updates for a specific shipment

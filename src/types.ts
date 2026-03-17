@@ -21,9 +21,11 @@ export type ShipmentStatus =
   | 'Delivered'
   | 'Under Verification'
   | 'Customs Hold'
+  | 'Awaiting Documents'
+  | 'Under Review'
   | 'Delayed';
 
-export type Role = 'Admin' | 'Manager' | 'Operations' | 'Viewer' | 'Export Operations Manager' | 'Client';
+export type Role = 'Admin' | 'Manager' | 'Operations' | 'Viewer' | 'Export Operations Manager' | 'Staff' | 'Client';
 
 export interface AnalyticsMetrics {
   totalShipments: number;
@@ -170,6 +172,8 @@ export interface UploadDocumentInput {
   fileFormat: 'PDF' | 'JPG' | 'PNG';
   uploadedBy: string;
 }
+
+
 
 export interface TrackingEvent {
   timestamp: string;
