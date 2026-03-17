@@ -317,7 +317,7 @@ export default function ShipmentDetailsPage() {
       </header>
 
       {/* ── Key Indicators ── */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 stagger-in">
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Compliance</span>
@@ -413,7 +413,7 @@ export default function ShipmentDetailsPage() {
       </section>
 
       {/* ── Content Grid ── */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 lg:grid-cols-3 animate-in fade-in slide-in-from-bottom-6 duration-1000">
         {/* Left Span - AI and Docs */}
         <div className="lg:col-span-2 space-y-6">
           {/* AI Intelligence Spotlight */}

@@ -17,6 +17,18 @@ const permissionMatrix = [
 
 import { SkeletonLine, SkeletonKpiCard, SkeletonCard, SkeletonAvatar, SkeletonText, SkeletonButton, SkeletonDetailSection } from '../components/SkeletonLoader';
 
+interface MemberStat {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  profilePicture?: string;
+  assignedCount: number;
+  pendingDocs: number;
+  wsRole: string;
+  status: 'online' | 'offline';
+}
+
 export default function ProfileTeamPage() {
   const {
     state: { user, teamMembers, shipments, invites },
@@ -124,7 +136,7 @@ export default function ProfileTeamPage() {
     setShowApiModal(false);
   };
 
-  const memberStats = useMemo(() => teamMembers.map((member) => {
+  const memberStats = useMemo<MemberStat[]>(() => teamMembers.map((member) => {
     const assigned = shipments.filter((s) => s.assignedTo === member.name);
     const pending = assigned.reduce((sum, s) => sum + s.documents.filter((d) => d.status === 'Pending').length, 0);
     const isOnline = (member.id.charCodeAt(member.id.length - 1) % 2) === 0;
@@ -287,7 +299,7 @@ export default function ProfileTeamPage() {
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-black text-slate-900 dark:text-white truncate">{member.name}</p>
                           <p className="text-[10px] text-slate-500 truncate">{member.email}</p>
-                          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase mt-2 ${ROLE_COLORS[member.wsRole].bg} ${ROLE_COLORS[member.wsRole].text}`}>
+                          <div className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[8px] font-black uppercase mt-2 ${ROLE_COLORS[member.wsRole as keyof typeof ROLE_COLORS]?.bg || ''} ${ROLE_COLORS[member.wsRole as keyof typeof ROLE_COLORS]?.text || ''}`}>
                             {member.role}
                           </div>
                         </div>

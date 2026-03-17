@@ -8,8 +8,15 @@ import StatusBadge from '../components/StatusBadge';
 import DriverTrackingPanel from '../components/DriverTrackingPanel';
 import { SkeletonKpiCard, SkeletonDetailSection, SkeletonLine } from '../components/SkeletonLoader';
 
-/* ─── Sub-Components ─────────────────────────────────────────────────── */
-const TrackingKpiCard = memo(({ label, value, icon, color, bg }: any) => (
+interface TrackingKpiCardProps {
+  label: string;
+  value: string | number;
+  icon: any;
+  color: string;
+  bg: string;
+}
+
+const TrackingKpiCard = memo(({ label, value, icon, color, bg }: TrackingKpiCardProps) => (
   <div className="bg-white dark:bg-slate-900/80 p-5 rounded-2xl border border-slate-200/60 dark:border-slate-800/60 flex items-center gap-4 group shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5 relative overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-br from-slate-100/50 to-transparent dark:from-slate-800/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
     <div className={`relative flex h-12 w-12 items-center justify-center rounded-xl shadow-sm ${bg} ${color}`}>
@@ -207,7 +214,7 @@ export default function TrackingPage() {
           </div>
 
           {/* Live Data Feed Cards */}
-          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 stagger-in">
             <TrackingKpiCard label="Last Location" value={trackingData?.location || 'Unknown'} icon="world" color="text-teal-600 dark:text-teal-400" bg="bg-teal-500/10" />
             <TrackingKpiCard label="Next Node" value={trackingData?.next_hub || 'Not assigned'} icon="shield" color="text-indigo-600 dark:text-indigo-400" bg="bg-indigo-500/10" />
             <TrackingKpiCard label="Current Lat" value={trackingData?.latitude?.toFixed(4) || '---'} icon="ai-extract" color="text-blue-600 dark:text-blue-400" bg="bg-blue-500/10" />

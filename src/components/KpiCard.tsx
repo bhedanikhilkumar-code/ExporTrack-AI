@@ -3,9 +3,9 @@ import AppIcon from './AppIcon';
 interface KpiCardProps {
   title: string;
   value: string | number;
-  subtitle: string;
+  subtitle?: string;
   accent: 'navy' | 'teal' | 'rose' | 'amber' | 'emerald' | 'slate' | 'indigo';
-  icon?: any;
+  icon?: string;
   suffix?: string;
   trend?: {
     value: string;

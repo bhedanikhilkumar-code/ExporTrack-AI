@@ -158,7 +158,7 @@ export default function AiDocumentValidatorPage() {
       )}
 
       {stage === 'done' && report && (
-        <div className="grid gap-6 lg:grid-cols-3 animate-report">
+        <div className="grid gap-6 lg:grid-cols-3 animate-report stagger-in">
           {/* Main Report Column */}
           <div className="lg:col-span-2 space-y-6">
             <section className="card-panel overflow-hidden border-none bg-gradient-to-br from-navy-800 to-navy-950 p-0 text-white dark:from-slate-900 dark:to-navy-950 shadow-2xl">
@@ -232,7 +232,7 @@ export default function AiDocumentValidatorPage() {
               </div>
             </section>
 
-            <section className="space-y-4">
+            <section className="space-y-4 stagger-in">
               <h3 className="card-title text-base">Detected Issues ({report.errors.length})</h3>
               <div className="grid gap-3">
                 {report.errors.map((err) => (

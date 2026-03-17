@@ -12,8 +12,18 @@ import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard, SkeletonLi
 import { ShipmentTracking } from '../types';
 
 /* ─── Sub-Components ─────────────────────────────────────────────────── */
-const DashboardKpiCard = memo(({ title, value, icon, accent, suffix, subtitle }: any) => (
-  <KpiCard title={title} value={value} icon={icon} accent={accent} suffix={suffix} subtitle={subtitle} />
+interface DashboardKpiCardProps {
+  title: string;
+  value: string | number;
+  icon: string;
+  accent: 'navy' | 'teal' | 'rose' | 'amber' | 'slate';
+  suffix?: string;
+  subtitle?: string;
+  trend?: { value: string; isPositive: boolean };
+}
+
+const DashboardKpiCard = memo(({ title, value, icon, accent, suffix, subtitle, trend }: DashboardKpiCardProps) => (
+  <KpiCard title={title} value={value} icon={icon} accent={accent} suffix={suffix} subtitle={subtitle} trend={trend} />
 ));
 DashboardKpiCard.displayName = 'DashboardKpiCard';
 

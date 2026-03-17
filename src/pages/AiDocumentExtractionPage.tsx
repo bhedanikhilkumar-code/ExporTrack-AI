@@ -194,7 +194,7 @@ export default function AiDocumentExtractionPage() {
         subtitle="Upload a logistics document for instant AI-powered field extraction and verification."
       />
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8 items-start stagger-in">
         {/* ── Upload Panel ── */}
         <div className="space-y-6">
           <section className="card-premium relative group overflow-hidden">
@@ -243,7 +243,7 @@ export default function AiDocumentExtractionPage() {
                 }`}
               >
                 {stage === 'scanning' && (
-                  <div className="absolute inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-teal-500 to-transparent animate-[scan_2s_ease-in-out_infinite]" />
+                  <div className="absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-teal-500 to-transparent animate-[scan_2s_ease-in-out_infinite] shadow-[0_0_15px_rgba(20,184,166,0.6)]" />
                 )}
                 
                 <div className="flex flex-col items-center gap-4">
