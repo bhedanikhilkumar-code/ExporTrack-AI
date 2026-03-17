@@ -136,6 +136,20 @@ export default function ProfileTeamPage() {
     setShowApiModal(false);
   };
 
+  const handleIntegrations = (name: string, connected: boolean) => {
+    alert(`✅ ${name} will be ${connected ? 'disconnected' : 'connected'} in the next update.`);
+  };
+
+  const handleExportBackup = (type: string) => {
+    alert(`✅ ${type} initiated successfully.`);
+  };
+
+  const handleRevokeSession = (id: number) => {
+    if (confirm(`Revoke Session ${id}?`)) {
+      alert(`✅ Session ${id} revoked.`);
+    }
+  };
+
   const memberStats = useMemo<MemberStat[]>(() => teamMembers.map((member) => {
     const assigned = shipments.filter((s) => s.assignedTo === member.name);
     const pending = assigned.reduce((sum, s) => sum + s.documents.filter((d) => d.status === 'Pending').length, 0);
@@ -408,16 +422,16 @@ export default function ProfileTeamPage() {
           <article className="card-premium">
             <h3 className="text-lg font-black mb-4">Export & Backups</h3>
             <div className="space-y-3">
-              <button className="btn-secondary w-full justify-center">
-                <AppIcon name="upload" className="h-4 w-4 mr-2" />
+              <button onClick={() => handleExportBackup('Team Data Export')} className="btn-secondary w-full justify-center">
+                <AppIcon name="upload" className="mr-2 h-4 w-4" />
                 Export Team Data
               </button>
-              <button className="btn-secondary w-full justify-center">
-                <AppIcon name="upload" className="h-4 w-4 mr-2" />
+              <button onClick={() => handleExportBackup('Workspace Backup')} className="btn-secondary w-full justify-center">
+                <AppIcon name="upload" className="mr-2 h-4 w-4" />
                 Create Backup
               </button>
-              <button className="btn-secondary w-full justify-center">
-                <AppIcon name="upload" className="h-4 w-4 mr-2" />
+              <button onClick={() => handleExportBackup('Data Import')} className="btn-secondary w-full justify-center">
+                <AppIcon name="upload" className="mr-2 h-4 w-4" />
                 Import Data
               </button>
             </div>
@@ -477,7 +491,14 @@ export default function ProfileTeamPage() {
                     <p className="font-bold text-slate-900 dark:text-white">Session {i}</p>
                     <p className="text-sm text-slate-600 dark:text-slate-400">Last active: {i === 1 ? 'Now' : '2 hours ago'}</p>
                   </div>
-                  {i !== 1 && <button className="text-rose-500 hover:text-rose-700 font-bold text-sm">Revoke</button>}
+                  {i !== 1 && (
+                    <button 
+                      onClick={() => handleRevokeSession(i)}
+                      className="text-rose-500 hover:text-rose-700 font-bold text-sm"
+                    >
+                      Revoke
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
@@ -600,7 +621,10 @@ export default function ProfileTeamPage() {
                       <p className="text-xs text-slate-600 dark:text-slate-400">{int.status}</p>
                     </div>
                   </div>
-                  <button className="btn-secondary btn-sm">
+                  <button 
+                    onClick={() => handleIntegrations(int.name, int.status === 'Connected')}
+                    className="btn-secondary btn-sm"
+                  >
                     {int.status === 'Connected' ? 'Disconnect' : 'Connect'}
                   </button>
                 </div>

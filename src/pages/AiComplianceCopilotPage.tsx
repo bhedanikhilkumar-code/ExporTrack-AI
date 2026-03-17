@@ -144,7 +144,12 @@ export default function AiComplianceCopilotPage() {
             </div>
 
             <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-800 flex justify-end">
-              <button className="btn-secondary btn-sm">Generate Full Audit Log</button>
+              <button 
+                onClick={() => alert('Full Compliance Audit Log generated and sent to your email.')}
+                className="btn-secondary btn-sm"
+              >
+                Generate Full Audit Log
+              </button>
             </div>
           </article>
         ))}

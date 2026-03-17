@@ -272,7 +272,7 @@ export default function AiDocumentValidatorPage() {
                    </div>
                  ))}
                </div>
-               <button className="btn-primary mt-8 w-full shadow-lg shadow-teal-500/20">
+               <button onClick={reset} className="btn-primary mt-8 w-full shadow-lg shadow-teal-500/20">
                  Fix & Re-validate
                </button>
             </section>
@@ -282,7 +282,7 @@ export default function AiDocumentValidatorPage() {
                <p className="mt-3 text-xs leading-relaxed text-slate-500 dark:text-slate-400">
                  This document contains patterns that may violate the <strong>UCC Section 2-201</strong> regarding statute of frauds for the sale of goods over $500.
                </p>
-               <button className="mt-4 text-xs font-bold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300">
+               <button onClick={() => alert('Viewing regulatory reference documentation...')} className="mt-4 text-xs font-bold text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300">
                  View Regulations Reference →
                </button>
             </section>
