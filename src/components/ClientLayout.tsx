@@ -13,7 +13,7 @@ export default function ClientLayout() {
   const { state: { isAuthenticated, user, theme }, logout, toggleTheme } = useAppContext();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const location = useLocation();
-  const isHeaderVisible = useScrollDirection();
+  const { isVisible: isHeaderVisible } = useScrollDirection();
 
   if (!isAuthenticated) return <Navigate to="/client/login" state={{ from: location }} replace />;
   if (user?.role !== 'Client') return <Navigate to="/dashboard" replace />;

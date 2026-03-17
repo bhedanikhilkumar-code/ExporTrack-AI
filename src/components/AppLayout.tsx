@@ -59,7 +59,7 @@ export default function AppLayout() {
     return navItems.filter(item => !('action' in item) || hasPermission(item.action as string));
   }, [user, hasPermission]);
 
-  const isHeaderVisible = useScrollDirection();
+  const { isVisible: isHeaderVisible, isScrolled } = useScrollDirection();
 
   const currentNav = filteredNavItems.find((item) => location.pathname.startsWith(item.to));
 
@@ -206,10 +206,14 @@ export default function AppLayout() {
 
       <div className={`transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:pl-64' : 'md:pl-20'
         }`}>
-        <header className={`sticky top-0 z-10 bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 shadow-[0_1px_3px_0_rgb(0_0_0/0.03)] transition-transform duration-250 ease-in-out will-change-transform pt-[env(safe-area-inset-top)] ${
+        <header className={`sticky top-0 z-40 transition-all duration-500 ease-in-out will-change-transform pt-[env(safe-area-inset-top)] ${
           isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+        } ${
+          isScrolled 
+            ? 'mx-4 mt-3 rounded-2xl glass-premium shadow-2xl border-white/20 dark:border-slate-800/50 h-14' 
+            : 'bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 h-16'
         }`}>
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 md:px-8 h-16">
+          <div className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 md:px-8 transition-all duration-500 ${isScrolled ? 'h-14' : 'h-16'}`}>
             {/* Left Section */}
             <div className="flex items-center gap-4 flex-1 min-w-0">
               <button
@@ -222,9 +226,9 @@ export default function AppLayout() {
 
               {/* Breadcrumb / Page Path */}
               <div className="hidden lg:flex items-center gap-2 text-xs font-semibold text-slate-400">
-                <span className="uppercase tracking-widest text-[10px] font-bold text-slate-400/70">Workspace</span>
-                <AppIcon name="chevron-right" className="h-3 w-3 text-slate-300/70 dark:text-slate-600" strokeWidth={3} />
-                <span className="font-bold text-slate-900 dark:text-slate-100 text-[11px]">{currentNav?.label ?? 'Dashboard'}</span>
+                <span className="uppercase tracking-widest text-[9px] font-black text-slate-400/50">Terminal</span>
+                <AppIcon name="chevron-right" className="h-3 w-3 text-slate-300/50 dark:text-slate-600" strokeWidth={4} />
+                <span className="font-black text-slate-900 dark:text-teal-400 text-[10px] uppercase tracking-tight">{currentNav?.label ?? 'Dashboard'}</span>
               </div>
 
               {/* Global Search Bar */}
@@ -235,7 +239,7 @@ export default function AppLayout() {
                 <input
                   type="text"
                   placeholder="Search everything (Ctrl+K)"
-                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2 text-xs font-semibold text-slate-900 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-teal-500 focus:bg-white focus:ring-4 focus:ring-teal-500/10 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100 focus:dark:bg-slate-900"
+                  className="w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-4 py-2 text-xs font-bold text-slate-900 shadow-sm outline-none transition-all placeholder:text-slate-400 focus:border-teal-500/50 focus:bg-white focus:ring-4 focus:ring-teal-500/20 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-100 focus:dark:bg-slate-900 focus:shadow-[0_0_20px_-5px_rgba(20,184,166,0.3)] header-search-glow"
                   value={searchQuery}
                   onChange={(e) => {
                     setSearchQuery(e.target.value);

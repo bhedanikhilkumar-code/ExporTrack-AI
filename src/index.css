@@ -1035,6 +1035,16 @@
 /* PWA PAGE TRANSITIONS                                           */
 /* ══════════════════════════════════════════════════════════════ */
 
+@keyframes search-glow-pulse {
+  0% { box-shadow: 0 0 15px -5px rgba(20, 184, 166, 0.3); }
+  50% { box-shadow: 0 0 25px -5px rgba(20, 184, 166, 0.5); }
+  100% { box-shadow: 0 0 15px -5px rgba(20, 184, 166, 0.3); }
+}
+
+.header-search-glow:focus {
+  animation: search-glow-pulse 2s infinite;
+}
+
 @keyframes page-enter {
   from {
     opacity: 0;

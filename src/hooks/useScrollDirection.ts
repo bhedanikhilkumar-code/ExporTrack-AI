@@ -5,8 +5,9 @@ import { useState, useEffect, useRef } from 'react';
  * Optimized with requestAnimationFrame for smooth performance and handles
  * edge cases like iOS bounce and "at top" visibility.
  */
-export function useScrollDirection(threshold = 10, offset = 50) {
+export function useScrollDirection(threshold = 10, offset = 20) {
   const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const lastScrollY = useRef(0);
   const ticking = useRef(false);
 
@@ -19,10 +20,14 @@ export function useScrollDirection(threshold = 10, offset = 50) {
       // Handle iOS bounce (negative scrollY)
       if (scrollY < 0) {
         setIsVisible(true);
+        setIsScrolled(false);
         lastScrollY.current = 0;
         ticking.current = false;
         return;
       }
+
+      // Track if we are scrolled past offset
+      setIsScrolled(scrollY > offset);
 
       // At the top of the page, the header should ALWAYS be visible
       if (scrollY < offset) {
@@ -65,5 +70,5 @@ export function useScrollDirection(threshold = 10, offset = 50) {
     };
   }, [threshold, offset]);
 
-  return isVisible;
+  return { isVisible, isScrolled };
 }
