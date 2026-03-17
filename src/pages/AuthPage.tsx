@@ -13,6 +13,13 @@ import {
   clearLoginAttempts,
   isAccountLockedOut
 } from '../utils/authSecurity';
+import {
+  verifyRecaptcha,
+  isRecaptchaConfigured,
+  isEmailRegistered,
+  validateLoginSecurity,
+  validateSignupSecurity
+} from '../utils/securityService';
 
 type Mode = 'login' | 'signup';
 
@@ -33,6 +40,9 @@ export default function AuthPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleInitialized, setGoogleInitialized] = useState(false);
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaError, setCaptchaError] = useState('');
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
 
   // Validation states
   const [emailError, setEmailError] = useState('');
@@ -45,6 +55,9 @@ export default function AuthPage() {
 
   // Check lockout status
   const lockoutStatus = useMemo(() => isAccountLockedOut(email), [email]);
+
+  // Check if CAPTCHA is configured
+  const captchaEnabled = useMemo(() => isRecaptchaConfigured(), []);
 
   // Initialize Google Sign-In
   useEffect(() => {
@@ -153,6 +166,10 @@ export default function AuthPage() {
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
     if (emailError) setEmailError('');
+    // Clear email registered error when user types
+    if (error && error.includes('not registered')) {
+      setError('');
+    }
   };
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,11 +208,12 @@ export default function AuthPage() {
     }
   };
 
-  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setGoogleError('');
     setIsLoading(true);
+    setCaptchaError('');
 
     // Get the redirect path
     const from = location.state?.from || '/dashboard';
@@ -205,6 +223,23 @@ export default function AuthPage() {
       setError('Account is temporarily locked due to too many failed attempts. Please try again in 15 minutes.');
       setIsLoading(false);
       return;
+    }
+
+    // Verify CAPTCHA before processing
+    if (captchaEnabled && !captchaVerified) {
+      try {
+        const captchaResult = await verifyRecaptcha(mode === 'login' ? 'login' : 'signup');
+        if (!captchaResult.success) {
+          setCaptchaError('Please complete the CAPTCHA verification to continue');
+          setIsLoading(false);
+          return;
+        }
+        setCaptchaVerified(true);
+      } catch (err) {
+        setCaptchaError('CAPTCHA verification failed. Please try again.');
+        setIsLoading(false);
+        return;
+      }
     }
 
     try {
@@ -223,8 +258,21 @@ export default function AuthPage() {
           return;
         }
 
+        // Check if email is registered
+        const emailExists = isEmailRegistered(email) || registeredEmails.includes(email.toLowerCase());
+        if (!emailExists) {
+          setError('Email not registered. Please sign up or use a registered email.');
+          setIsLoading(false);
+          // Record failed attempt for brute force protection
+          recordFailedAttempt(email);
+          return;
+        }
+
         // Attempt login
         login(email, password);
+
+        // Clear failed attempts on successful login
+        clearLoginAttempts(email);
 
         // Small delay for UX
         setTimeout(() => {
@@ -423,6 +471,19 @@ export default function AuthPage() {
                 </div>
               )}
 
+              {/* CAPTCHA Error Message */}
+              {captchaError && (
+                <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
+                  <div className="flex items-start gap-2">
+                    <AppIcon name="warning" className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm text-amber-800 dark:text-amber-300">CAPTCHA Required</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">{captchaError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Lockout Warning Banner */}
               {lockoutStatus.locked && mode === 'login' && (
                 <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
@@ -581,7 +642,14 @@ export default function AuthPage() {
                       {mode === 'login' ? 'Signing in...' : 'Creating account...'}
                     </span>
                   ) : (
-                    <>{mode === 'login' ? 'Sign In' : 'Create Account'}</>
+                    <>
+                      {mode === 'login' ? 'Sign In' : 'Create Account'}
+                      {captchaEnabled && !captchaVerified && (
+                        <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-white/20 text-xs">
+                          <AppIcon name="shield" className="h-3 w-3" />
+                        </span>
+                      )}
+                    </>
                   )}
                 </button>
               </form>
@@ -637,6 +705,22 @@ export default function AuthPage() {
                     {mode === 'login' ? 'Sign up' : 'Sign in'}
                   </button>
                 </p>
+              </div>
+
+              {/* Security Footer */}
+              <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                  {captchaEnabled && (
+                    <div className="flex items-center gap-1">
+                      <AppIcon name="shield" className="h-3.5 w-3.5 text-teal-500" />
+                      <span>reCAPTCHA</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-1">
+                    <AppIcon name="check" className="h-3.5 w-3.5 text-teal-500" />
+                    <span>Secure</span>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
