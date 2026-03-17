@@ -18,17 +18,15 @@ export default function MobileSidebar({ isOpen, onClose, navItems }: MobileSideb
     <>
       {/* Overlay */}
       <div
-        className={`fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+        className={`fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 md:hidden ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={onClose}
       />
 
       {/* Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-950 border-r border-slate-200/60 dark:border-slate-800/60 transform transition-transform duration-300 ease-in-out md:hidden shadow-2xl flex flex-col ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-950 border-r border-slate-200/60 dark:border-slate-800/60 transform transition-transform duration-300 ease-in-out md:hidden shadow-2xl flex flex-col ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex h-16 items-center justify-between px-6 border-b border-slate-200/60 dark:border-slate-800/60">
           <div className="flex items-center gap-3">
@@ -54,15 +52,28 @@ export default function MobileSidebar({ isOpen, onClose, navItems }: MobileSideb
               to={item.to}
               onClick={onClose}
               className={({ isActive }) =>
-                `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all min-h-[48px] ${
-                  isActive
-                    ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-md'
-                    : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50'
+                `group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ease-in-out min-h-[48px] overflow-hidden ${isActive
+                  ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white dark:from-slate-800 dark:to-slate-900 shadow-lg shadow-slate-900/20'
+                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 hover:scale-[1.02]'
                 }`
               }
             >
-              <AppIcon name={item.icon} className="h-5 w-5 shrink-0" />
-              <span>{item.label}</span>
+              {/* Active indicator bar */}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-teal-400 to-emerald-500 rounded-r-full shadow-lg shadow-teal-500/50" />
+                  )}
+                  <AppIcon
+                    name={item.icon}
+                    className={`h-5 w-5 shrink-0 transition-all duration-300 ${isActive
+                        ? 'text-teal-400 scale-110 drop-shadow-lg'
+                        : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                      }`}
+                  />
+                  <span className={isActive ? 'text-white' : ''}>{item.label}</span>
+                </>
+              )}
             </NavLink>
           ))}
         </nav>

@@ -168,23 +168,31 @@ export default function AppLayout() {
               key={item.to}
               to={item.to}
               className={({ isActive }) =>
-                `focus-ring relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-200 group ${isActive
-                  ? 'bg-slate-900 text-white dark:bg-teal-500/10 dark:text-teal-400 shadow-md nav-link-active'
-                  : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
+                `focus-ring group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-300 ease-in-out ${isActive
+                  ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white dark:from-slate-800 dark:to-slate-900 shadow-lg shadow-slate-900/20'
+                  : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 hover:scale-[1.02] dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
                 }`
               }
               title={!sidebarExpanded ? item.label : ''}
             >
-              <AppIcon name={item.icon as any} className={`h-4 w-4 shrink-0 transition-transform group-hover:scale-110 ${!sidebarExpanded ? 'mx-auto' : ''}`} />
-              {sidebarExpanded && (
-                <span className="min-w-0 flex-1 truncate font-bold flex items-center justify-between">
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && unreadCount > 0 && (
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white shadow-sm">
-                      {unreadCount}
+              {/* Active indicator bar */}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-teal-400 to-emerald-500 rounded-r-full shadow-lg shadow-teal-500/50" />
+                  )}
+                  <AppIcon name={item.icon as any} className={`h-4 w-4 shrink-0 transition-all duration-300 ${!sidebarExpanded ? 'mx-auto' : ''} ${isActive ? 'text-teal-400 scale-110 drop-shadow-lg' : 'group-hover:scale-110'}`} />
+                  {sidebarExpanded && (
+                    <span className="min-w-0 flex-1 truncate font-bold flex items-center justify-between">
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {item.badge && unreadCount > 0 && (
+                        <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white shadow-sm">
+                          {unreadCount}
+                        </span>
+                      )}
                     </span>
                   )}
-                </span>
+                </>
               )}
             </NavLink>
           ))}
@@ -347,20 +355,19 @@ export default function AppLayout() {
       <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 transition-all duration-300 ${isAiChatOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 pointer-events-none opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100'}`}>
         {isAiChatOpen && (
           <div className="mb-2 animate-in fade-in zoom-in duration-300 origin-bottom-right">
-            <AiLogisticsAssistant 
-              onClose={() => setIsAiChatOpen(false)} 
-              isFloating 
+            <AiLogisticsAssistant
+              onClose={() => setIsAiChatOpen(false)}
+              isFloating
             />
           </div>
         )}
-        
+
         <button
           onClick={() => setIsAiChatOpen(!isAiChatOpen)}
-          className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl transition-all duration-300 active:scale-95 border border-white/20 ${
-            isAiChatOpen 
-              ? 'bg-slate-900 text-white rotate-90 dark:bg-slate-800' 
+          className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl transition-all duration-300 active:scale-95 border border-white/20 ${isAiChatOpen
+              ? 'bg-slate-900 text-white rotate-90 dark:bg-slate-800'
               : 'bg-teal-500 text-white hover:bg-teal-600 hover:shadow-teal-500/40'
-          }`}
+            }`}
           aria-label="AI Assistant"
         >
           <div className={`absolute inset-0 rounded-2xl animate-pulse bg-teal-400/20 ${isAiChatOpen ? 'hidden' : ''}`} />
