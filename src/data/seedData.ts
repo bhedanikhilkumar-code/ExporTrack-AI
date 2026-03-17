@@ -252,6 +252,173 @@ export const createSeedState = (): AppState => ({
       driverPhone: '+91 99887-76655',
       vehicleNumber: 'KA-05-MN-1122',
       estimatedDeliveryTime: '2026-03-13T14:30:00.000Z'
+    },
+    {
+      id: 'EXP-2026-006',
+      clientName: 'SilverTech Electronics',
+      destinationCountry: 'Singapore',
+      shipmentDate: '2026-02-24',
+      containerNumber: 'EVHU8765432-1',
+      status: 'Delivered',
+      delayed: false,
+      deadline: '2026-03-05',
+      priority: 'High',
+      assignedTo: 'NIKHIL BHEDA',
+      documents: [
+        doc('DOC-601', 'Invoice', 'invoice-exp-006.pdf', 'PDF', 'Verified', '2026-02-24T12:10:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-602', 'Packing List', 'packing-list-exp-006.pdf', 'PDF', 'Verified', '2026-02-24T12:30:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-603', 'Bill of Lading', 'bill-exp-006.pdf', 'PDF', 'Verified', '2026-02-25T06:00:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-604', 'Shipping Bill', 'shipping-bill-exp-006.pdf', 'PDF', 'Verified', '2026-02-25T06:20:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-605', 'Certificate of Origin', 'origin-exp-006.pdf', 'PDF', 'Verified', '2026-02-25T07:15:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-606', 'Insurance Papers', 'insurance-exp-006.pdf', 'PDF', 'Verified', '2026-02-25T07:30:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-607', 'Customs Files', 'customs-exp-006.pdf', 'PDF', 'Verified', '2026-02-25T08:00:00.000Z', 'PRINCE DODIYA')
+      ],
+      aiScan: [scan('SCAN-008', 'Commercial Invoice', 'INV-SG-77654', '2026-02-24', 'SilverTech Electronics', 'USD 156,290.00', 'Singapore', 99)],
+      comments: [
+        {
+          id: 'COM-008',
+          author: 'PRINCE DODIYA',
+          role: 'Admin',
+          message: 'Perfect execution. Zero delays, all documents verified first submission.',
+          createdAt: '2026-03-08T14:20:00.000Z',
+          internal: true
+        }
+      ],
+      driverName: 'Mohammed Hassan',
+      driverPhone: '+91 94567-23456',
+      vehicleNumber: 'TN-14-AB-5678',
+      estimatedDeliveryTime: '2026-03-04T08:00:00.000Z'
+    },
+    {
+      id: 'EXP-2026-007',
+      clientName: 'EuroTrade Services',
+      destinationCountry: 'Netherlands',
+      shipmentDate: '2026-03-08',
+      containerNumber: 'MAEU9876543-2',
+      status: 'Under Verification',
+      delayed: false,
+      deadline: '2026-03-18',
+      priority: 'Medium',
+      assignedTo: 'DHRUV BHANVADIYA',
+      documents: [
+        doc('DOC-701', 'Invoice', 'invoice-exp-007.pdf', 'PDF', 'Verified', '2026-03-08T10:05:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-702', 'Packing List', 'packing-list-exp-007.pdf', 'PDF', 'Verified', '2026-03-08T10:25:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-703', 'Bill of Lading', 'bill-exp-007.pdf', 'PDF', 'Pending', '2026-03-08T11:00:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-704', 'Shipping Bill', 'shipping-bill-exp-007.pdf', 'PDF', 'Verified', '2026-03-08T11:15:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-705', 'Certificate of Origin', 'origin-exp-007.pdf', 'PDF', 'Pending', '2026-03-08T12:00:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-706', 'Insurance Papers', 'insurance-exp-007.pdf', 'PDF', 'Verified', '2026-03-08T12:30:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-707', 'Customs Files', 'customs-exp-007.pdf', 'PDF', 'Pending', '2026-03-09T09:00:00.000Z', 'NIKHIL BHEDA')
+      ],
+      aiScan: [scan('SCAN-009', 'Commercial Invoice', 'INV-NL-44556', '2026-03-08', 'EuroTrade Services', 'USD 234,500.00', 'Netherlands', 97)],
+      comments: [
+        {
+          id: 'COM-009',
+          author: 'DHRUV BHANVADIYA',
+          role: 'Manager',
+          message: 'BoL and CoO in verification. Customs files expected by EOD.',
+          createdAt: '2026-03-10T13:45:00.000Z',
+          internal: false
+        }
+      ],
+      driverName: 'Vikram Singh',
+      driverPhone: '+91 96543-21098',
+      vehicleNumber: 'GJ-01-CD-9876',
+      estimatedDeliveryTime: '2026-03-17T16:00:00.000Z'
+    },
+    {
+      id: 'EXP-2026-008',
+      clientName: 'AquaMarine Logistics',
+      destinationCountry: 'Vietnam',
+      shipmentDate: '2026-03-04',
+      containerNumber: 'OOCL1234567-8',
+      status: 'In Transit',
+      delayed: false,
+      deadline: '2026-03-14',
+      priority: 'Low',
+      assignedTo: 'NEEL NADIYAPARA',
+      documents: [
+        doc('DOC-801', 'Invoice', 'invoice-exp-008.pdf', 'PDF', 'Verified', '2026-03-04T14:10:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-802', 'Packing List', 'packing-list-exp-008.pdf', 'PDF', 'Verified', '2026-03-04T14:30:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-803', 'Bill of Lading', 'bill-exp-008.pdf', 'PDF', 'Verified', '2026-03-05T07:00:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-804', 'Shipping Bill', 'shipping-bill-exp-008.pdf', 'PDF', 'Verified', '2026-03-05T07:25:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-805', 'Certificate of Origin', 'origin-exp-008.pdf', 'PDF', 'Verified', '2026-03-05T08:10:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-806', 'Insurance Papers', 'insurance-exp-008.pdf', 'PDF', 'Verified', '2026-03-05T08:30:00.000Z', 'NEEL NADIYAPARA'),
+        doc('DOC-807', 'Customs Files', 'customs-exp-008.pdf', 'PDF', 'Verified', '2026-03-05T09:00:00.000Z', 'PRINCE DODIYA')
+      ],
+      aiScan: [scan('SCAN-010', 'Shipping Bill', 'SB-VN-7788', '2026-03-04', 'AquaMarine Logistics', 'USD 78,450.00', 'Vietnam', 94)],
+      comments: [],
+      driverName: 'Chen Wei',
+      driverPhone: '+91 97654-34567',
+      vehicleNumber: 'AP-02-EF-4321',
+      estimatedDeliveryTime: '2026-03-14T11:00:00.000Z'
+    },
+    {
+      id: 'EXP-2026-009',
+      clientName: 'Canadian Timber Co',
+      destinationCountry: 'Canada',
+      shipmentDate: '2026-03-09',
+      containerNumber: 'HAPAG1357924-3',
+      status: 'Shipment Created',
+      delayed: false,
+      deadline: '2026-03-25',
+      priority: 'Medium',
+      assignedTo: 'PRINCE DODIYA',
+      documents: [
+        doc('DOC-901', 'Invoice', 'invoice-exp-009.pdf', 'PDF', 'Verified', '2026-03-09T08:15:00.000Z', 'PRINCE DODIYA'),
+        doc('DOC-902', 'Packing List', 'Not uploaded', 'PDF', 'Missing', '2026-03-09T09:00:00.000Z', 'System'),
+        doc('DOC-903', 'Bill of Lading', 'Not uploaded', 'PDF', 'Missing', '2026-03-09T09:00:00.000Z', 'System'),
+        doc('DOC-904', 'Shipping Bill', 'Not uploaded', 'PDF', 'Missing', '2026-03-09T09:00:00.000Z', 'System'),
+        doc('DOC-905', 'Certificate of Origin', 'Not uploaded', 'PDF', 'Missing', '2026-03-09T09:00:00.000Z', 'System'),
+        doc('DOC-906', 'Insurance Papers', 'Not uploaded', 'PDF', 'Missing', '2026-03-09T09:00:00.000Z', 'System'),
+        doc('DOC-907', 'Customs Files', 'Not uploaded', 'PDF', 'Missing', '2026-03-09T09:00:00.000Z', 'System')
+      ],
+      aiScan: [scan('SCAN-011', 'Commercial Invoice', 'INV-CA-99887', '2026-03-09', 'Canadian Timber Co', 'USD 298,750.00', 'Canada', 96)],
+      comments: [
+        {
+          id: 'COM-010',
+          author: 'PRINCE DODIYA',
+          role: 'Admin',
+          message: 'Large shipment. Client to provide remaining docs by EOD March 12.',
+          createdAt: '2026-03-10T16:20:00.000Z',
+          internal: false
+        }
+      ]
+    },
+    {
+      id: 'EXP-2026-010',
+      clientName: 'Meridian Textiles',
+      destinationCountry: 'Bangladesh',
+      shipmentDate: '2026-03-07',
+      containerNumber: 'SEATRADE2468-4',
+      status: 'In Transit',
+      delayed: true,
+      deadline: '2026-03-12',
+      priority: 'High',
+      assignedTo: 'NIKHIL BHEDA',
+      documents: [
+        doc('DOC-1001', 'Invoice', 'invoice-exp-010.pdf', 'PDF', 'Verified', '2026-03-07T09:20:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-1002', 'Packing List', 'packing-list-exp-010.pdf', 'PDF', 'Verified', '2026-03-07T09:40:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-1003', 'Bill of Lading', 'bill-exp-010.pdf', 'PDF', 'Rejected', '2026-03-07T10:30:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-1004', 'Shipping Bill', 'shipping-bill-exp-010.pdf', 'PDF', 'Verified', '2026-03-07T11:00:00.000Z', 'DHRUV BHANVADIYA'),
+        doc('DOC-1005', 'Certificate of Origin', 'origin-exp-010.pdf', 'PDF', 'Pending', '2026-03-07T11:30:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-1006', 'Insurance Papers', 'insurance-exp-010.pdf', 'PDF', 'Verified', '2026-03-07T11:50:00.000Z', 'NIKHIL BHEDA'),
+        doc('DOC-1007', 'Customs Files', 'customs-exp-010.pdf', 'PDF', 'Pending', '2026-03-08T07:00:00.000Z', 'NIKHIL BHEDA')
+      ],
+      aiScan: [scan('SCAN-012', 'Commercial Invoice', 'INV-BD-55332', '2026-03-07', 'Meridian Textiles', 'USD 167,890.00', 'Bangladesh', 93)],
+      comments: [
+        {
+          id: 'COM-011',
+          author: 'NIKHIL BHEDA',
+          role: 'Manager',
+          message: 'Rejected BoL needs urgent replacement. Customs holding shipment.',
+          createdAt: '2026-03-10T08:15:00.000Z',
+          internal: false
+        }
+      ],
+      driverName: 'Arjun Reddy',
+      driverPhone: '+91 98765-12345',
+      vehicleNumber: 'TS-09-GH-2468',
+      estimatedDeliveryTime: '2026-03-13T12:00:00.000Z'
     }
   ],
   notifications: [
@@ -308,6 +475,61 @@ export const createSeedState = (): AppState => ({
       message: 'Shipment EXP-2026-004 completed with all verifications passed.',
       createdAt: '2026-03-08T15:15:00.000Z',
       dueDate: '2026-03-08',
+      read: true
+    },
+    {
+      id: 'NT-006',
+      shipmentId: 'EXP-2026-007',
+      type: 'Approval Delay',
+      severity: 'Medium',
+      title: 'Certificate of Origin pending review',
+      message: 'CoO document for EXP-2026-007 awaiting manager verification.',
+      createdAt: '2026-03-10T12:00:00.000Z',
+      dueDate: '2026-03-12',
+      read: false
+    },
+    {
+      id: 'NT-007',
+      shipmentId: 'EXP-2026-009',
+      type: 'Missing Docs',
+      severity: 'High',
+      title: 'Large shipment documents incomplete',
+      message: 'EXP-2026-009 (CAD $298.75K): Only invoice received. 6 of 7 required documents missing.',
+      createdAt: '2026-03-10T14:20:00.000Z',
+      dueDate: '2026-03-12',
+      read: false
+    },
+    {
+      id: 'NT-008',
+      shipmentId: 'EXP-2026-010',
+      type: 'Approval Delay',
+      severity: 'High',
+      title: 'Rejected BoL - resubmission critical',
+      message: 'Bill of Lading rejected for EXP-2026-010. Customs holding cargo. Urgent resubmission needed.',
+      createdAt: '2026-03-10T07:50:00.000Z',
+      dueDate: '2026-03-11',
+      read: false
+    },
+    {
+      id: 'NT-009',
+      shipmentId: 'EXP-2026-006',
+      type: 'Status Update',
+      severity: 'Low',
+      title: 'Shipment delivered successfully',
+      message: 'EXP-2026-006 to Singapore delivered. Client signed delivery receipt.',
+      createdAt: '2026-03-09T10:30:00.000Z',
+      dueDate: '2026-03-09',
+      read: true
+    },
+    {
+      id: 'NT-010',
+      shipmentId: 'EXP-2026-008',
+      type: 'Deadline',
+      severity: 'Low',
+      title: 'On-track for delivery',
+      message: 'EXP-2026-008 to Vietnam proceeding normally. Expected delivery March 14.',
+      createdAt: '2026-03-10T09:00:00.000Z',
+      dueDate: '2026-03-14',
       read: true
     }
   ],

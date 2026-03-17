@@ -1,12 +1,15 @@
 import { Link } from 'react-router-dom';
+import { useState } from 'react';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import { useAppContext } from '../context/AppContext';
 
 export default function AdminPage() {
   const {
-    state: { user, shipments, teamMembers, notifications }
+    state: { user, shipments, teamMembers, notifications },
+    dispatch
   } = useAppContext();
+  const [approving, setApproving] = useState(false);
 
   if (user?.role !== 'Admin') {
     return (
@@ -26,6 +29,35 @@ export default function AdminPage() {
   const pendingApprovals = shipments.filter((shipment) => shipment.documents.some((doc) => doc.status === 'Pending' || doc.status === 'Rejected'));
   const unresolvedAlerts = notifications.filter((notification) => !notification.read).length;
   const openCases = shipments.filter((shipment) => shipment.status !== 'Delivered').length;
+
+  const handleBulkApprove = async () => {
+    setApproving(true);
+    try {
+      // Approve all pending documents
+      const updatedShipments = pendingApprovals.map(shipment => ({
+        ...shipment,
+        documents: shipment.documents.map(doc => ({
+          ...doc,
+          status: doc.status === 'Pending' || doc.status === 'Rejected' ? 'Approved' : doc.status
+        }))
+      }));
+
+      // Update each shipment in context
+      updatedShipments.forEach(updatedShipment => {
+        const originalShipment = shipments.find(s => s.id === updatedShipment.id);
+        if (originalShipment) {
+          dispatch({
+            type: 'UPDATE_SHIPMENT',
+            payload: updatedShipment
+          });
+        }
+      });
+
+      alert(`✅ ${pendingApprovals.length} shipment(s) approved successfully!`);
+    } finally {
+      setApproving(false);
+    }
+  };
 
   return (
     <div className="page-stack">
@@ -51,17 +83,11 @@ export default function AdminPage() {
           <h3 className="card-title text-base md:text-lg">Approval Queue</h3>
           <button
             type="button"
-            onClick={() => {
-              const approved = pendingApprovals.length;
-              if (approved === 0) {
-                alert('No pending approvals to process.');
-              } else {
-                alert(`✅ ${approved} shipment(s) marked for approval and queued for processing.`);
-              }
-            }}
-            className="btn-primary btn-sm"
+            onClick={handleBulkApprove}
+            disabled={pendingApprovals.length === 0 || approving}
+            className="btn-primary btn-sm disabled:opacity-50"
           >
-            Bulk Approve
+            {approving ? 'Approving...' : `Bulk Approve (${pendingApprovals.length})`}
           </button>
         </div>
         <div className="space-y-3">

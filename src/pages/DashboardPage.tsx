@@ -25,6 +25,7 @@ export default function DashboardPage() {
   } = useAppContext();
 
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   // Simulate initial load for UX polish
   useEffect(() => {
@@ -61,6 +62,49 @@ export default function DashboardPage() {
 
   const now = new Date();
   const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+
+  // Export Global Report Handler
+  const handleExportReport = async () => {
+    setExporting(true);
+    try {
+      const reportData = {
+        generatedAt: new Date().toISOString(),
+        totalShipments: analyticsData.totalShipments,
+        onTimeDeliveryRate: analyticsData.onTimeDeliveryRate,
+        delayedShipments: analyticsData.delayedShipments,
+        averageDeliveryTime: analyticsData.averageDeliveryTime,
+        shipments: shipments.map(s => ({
+          id: s.id,
+          clientName: s.clientName,
+          status: s.status,
+          shipmentDate: s.shipmentDate
+        }))
+      };
+
+      const csvContent = [
+        ['ExporTrack AI - Global Report', new Date().toISOString()],
+        [],
+        ['Metric', 'Value'],
+        ['Total Shipments', analyticsData.totalShipments],
+        ['On-Time Rate', `${analyticsData.onTimeDeliveryRate}%`],
+        ['Delayed Units', analyticsData.delayedShipments],
+        ['Avg Lead Time', `${analyticsData.averageDeliveryTime} days`],
+        [],
+        ['Shipment Details'],
+        ['ID', 'Client', 'Status', 'Date']
+      ].concat(shipments.map(s => [s.id, s.clientName, s.status, s.shipmentDate])).map(row => row.join(',')).join('\n');
+
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `exportrack-report-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -156,7 +200,7 @@ export default function DashboardPage() {
       <div className="dashboard-grid-section">
         {/* AI Logistics Assistant */}
         <AiLogisticsAssistant />
-        
+
         {/* Recent Activity */}
         <article className="card-premium lg:col-span-2">
           <div className="mb-6 flex items-center justify-between">
@@ -200,52 +244,37 @@ export default function DashboardPage() {
               <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
               Live Fleet Intelligence
             </h2>
-            <Link to="/tracking" className="text-xs font-bold text-teal-600 hover:text-teal-500 flex items-center gap-1 transition-all hover:gap-2">
+            <Link to={`/shipments/${shipments[0]?.id || 'demo'}/tracking`} className="text-xs font-bold text-teal-600 hover:text-teal-500 flex items-center gap-1 transition-all hover:gap-2">
               Deep View <AppIcon name="arrow-right" className="h-3 w-3" />
             </Link>
           </div>
           <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50">
-            <TrackingMap 
-              tracking={mockTrackingData} 
+            <TrackingMap
+              tracking={mockTrackingData}
               className="h-[420px] w-full"
             />
           </div>
         </div>
 
-        {/* AI Assistant */}
-        <div className="col-span-1 flex flex-col space-y-4">
-           <h2 className="text-lg font-black tracking-tight px-1">Predictive Ops Assistant</h2>
-           <div className="flex-1 glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50">
-             <AiLogisticsAssistant />
-           </div>
-        </div>
-      </div>
-
-      <div className="dashboard-grid-wide">
         {/* AI Predictions Spotlight */}
-        <div className="card-premium">
-          <div className="mb-6 flex items-start gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-900 text-teal-400 dark:bg-teal-500/10 shadow-sm">
-              <AppIcon name="ai-extract" className="h-5 w-5" />
+        <div className="col-span-1 space-y-4">
+          <h2 className="text-lg font-black tracking-tight px-1">Risk Intelligence</h2>
+          <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50 p-6">
+            <div className="space-y-3">
+              {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
+                <AiDelayPrediction key={s.id} shipmentId={s.id} />
+              ))}
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white">Neural Risk Analysis</h3>
-              <p className="text-[11px] font-medium text-slate-500">Predictive Delay Modeling</p>
-            </div>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
-              <AiDelayPrediction key={s.id} shipmentId={s.id} />
-            ))}
           </div>
         </div>
       </div>
 
-      {/* ── Recent Shipments Table ── */}
       <article className="dashboard-grid-table card-premium overflow-hidden">
         <div className="mb-6 flex items-center justify-between">
           <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Pipeline Monitoring</h3>
-          <button className="btn-secondary btn-sm">Export Global Report</button>
+          <button onClick={handleExportReport} disabled={exporting} className="btn-secondary btn-sm disabled:opacity-50">
+            {exporting ? 'Exporting...' : 'Export Global Report'}
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">

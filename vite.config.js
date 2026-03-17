@@ -7,10 +7,10 @@ export default defineConfig({
         react(),
         VitePWA({
             registerType: 'prompt',
-            includeAssets: ['logo.png', 'pwa-icons/*.png'],
+            includeAssets: ['logo.svg', 'favicon.svg'],
             workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,svg,woff2}', 'pwa-icons/*.png'],
-                maximumFileSizeToCacheInBytes: 10 * 1024 * 1024,
+                globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

@@ -55,6 +55,36 @@ export default function UploadDocumentsPage() {
     setFiles([]);
   };
 
+  const handleDownloadAllFiles = () => {
+    if (!sortedDocs.length) {
+      alert('No documents to download.');
+      return;
+    }
+
+    // Create a simple zip-like download structure or download each individually
+    const doc = sortedDocs[0];
+    const content = `Shipment ${shipment.id} - Document Manifest\n\nDocuments:\n${sortedDocs.map((d, i) => `${i + 1}. ${d.type} (${d.fileName}) - Status: ${d.status}`).join('\n')}`;
+
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${shipment.id}-documents-manifest.txt`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadDocument = (doc: typeof sortedDocs[0]) => {
+    const content = `${doc.type} Document\n\nFile: ${doc.fileName}\nStatus: ${doc.status}\nUploaded By: ${doc.uploadedBy}\nDate: ${doc.uploadedAt}`;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = doc.fileName || `${doc.type}.txt`;
+    link.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="page-stack">
       <PageHeader
@@ -133,7 +163,7 @@ export default function UploadDocumentsPage() {
         <article className="card-panel">
           <h3 className="mb-3 card-title text-base md:text-lg">Quick Actions</h3>
           <div className="space-y-3">
-            <button type="button" onClick={() => window.alert(`Downloading all files for ${shipment.id}.`)} className="btn-secondary w-full justify-center">
+            <button type="button" onClick={handleDownloadAllFiles} className="btn-secondary w-full justify-center">
               Download Shipment Files
             </button>
             <Link to={`/shipments/${shipment.id}/checklist`} className="btn-secondary w-full justify-center">
@@ -159,7 +189,7 @@ export default function UploadDocumentsPage() {
               </div>
               <div className="flex items-center gap-2">
                 <StatusBadge value={document.status} />
-                <button type="button" onClick={() => window.alert(`Downloading ${document.fileName}.`)} className="btn-secondary btn-xs">
+                <button type="button" onClick={() => handleDownloadDocument(document)} className="btn-secondary btn-xs">
                   Download
                 </button>
               </div>
