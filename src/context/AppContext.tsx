@@ -1,5 +1,6 @@
 import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { createEmptyState, createSeedState } from '../data/seedData';
+import { updateShipmentStatus, calculateShipmentStatus, isRealUser as checkIsRealUser } from '../services/shipmentStatusService';
 import {
   AppState,
   CreateShipmentInput,
@@ -458,6 +459,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   const createShipment = useCallback((input: CreateShipmentInput): Shipment => {
     const now = new Date().toISOString();
+    const userMode = state.user?.userMode;
+
+    // Create initial shipment with Draft status
     const shipment: Shipment = {
       id: input.shipmentId,
       userId: userId || undefined,
@@ -465,7 +469,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       destinationCountry: input.destinationCountry,
       shipmentDate: input.shipmentDate,
       containerNumber: input.containerNumber,
-      status: input.status,
+      status: 'Shipment Created', // Initial legacy status
       delayed: false,
       deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       priority: 'Medium',
@@ -481,8 +485,33 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           createdAt: now,
           internal: true
         }
+      ],
+      // Initialize timeline for status automation
+      timeline: [
+        {
+          id: createId('TLE'),
+          status: 'Draft',
+          timestamp: now,
+          note: 'Shipment created and saved as draft'
+        }
       ]
     };
+
+    // Apply status automation for real users
+    if (checkIsRealUser(userMode)) {
+      const automationResult = updateShipmentStatus(shipment, userMode);
+      if (automationResult) {
+        shipment.status = automationResult.newStatus as any;
+        if (automationResult.timelineEvent) {
+          // Add id to timeline event
+          const timelineWithId = {
+            ...automationResult.timelineEvent,
+            id: createId('TLE')
+          };
+          shipment.timeline = [timelineWithId];
+        }
+      }
+    }
 
     setState(prev => ({
       ...prev,
@@ -504,15 +533,37 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   }, [state.user, userId]);
 
   const updateShipment = useCallback((shipmentId: string, updates: Partial<Shipment>) => {
-    setState(prev => ({
-      ...prev,
-      shipments: prev.shipments.map(shipment =>
-        shipment.id === shipmentId
-          ? { ...shipment, ...updates }
-          : shipment
-      )
-    }));
-  }, []);
+    const userMode = state.user?.userMode;
+
+    setState(prev => {
+      const shipments = prev.shipments.map(shipment => {
+        if (shipment.id !== shipmentId) return shipment;
+
+        const updatedShipment = { ...shipment, ...updates };
+
+        // Apply status automation for real users
+        if (checkIsRealUser(userMode)) {
+          const automationResult = updateShipmentStatus(updatedShipment, userMode);
+          if (automationResult) {
+            updatedShipment.status = automationResult.newStatus as any;
+            if (automationResult.timelineEvent) {
+              // Add id to timeline event
+              const timelineEvent = {
+                ...automationResult.timelineEvent,
+                id: createId('TLE')
+              };
+              // Add to existing timeline
+              updatedShipment.timeline = [...(updatedShipment.timeline || []), timelineEvent];
+            }
+          }
+        }
+
+        return updatedShipment;
+      });
+
+      return { ...prev, shipments };
+    });
+  }, [state.user]);
 
   const deleteShipment = useCallback((shipmentId: string) => {
     setState(prev => ({

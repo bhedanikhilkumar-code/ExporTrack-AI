@@ -68,6 +68,13 @@ export interface ShipmentComment {
   internal: boolean;
 }
 
+export interface ShipmentTimelineEvent {
+  id: string;
+  status: string;
+  timestamp: string;
+  note?: string;
+}
+
 export interface Shipment {
   id: string;
   userId?: string;
@@ -88,6 +95,12 @@ export interface Shipment {
   driverPhone?: string;
   vehicleNumber?: string;
   estimatedDeliveryTime?: string;
+  // NEW: Status Automation fields
+  bookingDate?: string;
+  departureDate?: string;
+  deliveryDate?: string;
+  customsDocumentUploaded?: boolean;
+  timeline?: ShipmentTimelineEvent[];
 }
 
 export interface NotificationItem {

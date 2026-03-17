@@ -9,6 +9,7 @@ import { REQUIRED_DOCUMENT_TYPES, ShipmentStatus } from '../types';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import ShipmentTimeline from '../components/ShipmentTimeline';
 import ShipmentRiskAlert from '../components/ShipmentRiskAlert';
+import ShipmentProgressBar from '../components/ShipmentProgressBar';
 import Modal from '../components/Modal';
 import { Skeleton, SkeletonText, SkeletonButton, SkeletonKpiCard, SkeletonTable, SkeletonDetailSection } from '../components/SkeletonLoader';
 
@@ -215,8 +216,8 @@ export default function ShipmentDetailsPage() {
 
                 {/* Node */}
                 <div className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ${isCompleted ? 'bg-teal-500 border-teal-500 text-white' :
-                    isCurrent ? 'bg-white border-teal-500 text-teal-600 scale-110 shadow-lg dark:bg-slate-900' :
-                      'bg-white border-slate-200 text-slate-300 dark:bg-slate-900 dark:border-slate-800'
+                  isCurrent ? 'bg-white border-teal-500 text-teal-600 scale-110 shadow-lg dark:bg-slate-900' :
+                    'bg-white border-slate-200 text-slate-300 dark:bg-slate-900 dark:border-slate-800'
                   }`}>
                   {isCompleted ? (
                     <AppIcon name="check" className="h-4 w-4" strokeWidth={3} />
@@ -364,6 +365,19 @@ export default function ShipmentDetailsPage() {
             <span className="mt-1 text-[11px] font-bold text-slate-500">EtD: {shipment.shipmentDate}</span>
           </div>
         </div>
+
+        {/* Progress Bar - Shipment Status Automation */}
+        {user?.userMode === 'real' && (
+          <div className="card-premium col-span-full">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Shipment Progress</span>
+              <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-900/20 text-teal-600">
+                <AppIcon name="shipments" className="h-4 w-4" />
+              </div>
+            </div>
+            <ShipmentProgressBar status={shipment.status} />
+          </div>
+        )}
 
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
@@ -610,8 +624,8 @@ export default function ShipmentDetailsPage() {
                 const isVerified = item.status === 'Verified';
                 return (
                   <div key={item.type} className={`p-3 rounded-xl border flex items-center justify-between group transition-all hover:border-teal-500/30 ${isVerified
-                      ? 'bg-emerald-50/20 border-emerald-100 dark:border-emerald-900/20'
-                      : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                    ? 'bg-emerald-50/20 border-emerald-100 dark:border-emerald-900/20'
+                    : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
                     }`}>
                     <div className="flex items-center gap-3">
                       <div className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${isVerified ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
@@ -658,8 +672,8 @@ export default function ShipmentDetailsPage() {
             <div className="space-y-4">
               {visibleComments.map((comment) => (
                 <div key={comment.id} className={`p-4 rounded-xl border relative ${comment.internal
-                    ? 'bg-amber-50/30 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/20'
-                    : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                  ? 'bg-amber-50/30 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/20'
+                  : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
                   }`}>
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
