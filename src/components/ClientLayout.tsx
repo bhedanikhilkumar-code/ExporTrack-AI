@@ -106,7 +106,9 @@ export default function ClientLayout() {
         </header>
 
         <main className="flex-1">
-          <Outlet />
+          <div key={location.pathname} className="page-wrapper page-transition-enter">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

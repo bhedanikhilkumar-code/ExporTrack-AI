@@ -411,8 +411,25 @@
 }
 
 @keyframes fade-in-slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { 
+    opacity: 0; 
+    transform: translateY(12px) scale(0.99); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+.page-transition-enter {
+  animation: fade-in-slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: opacity, transform;
+}
+
+.page-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 100%;
 }
 
 /* ══════════════════════════════════════════════════════════════ */
