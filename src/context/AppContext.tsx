@@ -1,7 +1,6 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { createSeedState, createEmptyState, getDemoSeedState } from '../data/seedData';
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { createSeedState } from '../data/seedData';
 import {
-  AnalyticsMetrics,
   AppState,
   CreateShipmentInput,
   DocStatus,
@@ -11,67 +10,26 @@ import {
   Role,
   Shipment,
   ShipmentDocument,
-  UploadDocumentInput,
-  ShipmentStatus,
-  InviteTeamMemberInput,
-  TeamInvite,
-  Team,
-  TeamMemberWithPermissions,
-  TeamPermission
+  UploadDocumentInput
 } from '../types';
 import { decodeJWT } from '../utils/googleAuth';
-import { safeStorage } from '../utils/storage';
-import { NotificationService } from '../services/NotificationService';
 
-const STORAGE_KEY_PREFIX = 'exportrack-ai-state';
-const DEMO_STORAGE_KEY = 'exportrack-ai-state-v1'; // Legacy key for backwards compat
-
-/** Generate a per-user storage key */
-const getUserStorageKey = (userId: string): string =>
-  `${STORAGE_KEY_PREFIX}-${userId}`;
-
-/** Get the best storage key for the current session */
-const getActiveStorageKey = (userId?: string): string =>
-  userId ? getUserStorageKey(userId) : DEMO_STORAGE_KEY;
+const STORAGE_KEY = 'exportrack-ai-state-v1';
 
 interface AppContextValue {
   state: AppState;
-  isDemoUser: boolean;
   login: (email: string, password: string) => void;
   signup: (name: string, email: string, password: string) => void;
-  // Backwards-compatible alias (some UI may still call this)
-  loginWithGoogle: () => void;
   loginWithDemoAccount: () => void;
   loginWithGoogleToken: (token: string) => void;
   logout: () => void;
   switchRole: (role: Role) => void;
-  setTheme: (theme: 'light' | 'dark' | 'system') => void;
   toggleTheme: () => void;
   createShipment: (input: CreateShipmentInput) => Shipment;
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
-  updateShipmentStatus: (shipmentId: string, status: ShipmentStatus) => void;
-  assignDriver: (shipmentId: string, driverInfo: { name: string; phone: string; vehicle: string }) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
-  markAllNotificationsRead: () => void;
-  triggerDelayAlert: (shipmentId: string, daysDelayed: number) => void;
-  applyOptimizedRoute: (shipmentId: string) => void;
-  getAnalytics: () => AnalyticsMetrics;
-  hasPermission: (action: string) => boolean;
-  inviteTeamMember: (input: InviteTeamMemberInput) => Promise<void>;
-  updateMemberRole: (memberId: string, role: Role) => void;
-  removeTeamMember: (memberId: string) => void;
-  updateUserProfile: (updates: Partial<AppState['user']>) => void;
-  deleteInvite: (inviteId: string) => void;
-  // Team management functions
-  createTeam: (teamName: string) => Team;
-  addTeamMember: (teamId: string, email: string, permission: TeamPermission) => void;
-  removeTeamMemberFromTeam: (teamId: string, memberId: string) => void;
-  updateTeamMemberPermission: (teamId: string, memberId: string, permission: TeamPermission) => void;
-  getUserTeams: () => Team[];
-  deleteShipment: (shipmentId: string) => void;
-  editShipment: (shipmentId: string, updates: Partial<Shipment>) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -81,51 +39,19 @@ const createId = (prefix: string): string =>
     .toString()
     .padStart(4, '0')}`;
 
-/**
- * Load state from localStorage.
- * For demo users or initial load: returns demo seed data.
- * For real users: loads from per-user storage key, or returns empty state.
- */
-const loadState = (userId?: string): AppState => {
-  try {
-    // Try user-specific key first, then legacy fallback
-    const storageKey = getActiveStorageKey(userId);
-    const raw = safeStorage.getItem(storageKey);
-    if (!raw) {
-      // No existing data — for initial app load, use demo seed data (splash page needs it)
-      return createSeedState();
-    }
-    return {
-      ...JSON.parse(raw),
-      invites: (JSON.parse(raw) as AppState).invites ?? []
-    } as AppState;
-  } catch (error) {
-    console.warn('[AppContext] Failed to load state, using seed data:', error);
+const loadState = (): AppState => {
+  if (typeof globalThis.window === 'undefined') {
     return createSeedState();
   }
-};
 
-/**
- * Load state for a specific real user from their own storage key.
- * Returns empty state if no data found (new user).
- */
-const loadUserState = (userId: string): Partial<AppState> => {
   try {
-    const key = getUserStorageKey(userId);
-    const raw = safeStorage.getItem(key);
-    if (!raw) return {};
-    const parsed = JSON.parse(raw) as AppState;
-    return {
-      shipments: parsed.shipments ?? [],
-      notifications: parsed.notifications ?? [],
-      teamMembers: parsed.teamMembers ?? [],
-      clients: parsed.clients ?? [],
-      invites: parsed.invites ?? [],
-      userTeams: parsed.userTeams ?? [],
-      theme: parsed.theme ?? 'system'
-    };
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) {
+      return createSeedState();
+    }
+    return JSON.parse(raw) as AppState;
   } catch {
-    return {};
+    return createSeedState();
   }
 };
 
@@ -151,11 +77,9 @@ const buildNotification = (
   severity: NotificationItem['severity'],
   title: string,
   message: string,
-  dueDate: string,
-  userId?: string
+  dueDate: string
 ): NotificationItem => ({
   id: createId('NT'),
-  userId,
   shipmentId,
   type,
   severity,
@@ -166,33 +90,6 @@ const buildNotification = (
   read: false
 });
 
-// Refactored deeply nested logic in updateDocumentStatus
-const findDocumentIndex = (documents: ShipmentDocument[], documentType: DocumentType): number => {
-  return documents.findIndex((doc) => doc.type === documentType);
-};
-
-// Ensure processDocuments is defined
-const processDocuments = (
-  shipment: Shipment,
-  newDocument: ShipmentDocument,
-  input: UploadDocumentInput,
-  shipmentId: string
-): Shipment => {
-  const withoutPlaceholder = shipment.documents.filter(
-    (doc) => !(doc.type === input.type && doc.fileName === 'Not uploaded')
-  );
-  return {
-    ...shipment,
-    documents: [newDocument, ...withoutPlaceholder],
-    aiScan: [mockExtraction(shipmentId, input.type), ...shipment.aiScan],
-  };
-};
-
-// Refactored negated condition
-const isMatchingShipment = (shipment: Shipment, shipmentId: string): boolean => {
-  return shipment.id === shipmentId;
-};
-
 export const AppProvider = ({ children }: PropsWithChildren) => {
   const [state, setState] = useState<AppState>(() => {
     const initialState = loadState();
@@ -200,15 +97,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     // Clean up invalid or demo sessions on app load
     if (initialState.isAuthenticated && initialState.user) {
       // Remove demo sessions - force re-login
-      // Log session restoration
       if (initialState.user.authProvider === 'demo') {
-        console.log('Restoring Demo session');
+        console.log('Demo session cleared on app load');
+        return {
+          ...initialState,
+          isAuthenticated: false,
+          user: null
+        };
       }
 
       // Validate Google sessions
       if (initialState.user.authProvider === 'google') {
-        const token = safeStorage.getItem('google_auth_token');
-        const userEmail = safeStorage.getItem('google_user_email');
+        const token = sessionStorage.getItem('google_auth_token');
+        const userEmail = sessionStorage.getItem('google_user_email');
 
         if (!token || !userEmail) {
           console.warn('Invalid Google session detected, logging out');
@@ -225,9 +126,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   });
   // Restore user session on app load if authenticated
   useEffect(() => {
-    if (state.isAuthenticated && state.user?.authProvider === 'google') {
-      const token = safeStorage.getItem('google_auth_token');
-      const userEmail = safeStorage.getItem('google_user_email');
+    if (typeof globalThis.window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
+      const token = sessionStorage.getItem('google_auth_token');
+      const userEmail = sessionStorage.getItem('google_user_email');
 
       // Verify session is still valid
       if (!token || !userEmail) {
@@ -241,67 +142,22 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }
   }, []);
 
-  // Track current user ID for storage key resolution
-  const currentUserIdRef = useRef<string | undefined>(state.user?.id);
   useEffect(() => {
-    currentUserIdRef.current = state.user?.id;
-  }, [state.user?.id]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 
-  // Persist state — skip for demo users (demo data resets on refresh)
-  useEffect(() => {
-    if (state.user?.userMode === 'demo') {
-      // Demo users: don't persist state to localStorage
-      return;
+    // Sync theme with document class
+    if (state.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
     }
-    const key = state.user?.id
-      ? getUserStorageKey(state.user.id)
-      : DEMO_STORAGE_KEY;
-    safeStorage.setItem(key, JSON.stringify(state));
   }, [state]);
 
-  useEffect(() => {
-    // Sync theme with document class
-    if (typeof document !== 'undefined') {
-      const applyTheme = (t: 'light' | 'dark' | 'system') => {
-        let isDark = t === 'dark';
-        if (t === 'system') {
-          isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-
-        if (isDark) {
-          document.documentElement.classList.add('dark');
-          document.documentElement.style.colorScheme = 'dark';
-        } else {
-          document.documentElement.classList.remove('dark');
-          document.documentElement.style.colorScheme = 'light';
-        }
-      };
-
-      applyTheme(state.theme);
-
-      // Listener for system theme changes if in system mode
-      if (state.theme === 'system') {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = () => applyTheme('system');
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-      }
-    }
-  }, [state.theme]);
-
   const toggleTheme = () => {
-    setState(prev => {
-      let nextTheme: 'light' | 'dark' | 'system' = 'dark';
-      if (prev.theme === 'dark') nextTheme = 'light';
-      else if (prev.theme === 'light') nextTheme = 'system';
-      else nextTheme = 'dark';
-
-      return { ...prev, theme: nextTheme };
-    });
-  };
-
-  const setTheme = (theme: 'light' | 'dark' | 'system') => {
-    setState(prev => ({ ...prev, theme }));
+    setState(prev => ({
+      ...prev,
+      theme: prev.theme === 'dark' ? 'light' : 'dark'
+    }));
   };
 
   const login = (email: string, password: string) => {
@@ -315,30 +171,28 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Password must be at least 6 characters');
     }
 
-    // Deterministic userId from email for data persistence across sessions
-    const userId = `USER-${email.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-    const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
-    const displayName = nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
+    // Check if known team member
+    const knownMember = state.teamMembers.find(
+      (member) => member.email.toLowerCase() === email.toLowerCase()
+    );
 
-    // Load existing user data if any
-    const existingData = loadUserState(userId);
-    const hasExistingData = Object.keys(existingData).length > 0 && (existingData.shipments?.length ?? 0) > 0;
+    const nameFromEmail = email.split('@')[0].replaceAll(/[._]/g, ' ');
+    const displayName = knownMember?.name ?? nameFromEmail.replaceAll(/\b\w/g, (char) => char.toUpperCase());
 
-    setState(() => ({
-      ...(hasExistingData ? { ...createEmptyState(), ...existingData } : createEmptyState()),
+    setState((prev) => ({
+      ...prev,
       isAuthenticated: true,
       user: {
-        id: userId,
-        name: existingData.teamMembers ? displayName : displayName,
+        name: displayName,
         email,
-        role: 'Operations',
-        authProvider: 'email',
-        userMode: 'real'
-      },
-      theme: existingData.theme ?? 'system'
+        role: knownMember?.role ?? prev.user?.role ?? 'Staff',
+        authProvider: 'email'
+      }
     }));
 
-    console.log('User logged in with email:', email, hasExistingData ? '(restored data)' : '(new user)');
+    if (typeof globalThis.window !== 'undefined') {
+      console.log('User logged in with email:', email);
+    }
   };
 
   const signup = (name: string, email: string, password: string) => {
@@ -356,23 +210,20 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Name is required');
     }
 
-    // Deterministic userId from email for data persistence across sessions
-    const userId = `USER-${email.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
-
-    setState(() => ({
-      ...createEmptyState(),
+    setState((prev) => ({
+      ...prev,
       isAuthenticated: true,
       user: {
-        id: userId,
         name: name.trim() || 'New User',
         email,
-        role: 'Operations',
-        authProvider: 'email',
-        userMode: 'real'
+        role: 'Staff',
+        authProvider: 'email'
       }
     }));
 
-    console.log('New user registered:', email);
+    if (typeof globalThis.window !== 'undefined') {
+      console.log('New user registered:', email);
+    }
   };
 
   /**
@@ -380,32 +231,25 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
    * Only use this for demo purposes via demo buttons - NOT real Google OAuth!
    */
   const loginWithDemoAccount = () => {
-    // Create demo user session with fixed ID and fresh seed data
-    const demoState = getDemoSeedState();
+    // Create demo user session
     const demoUser = {
-      id: 'DEMO-USER',
       name: 'Demo User',
       email: 'demo@exportrack.ai',
-      role: 'Admin' as Role,
-      userMode: 'demo' as const
+      role: 'Staff' as const
     };
 
-    setState(() => ({
-      ...demoState,
+    setState((prev) => ({
+      ...prev,
       isAuthenticated: true,
       user: {
-        ...demoUser,
-        authProvider: 'demo' as const
+        name: demoUser.name,
+        email: demoUser.email,
+        role: demoUser.role,
+        authProvider: 'demo' as any
       }
-      // Demo users always get fresh seed data (never persisted)
     }));
 
     console.warn('⚠️ Demo account loaded for testing - this is NOT real Google OAuth authentication');
-  };
-
-  // Backwards-compatible alias for older UI code.
-  const loginWithGoogle = () => {
-    loginWithDemoAccount();
   };
 
   const loginWithGoogleToken = (token: string) => {
@@ -417,52 +261,52 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         throw new Error('Invalid token or missing email');
       }
 
+      // Check if user is in team members (optional - for role assignment)
+      const knownMember = state.teamMembers.find(
+        (member) => member.email.toLowerCase() === payload.email.toLowerCase()
+      );
+
       // Extract user information from Google token
       const userName = payload.name || payload.given_name || 'Google User';
       const userEmail = payload.email;
       const profilePicture = payload.picture;
-      // Deterministic userId from email for data persistence across sessions
-      const userId = `USER-${userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
-      // Load existing user data if any
-      const existingData = loadUserState(userId);
-      const hasExistingData = Object.keys(existingData).length > 0 && (existingData.shipments?.length ?? 0) > 0;
-
-      // Create user session with Google data + restore or empty state
-      setState(() => ({
-        ...(hasExistingData ? { ...createEmptyState(), ...existingData } : createEmptyState()),
+      // Create user session with Google data
+      setState((prev) => ({
+        ...prev,
         isAuthenticated: true,
         user: {
-          id: userId,
           name: userName,
           email: userEmail,
-          role: 'Operations',
+          role: knownMember?.role ?? prev.user?.role ?? 'Staff',
           authProvider: 'google',
-          profilePicture: profilePicture,
-          userMode: 'real' as const
-        },
-        theme: existingData.theme ?? 'system'
+          profilePicture: profilePicture
+        }
       }));
 
-      // Store the token for future API calls (if needed) - Use localStorage for persistence
-      safeStorage.setItem('google_auth_token', token);
-      safeStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
-      safeStorage.setItem('google_user_email', userEmail);
+      // Store the token for future API calls (if needed)
+      if (typeof globalThis.window !== 'undefined') {
+        // Use sessionStorage with expiry for security
+        sessionStorage.setItem('google_auth_token', token);
+        sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
+        sessionStorage.setItem('google_user_email', userEmail);
 
-      // Log successful authentication
-      console.log('User authenticated with Google:', {
-        name: userName,
-        email: userEmail,
-        hasProfilePicture: !!profilePicture,
-        restoredData: hasExistingData
-      });
+        // Log successful authentication
+        console.log('User authenticated with Google:', {
+          name: userName,
+          email: userEmail,
+          hasProfilePicture: !!profilePicture
+        });
+      }
     } catch (error) {
       console.error('Failed to login with Google token:', error);
 
       // Clear any partial session data on error
-      safeStorage.removeItem('google_auth_token');
-      safeStorage.removeItem('google_token_expiry');
-      safeStorage.removeItem('google_user_email');
+      if (typeof globalThis.window !== 'undefined') {
+        sessionStorage.removeItem('google_auth_token');
+        sessionStorage.removeItem('google_token_expiry');
+        sessionStorage.removeItem('google_user_email');
+      }
 
       throw new Error('Google authentication failed. Please try again.');
     }
@@ -470,19 +314,18 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
   const logout = () => {
     // Clear all authentication data
-    safeStorage.removeItem('google_auth_token');
-    safeStorage.removeItem('google_token_expiry');
-    safeStorage.removeItem('google_user_email');
-    // Note: Don't clear user-specific storage on logout (preserves data for next login)
-    // Only clear the legacy key
-    safeStorage.removeItem(DEMO_STORAGE_KEY);
+    if (typeof globalThis.window !== 'undefined') {
+      // Clear Google auth tokens
+      sessionStorage.removeItem('google_auth_token');
+      sessionStorage.removeItem('google_token_expiry');
+      sessionStorage.removeItem('google_user_email');
 
-    // Log logout
-    console.log('User logged out');
+      // Log logout
+      console.log('User logged out');
+    }
 
-    // Reset to initial demo seed data for splash page display
-    setState(() => ({
-      ...createSeedState(),
+    setState((prev) => ({
+      ...prev,
       isAuthenticated: false,
       user: null
     }));
@@ -499,7 +342,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     const now = new Date().toISOString();
     const shipment: Shipment = {
       id: input.shipmentId,
-      userId: state.user?.id,
       clientName: input.clientName,
       destinationCountry: input.destinationCountry,
       shipmentDate: input.shipmentDate,
@@ -515,7 +357,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         {
           id: createId('COM'),
           author: state.user?.name ?? 'System',
-          role: state.user?.role ?? 'Operations',
+          role: state.user?.role ?? 'Staff',
           message: 'Shipment record created. Awaiting first document upload.',
           createdAt: now,
           internal: true
@@ -523,15 +365,21 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ]
     };
 
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
-      shipments: [shipment, ...prev.shipments]
+      shipments: [shipment, ...prev.shipments],
+      notifications: [
+        buildNotification(
+          shipment.id,
+          'Deadline',
+          'Medium',
+          `Shipment ${shipment.id} created`,
+          'New shipment added. Upload and verify mandatory documents.',
+          shipment.deadline
+        ),
+        ...prev.notifications
+      ]
     }));
-
-    const addNotif = (t: any) => {
-      setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
-    };
-    NotificationService.trigger('shipment_created', shipment, addNotif);
 
     return shipment;
   };
@@ -539,7 +387,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const addDocument = (shipmentId: string, input: UploadDocumentInput) => {
     const newDocument: ShipmentDocument = {
       id: createId('DOC'),
-      userId: state.user?.id,
       type: input.type,
       fileName: input.fileName,
       fileFormat: input.fileFormat,
@@ -550,18 +397,35 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
     setState((prev) => {
       const shipments = prev.shipments.map((shipment) => {
-        if (isMatchingShipment(shipment, shipmentId)) {
-          return {
-            ...shipment,
-            documents: [newDocument, ...shipment.documents]
-          };
+        if (shipment.id !== shipmentId) {
+          return shipment;
         }
-        return shipment;
+
+        const withoutPlaceholder = shipment.documents.filter(
+          (doc) => !(doc.type === input.type && doc.fileName === 'Not uploaded')
+        );
+
+        return {
+          ...shipment,
+          documents: [newDocument, ...withoutPlaceholder],
+          aiScan: [mockExtraction(shipmentId, input.type), ...shipment.aiScan]
+        };
       });
 
       return {
         ...prev,
         shipments,
+        notifications: [
+          buildNotification(
+            shipmentId,
+            'Approval Delay',
+            'Low',
+            `${input.type} uploaded for ${shipmentId}`,
+            `${input.fileName} uploaded and queued for verification.`,
+            new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+          ),
+          ...prev.notifications
+        ]
       };
     });
   };
@@ -574,7 +438,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         }
 
         const nextDocuments = [...shipment.documents];
-        const documentIndex = findDocumentIndex(nextDocuments, documentType);
+        const documentIndex = nextDocuments.findIndex((doc) => doc.type === documentType);
 
         if (documentIndex >= 0) {
           nextDocuments[documentIndex] = {
@@ -599,53 +463,25 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         };
       });
 
+      const notifications = [...prev.notifications];
+      if (status === 'Missing' || status === 'Rejected') {
+        notifications.unshift(
+          buildNotification(
+            shipmentId,
+            'Missing Docs',
+            status === 'Rejected' ? 'High' : 'Medium',
+            `${documentType} ${status.toLowerCase()} for ${shipmentId}`,
+            `Please resolve ${documentType} status: ${status}.`,
+            new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+          )
+        );
+      }
+
       return {
         ...prev,
         shipments,
+        notifications
       };
-    });
-  };
-
-  const updateShipmentStatus = (shipmentId: string, status: ShipmentStatus) => {
-    setState((prev) => {
-      const shipment = prev.shipments.find(s => s.id === shipmentId);
-      if (!shipment) return prev;
-
-      const updatedShipment = { ...shipment, status };
-      const shipments = prev.shipments.map(s =>
-        s.id === shipmentId ? updatedShipment : s
-      );
-
-      // Trigger notifications based on new status
-      const addNotif = (t: any) => {
-        setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
-      };
-
-      if (status === 'In Transit' && shipment.status !== 'In Transit') {
-        NotificationService.trigger('shipment_dispatched', updatedShipment, addNotif);
-      } else if (status === 'Delivered' && shipment.status !== 'Delivered') {
-        NotificationService.trigger('shipment_delivered', updatedShipment, addNotif);
-      }
-
-      return { ...prev, shipments };
-    });
-  };
-
-  const assignDriver = (shipmentId: string, driverInfo: { name: string; phone: string; vehicle: string }) => {
-    setState((prev) => {
-      const shipments = prev.shipments.map((s) => {
-        if (s.id === shipmentId) {
-          return {
-            ...s,
-            driverName: driverInfo.name,
-            driverPhone: driverInfo.phone,
-            vehicleNumber: driverInfo.vehicle,
-            status: 'Driver Assigned' as ShipmentStatus
-          };
-        }
-        return s;
-      });
-      return { ...prev, shipments };
     });
   };
 
@@ -654,32 +490,27 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    setState((prev) => {
-      const shipments = prev.shipments.map((shipment) => {
-        if (shipment.id === shipmentId) {
-          return {
+    setState((prev) => ({
+      ...prev,
+      shipments: prev.shipments.map((shipment) =>
+        shipment.id !== shipmentId
+          ? shipment
+          : {
             ...shipment,
             comments: [
               {
                 id: createId('COM'),
                 author: prev.user?.name ?? 'Unknown',
-                role: prev.user?.role ?? 'Operations',
-                message: message,
+                role: prev.user?.role ?? 'Staff',
+                message,
                 createdAt: new Date().toISOString(),
-                internal: internal,
+                internal
               },
-              ...shipment.comments,
-            ],
-          };
-        }
-        return shipment;
-      });
-
-      return {
-        ...prev,
-        shipments,
-      };
-    });
+              ...shipment.comments
+            ]
+          }
+      )
+    }));
   };
 
   const markNotificationRead = (notificationId: string) => {
@@ -691,361 +522,21 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
-  const markAllNotificationsRead = () => {
-    setState((prev) => ({
-      ...prev,
-      notifications: prev.notifications.map((notification) => ({ ...notification, read: true }))
-    }));
-  };
-
-  const triggerDelayAlert = (shipmentId: string, daysDelayed: number) => {
-    setState((prev) => {
-      // Check if we already have a delay alert for this shipment to avoid spam
-      const alreadyHasAlert = prev.notifications.some(
-        n => n.shipmentId === shipmentId && n.type === 'Deadline' && !n.read
-      );
-
-      if (alreadyHasAlert) return prev;
-
-      const shipment = prev.shipments.find(s => s.id === shipmentId);
-      if (!shipment) return prev;
-
-      const updatedShipment = { ...shipment, delayed: true, priority: 'High' as const };
-      const updatedShipments = prev.shipments.map(s =>
-        s.id === shipmentId ? updatedShipment : s
-      );
-
-      const addNotif = (t: any) => {
-        setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
-      };
-      NotificationService.trigger('shipment_delayed', updatedShipment, addNotif);
-
-      const newNotification = buildNotification(
-        shipmentId,
-        'Deadline', // Changed to Deadline as per NotificationService logic
-        'High',
-        `Delay Detected: ${shipment.clientName}`,
-        `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. Network re-routing advised.`,
-        new Date().toISOString(),
-        state.user?.id
-      );
-
-      return {
-        ...prev,
-        shipments: updatedShipments,
-        notifications: [newNotification, ...prev.notifications]
-      };
-    });
-  };
-
-  const applyOptimizedRoute = (shipmentId: string) => {
-    setState((prev) => {
-      const shipment = prev.shipments.find((s) => s.id === shipmentId);
-      if (!shipment) return prev;
-
-      return {
-        ...prev,
-        shipments: prev.shipments.map((s) =>
-          s.id === shipmentId
-            ? {
-              ...s,
-              status: 'In Transit' as ShipmentStatus,
-              comments: [
-                {
-                  id: createId('COM'),
-                  author: 'AI Route Optimizer',
-                  role: 'Admin',
-                  message: 'AI Optimized Route applied. Vessel coordinates updated to reflect high-efficiency path.',
-                  createdAt: new Date().toISOString(),
-                  internal: true,
-                },
-                ...s.comments,
-              ],
-            }
-            : s
-        ),
-      };
-    });
-  };
-
-  const inviteTeamMember = async (input: InviteTeamMemberInput) => {
-    // Check for duplicates
-    const existingMember = state.teamMembers.find(m => m.email.toLowerCase() === input.email.toLowerCase());
-    const existingInvite = state.invites.find(i => i.email.toLowerCase() === input.email.toLowerCase() && i.status === 'Pending');
-
-    if (existingMember) {
-      throw new Error('This user is already a member of the workspace.');
-    }
-
-    if (existingInvite) {
-      throw new Error('An active invitation for this email already exists.');
-    }
-
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const inviteId = createId('INV');
-    const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-
-    const newInvite: TeamInvite = {
-      id: inviteId,
-      name: input.name,
-      email: input.email,
-      role: input.role,
-      workspaceId: input.workspaceId ?? 'default-workspace',
-      token,
-      status: 'Pending',
-      createdAt: new Date().toISOString()
-    };
-
-    setState(prev => ({
-      ...prev,
-      invites: [newInvite, ...prev.invites]
-    }));
-
-    // Mock Email Dispatch
-    console.log('Sending Invitation Email...', {
-      to: newInvite.email,
-      name: newInvite.name,
-      role: newInvite.role,
-      link: `https://exportrack.ai/invite/${newInvite.token}`
-    });
-
-    // Add internal notification
-    const addNotif = (t: any) => {
-      setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
-    };
-
-    const notification = buildNotification(
-      'SYSTEM',
-      'Deadline',
-      'Low',
-      'Invitation Sent',
-      `Team invitation sent to ${newInvite.name} (${newInvite.email}) as ${newInvite.role}.`,
-      new Date().toISOString(),
-      state.user?.id
-    );
-    addNotif(notification);
-  };
-
-  const updateMemberRole = (memberId: string, role: Role) => {
-    setState(prev => ({
-      ...prev,
-      teamMembers: prev.teamMembers.map(m => m.id === memberId ? { ...m, role } : m)
-    }));
-  };
-
-  const deleteInvite = (inviteId: string) => {
-    setState(prev => ({
-      ...prev,
-      invites: prev.invites.filter(i => i.id !== inviteId)
-    }));
-  };
-
-  const removeTeamMember = (memberId: string) => {
-    setState(prev => ({
-      ...prev,
-      teamMembers: prev.teamMembers.filter(m => m.id !== memberId)
-    }));
-  };
-
-  const updateUserProfile = (updates: any) => {
-    setState(prev => ({
-      ...prev,
-      user: prev.user ? { ...prev.user, ...updates } : prev.user
-    }));
-  };
-
-  const createTeam = (teamName: string): Team => {
-    if (!state.user) throw new Error('Must be authenticated');
-
-    const teamId = createId('TEAM');
-    const team: Team = {
-      id: teamId,
-      ownerId: state.user.id,
-      name: teamName,
-      createdAt: new Date().toISOString(),
-      members: []
-    };
-
-    setState(prev => ({
-      ...prev,
-      userTeams: [team, ...prev.userTeams]
-    }));
-
-    return team;
-  };
-
-  const addTeamMember = (teamId: string, email: string, permission: TeamPermission) => {
-    if (!state.user) throw new Error('Must be authenticated');
-
-    setState(prev => {
-      const teams = prev.userTeams.map(t => {
-        if (t.id !== teamId) return t;
-
-        // Create new team member
-        const newMember: TeamMemberWithPermissions = {
-          id: createId('TMEM'),
-          userId: createId('USER'),
-          name: email.split('@')[0],
-          email,
-          role: 'Staff',
-          permission,
-          joinedAt: new Date().toISOString()
-        };
-
-        return {
-          ...t,
-          members: [newMember, ...t.members]
-        };
-      });
-
-      return { ...prev, userTeams: teams };
-    });
-  };
-
-  const removeTeamMemberFromTeam = (teamId: string, memberId: string) => {
-    if (!state.user) throw new Error('Must be authenticated');
-
-    setState(prev => {
-      const teams = prev.userTeams.map(t => {
-        if (t.id !== teamId) return t;
-        return {
-          ...t,
-          members: t.members.filter(m => m.id !== memberId)
-        };
-      });
-
-      return { ...prev, userTeams: teams };
-    });
-  };
-
-  const updateTeamMemberPermission = (teamId: string, memberId: string, permission: TeamPermission) => {
-    if (!state.user) throw new Error('Must be authenticated');
-
-    setState(prev => {
-      const teams = prev.userTeams.map(t => {
-        if (t.id !== teamId) return t;
-        return {
-          ...t,
-          members: t.members.map(m =>
-            m.id === memberId ? { ...m, permission } : m
-          )
-        };
-      });
-
-      return { ...prev, userTeams: teams };
-    });
-  };
-
-  const getUserTeams = (): Team[] => {
-    if (!state.user) return [];
-    return state.user.userMode === 'demo' ? [] : state.userTeams;
-  };
-
-  const deleteShipment = (shipmentId: string) => {
-    if (!state.user || state.user.userMode === 'demo') throw new Error('Cannot delete demo shipments');
-
-    setState(prev => ({
-      ...prev,
-      shipments: prev.shipments.filter(s => s.id !== shipmentId),
-      notifications: prev.notifications.filter(n => n.shipmentId !== shipmentId)
-    }));
-  };
-
-  const editShipment = (shipmentId: string, updates: Partial<Shipment>) => {
-    if (!state.user || state.user.userMode === 'demo') throw new Error('Cannot edit demo shipments');
-
-    setState(prev => ({
-      ...prev,
-      shipments: prev.shipments.map(s =>
-        s.id === shipmentId ? { ...s, ...updates } : s
-      )
-    }));
-  };
-
-  const isDemoUser = state.user?.userMode === 'demo';
-
   const value = useMemo<AppContextValue>(
     () => ({
       state,
-      isDemoUser: state.user?.userMode === 'demo',
       login,
       signup,
       loginWithGoogle,
-      loginWithDemoAccount,
       loginWithGoogleToken,
       logout,
       switchRole,
-      setTheme,
       toggleTheme,
       createShipment,
       addDocument,
       updateDocumentStatus,
-      updateShipmentStatus,
-      assignDriver,
       addComment,
-      markNotificationRead,
-      markAllNotificationsRead,
-      triggerDelayAlert,
-      applyOptimizedRoute,
-      inviteTeamMember,
-      updateMemberRole,
-      removeTeamMember,
-      updateUserProfile,
-      deleteInvite,
-      createTeam,
-      addTeamMember,
-      removeTeamMemberFromTeam,
-      updateTeamMemberPermission,
-      getUserTeams,
-      deleteShipment,
-      editShipment,
-      getAnalytics: () => {
-        const total = state.shipments.length;
-        const verifiedDocs = state.shipments.flatMap(s => s.documents).filter(d => d.status === 'Verified').length;
-        const totalDocs = state.shipments.flatMap(s => s.documents).length || 1;
-        const onTimeRate = Math.round((verifiedDocs / totalDocs) * 100);
-        const delayed = state.shipments.filter(s => s.delayed).length;
-
-        return {
-          totalShipments: total,
-          onTimeDeliveryRate: onTimeRate,
-          delayedShipments: delayed,
-          averageDeliveryTime: 4.8,
-          monthlyShipmentTrend: [
-            { month: 'Oct', count: 45 },
-            { month: 'Nov', count: 52 },
-            { month: 'Dec', count: 48 },
-            { month: 'Jan', count: 61 },
-            { month: 'Feb', count: 55 },
-            { month: 'Mar', count: total }
-          ],
-          carrierPerformance: [
-            { carrier: 'Maersk', rating: 4.8, shipments: 24 },
-            { carrier: 'MSC', rating: 4.5, shipments: 18 },
-            { carrier: 'Hapag-Lloyd', rating: 4.2, shipments: 12 },
-            { carrier: 'CMA CGM', rating: 3.9, shipments: 8 }
-          ],
-          deliveryTimeDistribution: [
-            { range: '0-2 days', count: 12 },
-            { range: '3-5 days', count: 35 },
-            { range: '6-10 days', count: 18 },
-            { range: '10+ days', count: 5 }
-          ]
-        };
-      },
-      hasPermission: (action: string) => {
-        const role = state.user?.role || 'Viewer';
-        const permissions: Record<string, Role[]> = {
-          'manage_users': ['Admin'],
-          'edit_shipments': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
-          'access_analytics': ['Admin', 'Manager', 'Viewer', 'Export Operations Manager'],
-          'create_shipments': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
-          'update_tracking': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
-        };
-        return permissions[action]?.includes(role) || false;
-      }
+      markNotificationRead
     }),
     [state]
   );
