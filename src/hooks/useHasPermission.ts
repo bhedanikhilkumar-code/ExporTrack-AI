@@ -1,5 +1,5 @@
-import { useApp } from '../context/AppContext';
-import { hasPermission, Permission } from '../utils/permissions';
+import { useAppContext } from '../context/AppContext';
+import { hasPermission, getPermissions, Permission } from '../utils/permissions';
 
 /**
  * Hook to check if the current user has a specific permission
@@ -7,26 +7,8 @@ import { hasPermission, Permission } from '../utils/permissions';
  * Demo users have limited permissions - they can only view and create shipments
  */
 export function useHasPermission(permission: Permission): boolean {
-    const { state, isDemoUser } = useApp();
-
-    // Not authenticated - no permissions
-    if (!state.user) {
-        return false;
-    }
-
-    // Demo users have limited permissions
-    // They can only: view_shipments, create_shipments, view_documents
-    if (isDemoUser) {
-        const demoAllowedPermissions: Permission[] = [
-            'view_shipments',
-            'create_shipments',
-            'view_documents',
-        ];
-        return demoAllowedPermissions.includes(permission);
-    }
-
-    // Real users - check role-based permissions
-    return hasPermission(state.user.role, permission);
+    const { hasPermission: contextHasPermission } = useAppContext();
+    return contextHasPermission(permission);
 }
 
 /**
@@ -37,7 +19,7 @@ export function useCanPerform(permission: Permission): {
     canPerform: boolean;
     message?: string;
 } {
-    const { isDemoUser } = useApp();
+    const { isDemoUser } = useAppContext();
     const hasPermissionResult = useHasPermission(permission);
 
     if (!hasPermissionResult) {
@@ -60,7 +42,7 @@ export function useCanPerform(permission: Permission): {
  * Hook to get all permissions for the current user
  */
 export function useUserPermissions(): Permission[] {
-    const { state, isDemoUser } = useApp();
+    const { state, isDemoUser } = useAppContext();
 
     if (!state.user) {
         return [];
@@ -75,7 +57,5 @@ export function useUserPermissions(): Permission[] {
         ];
     }
 
-    // Import the getPermissions function
-    const { getPermissions } = require('../utils/permissions');
     return getPermissions(state.user.role);
 }

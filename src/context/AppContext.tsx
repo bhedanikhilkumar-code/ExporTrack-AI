@@ -248,16 +248,26 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         setUserId(null);
       }
     }
-  }, []);
+  }, [state.isAuthenticated, state.user?.authProvider]);
 
-  const toggleTheme = () => {
+  // Helper properties
+  const isDemoUser = state.user?.userMode === 'demo' || state.user?.authProvider === 'demo';
+  const isRealUser = state.user?.userMode === 'real' || state.user?.authProvider === 'email' || state.user?.authProvider === 'google';
+
+  // Demo users cannot manage teams
+  const canManageTeam = isRealUser && state.user !== null;
+
+  // All authenticated users can create shipments
+  const canCreateShipment = state.isAuthenticated && state.user !== null;
+
+  const toggleTheme = useCallback(() => {
     setState(prev => ({
       ...prev,
       theme: prev.theme === 'dark' ? 'light' : 'dark'
     }));
-  };
+  }, []);
 
-  const login = (email: string, password: string) => {
+  const login = useCallback((email: string, password: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       throw new Error('Invalid email format');
@@ -294,9 +304,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     if (typeof globalThis.window !== 'undefined') {
       console.log('User logged in with email:', email);
     }
-  };
+  }, []);
 
-  const signup = (name: string, email: string, password: string) => {
+  const signup = useCallback((name: string, email: string, password: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       throw new Error('Invalid email format');
@@ -334,9 +344,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     if (typeof globalThis.window !== 'undefined') {
       console.log('New user registered:', email);
     }
-  };
+  }, []);
 
-  const loginWithDemoAccount = () => {
+  const loginWithDemoAccount = useCallback(() => {
     // Create demo user session with full seed data
     const demoState = createSeedState();
     const demoUserId = 'demo-user';
@@ -360,9 +370,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     });
 
     console.warn('Demo account loaded for testing');
-  };
+  }, []);
 
-  const loginWithGoogleToken = (token: string) => {
+  const loginWithGoogleToken = useCallback((token: string) => {
     try {
       const payload = decodeJWT(token);
 
@@ -417,9 +427,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
 
       throw new Error('Google authentication failed. Please try again.');
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     if (typeof globalThis.window !== 'undefined') {
       sessionStorage.removeItem('google_auth_token');
       sessionStorage.removeItem('google_token_expiry');
@@ -437,16 +447,16 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       isAuthenticated: false,
       user: null
     }));
-  };
+  }, []);
 
-  const switchRole = (role: Role) => {
+  const switchRole = useCallback((role: Role) => {
     setState(prev => ({
       ...prev,
       user: prev.user ? { ...prev.user, role } : prev.user
     }));
-  };
+  }, []);
 
-  const createShipment = (input: CreateShipmentInput): Shipment => {
+  const createShipment = useCallback((input: CreateShipmentInput): Shipment => {
     const now = new Date().toISOString();
     const shipment: Shipment = {
       id: input.shipmentId,
@@ -491,9 +501,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
 
     return shipment;
-  };
+  }, [state.user, userId]);
 
-  const updateShipment = (shipmentId: string, updates: Partial<Shipment>) => {
+  const updateShipment = useCallback((shipmentId: string, updates: Partial<Shipment>) => {
     setState(prev => ({
       ...prev,
       shipments: prev.shipments.map(shipment =>
@@ -502,17 +512,17 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           : shipment
       )
     }));
-  };
+  }, []);
 
-  const deleteShipment = (shipmentId: string) => {
+  const deleteShipment = useCallback((shipmentId: string) => {
     setState(prev => ({
       ...prev,
       shipments: prev.shipments.filter(shipment => shipment.id !== shipmentId),
       notifications: prev.notifications.filter(n => n.shipmentId !== shipmentId)
     }));
-  };
+  }, []);
 
-  const addDocument = (shipmentId: string, input: UploadDocumentInput) => {
+  const addDocument = useCallback((shipmentId: string, input: UploadDocumentInput) => {
     const newDocument: ShipmentDocument = {
       id: createId('DOC'),
       userId: userId || undefined,
@@ -557,9 +567,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         ]
       };
     });
-  };
+  }, [userId]);
 
-  const updateDocumentStatus = (shipmentId: string, documentType: DocumentType, status: DocStatus) => {
+  const updateDocumentStatus = useCallback((shipmentId: string, documentType: DocumentType, status: DocStatus) => {
     setState(prev => {
       const shipments = prev.shipments.map(shipment => {
         if (shipment.id !== shipmentId) {
@@ -612,13 +622,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         notifications
       };
     });
-  };
+  }, []);
 
-  const addComment = (shipmentId: string, message: string, internal: boolean) => {
-    if (!state.user) {
-      return;
-    }
-
+  const addComment = useCallback((shipmentId: string, message: string, internal: boolean) => {
     setState(prev => ({
       ...prev,
       shipments: prev.shipments.map(shipment =>
@@ -640,19 +646,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           }
       )
     }));
-  };
+  }, []);
 
-  const markNotificationRead = (notificationId: string) => {
+  const markNotificationRead = useCallback((notificationId: string) => {
     setState(prev => ({
       ...prev,
       notifications: prev.notifications.map(notification =>
         notification.id === notificationId ? { ...notification, read: true } : notification
       )
     }));
-  };
+  }, []);
 
   // Team management functions
-  const createTeam = (teamName: string): Team => {
+  const createTeam = useCallback((teamName: string): Team => {
     if (!state.user) {
       throw new Error('Must be logged in to create a team');
     }
@@ -686,9 +692,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
 
     return team;
-  };
+  }, [state.user, isDemoUser]);
 
-  const addTeamMember = (
+  const addTeamMember = useCallback((
     teamId: string,
     name: string,
     email: string,
@@ -731,9 +737,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
 
     return newMember;
-  };
+  }, [state.user, state.userTeams, isDemoUser]);
 
-  const removeTeamMember = (teamId: string, memberId: string) => {
+  const removeTeamMember = useCallback((teamId: string, memberId: string) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot remove team members');
       return;
@@ -757,9 +763,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           : t
       )
     }));
-  };
+  }, [state.user, state.userTeams, isDemoUser]);
 
-  const updateTeamMemberPermission = (teamId: string, memberId: string, permission: TeamPermission) => {
+  const updateTeamMemberPermission = useCallback((teamId: string, memberId: string, permission: TeamPermission) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot update team member permissions');
       return;
@@ -788,9 +794,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           : t
       )
     }));
-  };
+  }, [state.user, state.userTeams, isDemoUser]);
 
-  const leaveTeam = (teamId: string) => {
+  const leaveTeam = useCallback((teamId: string) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot leave teams');
       return;
@@ -804,10 +810,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           : t
       ).filter(t => t.members.length > 0) // Remove team if no members left
     }));
-  };
+  }, [state.user, isDemoUser]);
 
   // Legacy team management for ProfileTeamPage
-  const inviteTeamMember = (input: InviteTeamMemberInput) => {
+  const inviteTeamMember = useCallback((input: InviteTeamMemberInput) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot invite team members');
       return;
@@ -828,9 +834,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ...prev,
       invites: [...prev.invites, invite]
     }));
-  };
+  }, [state.user, isDemoUser]);
 
-  const updateMemberRole = (memberId: string, role: Role) => {
+  const updateMemberRole = useCallback((memberId: string, role: Role) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot update member roles');
       return;
@@ -842,9 +848,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         member.id === memberId ? { ...member, role } : member
       )
     }));
-  };
+  }, [state.user, isDemoUser]);
 
-  const removeLegacyTeamMember = (memberId: string) => {
+  const removeLegacyTeamMember = useCallback((memberId: string) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot remove team members');
       return;
@@ -854,18 +860,18 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ...prev,
       teamMembers: prev.teamMembers.filter(member => member.id !== memberId)
     }));
-  };
+  }, [state.user, isDemoUser]);
 
-  const updateUserProfile = (updates: { name?: string; region?: string }) => {
+  const updateUserProfile = useCallback((updates: { name?: string; region?: string }) => {
     if (!state.user) return;
 
     setState(prev => ({
       ...prev,
       user: prev.user ? { ...prev.user, ...updates } : prev.user
     }));
-  };
+  }, [state.user]);
 
-  const deleteInvite = (inviteId: string) => {
+  const deleteInvite = useCallback((inviteId: string) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot delete invites');
       return;
@@ -875,9 +881,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ...prev,
       invites: prev.invites.filter(invite => invite.id !== inviteId)
     }));
-  };
+  }, [state.user, isDemoUser]);
 
-  const acceptInvite = (inviteId: string) => {
+  const acceptInvite = useCallback((inviteId: string) => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot accept invites');
       return;
@@ -913,24 +919,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         i.id === inviteId ? { ...i, status: 'Accepted' as const } : i
       )
     }));
-  };
-
-  // Helper properties
-  const isDemoUser = state.user?.userMode === 'demo' || state.user?.authProvider === 'demo';
-  const isRealUser = state.user?.userMode === 'real' || state.user?.authProvider === 'email' || state.user?.authProvider === 'google';
-
-  // Demo users cannot manage teams
-  const canManageTeam = isRealUser && state.user !== null;
-
-  // All authenticated users can create shipments
-  const canCreateShipment = state.isAuthenticated && state.user !== null;
+  }, [state.user, state.invites, isDemoUser]);
 
   // Permission checker - use a different name to avoid conflict with imported function
   const checkUserPermission = useCallback((permission: Permission): boolean => {
     if (!state.user) return false;
     // Demo users have limited permissions
     if (isDemoUser) {
-      return permission === 'view_shipments' || permission === 'view_documents';
+      return permission === 'view_shipments' || permission === 'view_documents' || permission === 'create_shipments';
     }
     return checkPermission(state.user.role, permission);
   }, [state.user, isDemoUser]);
@@ -939,11 +935,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const getAnalytics = useCallback((): ShipmentAnalyticsMetrics => {
     return computeAnalytics(state.shipments);
   }, [state.shipments]);
-
-  // Wrap getAnalytics as a function for backward compatibility
-  const getAnalyticsFn = (): ShipmentAnalyticsMetrics => {
-    return computeAnalytics(state.shipments);
-  };
 
   const value = useMemo<AppContextValue>(
     () => ({
@@ -1010,6 +1001,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           case 'SET_THEME':
             setState(prev => ({ ...prev, theme: action.payload }));
             break;
+          case 'UPDATE_SHIPMENT':
+            setState(prev => ({
+              ...prev,
+              shipments: prev.shipments.map(s =>
+                s.id === action.payload.id ? action.payload : s
+              )
+            }));
+            break;
           default:
             break;
         }
@@ -1041,16 +1040,39 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       canManageTeam,
       canCreateShipment,
       hasPermission: checkUserPermission,
-      getAnalytics: getAnalyticsFn
+      getAnalytics
     }),
     [
       state,
-      userMode,
-      userId,
       isDemoUser,
       isRealUser,
       canManageTeam,
       canCreateShipment,
+      login,
+      signup,
+      loginWithDemoAccount,
+      loginWithGoogleToken,
+      logout,
+      switchRole,
+      toggleTheme,
+      createShipment,
+      updateShipment,
+      deleteShipment,
+      addDocument,
+      updateDocumentStatus,
+      addComment,
+      markNotificationRead,
+      createTeam,
+      addTeamMember,
+      removeTeamMember,
+      updateTeamMemberPermission,
+      leaveTeam,
+      inviteTeamMember,
+      updateMemberRole,
+      removeLegacyTeamMember,
+      updateUserProfile,
+      deleteInvite,
+      acceptInvite,
       checkUserPermission,
       getAnalytics
     ]

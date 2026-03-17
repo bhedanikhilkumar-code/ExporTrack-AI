@@ -1,6 +1,7 @@
 import { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import PageHeader from '../components/PageHeader';
 import AppIcon from '../components/AppIcon';
+import jsPDF from 'jspdf';
 
 type ValidationStatus = 'Passed' | 'Warning' | 'Failed';
 
@@ -86,6 +87,26 @@ export default function AiDocumentValidatorPage() {
     setStage('idle');
     setReport(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleExportPdf = () => {
+    if (!report) return;
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.text('Compliance Validation Report', 20, 20);
+    doc.setFontSize(12);
+    doc.text(`Document: ${report.docType}`, 20, 40);
+    doc.text(`File: ${report.fileName}`, 20, 50);
+    doc.text(`Score: ${report.score}/100`, 20, 60);
+    doc.text(`Status: ${report.status}`, 20, 70);
+    doc.text(`Timestamp: ${new Date(report.timestamp).toLocaleString()}`, 20, 80);
+    
+    doc.text('Detected Issues:', 20, 100);
+    report.errors.forEach((err, i) => {
+      doc.text(`- [${err.severity.toUpperCase()}] ${err.field}: ${err.message}`, 20, 110 + (i * 10));
+    });
+    
+    doc.save(`validation-report-${report.fileName}.pdf`);
   };
 
   return (
@@ -274,6 +295,13 @@ export default function AiDocumentValidatorPage() {
                </div>
                <button onClick={reset} className="btn-primary mt-8 w-full shadow-lg shadow-teal-500/20">
                  Fix & Re-validate
+               </button>
+               <button 
+                 onClick={handleExportPdf}
+                 className="btn-secondary mt-3 w-full border-teal-500 text-teal-600 hover:bg-teal-50"
+               >
+                 <AppIcon name="file" className="mr-2 h-4 w-4" />
+                 Download PDF Report
                </button>
             </section>
 
