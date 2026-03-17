@@ -39,6 +39,7 @@ export interface AnalyticsMetrics {
 
 export interface ShipmentDocument {
   id: string;
+  userId?: string;
   type: DocumentType;
   fileName: string;
   fileFormat: 'PDF' | 'JPG' | 'PNG';
@@ -69,6 +70,7 @@ export interface ShipmentComment {
 
 export interface Shipment {
   id: string;
+  userId?: string;
   clientName: string;
   destinationCountry: string;
   shipmentDate: string;
@@ -90,6 +92,7 @@ export interface Shipment {
 
 export interface NotificationItem {
   id: string;
+  userId?: string;
   shipmentId: string;
   type: 'Missing Docs' | 'Approval Delay' | 'Deadline';
   severity: 'High' | 'Medium' | 'Low';
@@ -138,12 +141,34 @@ export interface Client {
 }
 
 export interface UserSession {
+  id: string;
   name: string;
   email: string;
   role: Role;
   authProvider?: 'email' | 'google' | 'demo';
   profilePicture?: string;
   region?: string;
+  userMode: 'demo' | 'real';
+}
+
+export type TeamPermission = 'view_only' | 'edit' | 'admin';
+
+export interface TeamMemberWithPermissions {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: Role;
+  permission: TeamPermission;
+  joinedAt: string;
+}
+
+export interface Team {
+  id: string;
+  ownerId: string;
+  name: string;
+  createdAt: string;
+  members: TeamMemberWithPermissions[];
 }
 
 export interface AppState {
@@ -155,6 +180,7 @@ export interface AppState {
   clients: Client[];
   theme: 'light' | 'dark' | 'system';
   invites: TeamInvite[];
+  userTeams: Team[];
 }
 
 export interface CreateShipmentInput {
@@ -213,7 +239,7 @@ export interface DelayEvaluation {
   daysDelayed: number;
 }
 
-export type NotificationEventType = 
+export type NotificationEventType =
   | 'shipment_created'
   | 'shipment_dispatched'
   | 'shipment_delayed'
@@ -245,7 +271,7 @@ export interface ShipmentTracking {
   lastUpdatedTime: string;
   trackingHistory: LocationUpdate[]; // Keeping existing for legacy support while migrating
   estimatedArrival?: string;
-  
+
   // New unified tracking fields
   tracking_number?: string;
   carrier?: string;
@@ -257,7 +283,7 @@ export interface ShipmentTracking {
   // Step 2 & 3 Additions
   aiEta?: AIEtaPrediction;
   delayAlert?: DelayEvaluation;
-  
+
   // Step 4: AI Route Optimization
   optimizedRoute?: OptimizedRoute;
 

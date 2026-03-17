@@ -42,6 +42,7 @@ export const createSeedState = (): AppState => ({
   isAuthenticated: false,
   user: null,
   theme: 'system',
+  userTeams: [],
   teamMembers: [
     {
       id: 'TM-001',
@@ -513,7 +514,7 @@ export const createSeedState = (): AppState => ({
     {
       id: 'NT-009',
       shipmentId: 'EXP-2026-006',
-      type: 'Status Update',
+      type: 'Deadline',
       severity: 'Low',
       title: 'Shipment delivered successfully',
       message: 'EXP-2026-006 to Singapore delivered. Client signed delivery receipt.',

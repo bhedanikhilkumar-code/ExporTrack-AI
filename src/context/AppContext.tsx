@@ -14,7 +14,10 @@ import {
   UploadDocumentInput,
   ShipmentStatus,
   InviteTeamMemberInput,
-  TeamInvite
+  TeamInvite,
+  Team,
+  TeamMemberWithPermissions,
+  TeamPermission
 } from '../types';
 import { decodeJWT } from '../utils/googleAuth';
 import { safeStorage } from '../utils/storage';
@@ -51,6 +54,14 @@ interface AppContextValue {
   removeTeamMember: (memberId: string) => void;
   updateUserProfile: (updates: Partial<AppState['user']>) => void;
   deleteInvite: (inviteId: string) => void;
+  // Team management functions
+  createTeam: (teamName: string) => Team;
+  addTeamMember: (teamId: string, email: string, permission: TeamPermission) => void;
+  removeTeamMemberFromTeam: (teamId: string, memberId: string) => void;
+  updateTeamMemberPermission: (teamId: string, memberId: string, permission: TeamPermission) => void;
+  getUserTeams: () => Team[];
+  deleteShipment: (shipmentId: string) => void;
+  editShipment: (shipmentId: string, updates: Partial<Shipment>) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -98,9 +109,11 @@ const buildNotification = (
   severity: NotificationItem['severity'],
   title: string,
   message: string,
-  dueDate: string
+  dueDate: string,
+  userId?: string
 ): NotificationItem => ({
   id: createId('NT'),
+  userId,
   shipmentId,
   type,
   severity,
@@ -145,7 +158,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     // Clean up invalid or demo sessions on app load
     if (initialState.isAuthenticated && initialState.user) {
       // Remove demo sessions - force re-login
-        // Log session restoration
+      // Log session restoration
       if (initialState.user.authProvider === 'demo') {
         console.log('Restoring Demo session');
       }
@@ -198,7 +211,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         if (t === 'system') {
           isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         }
-        
+
         if (isDark) {
           document.documentElement.classList.add('dark');
           document.documentElement.style.colorScheme = 'dark';
@@ -226,7 +239,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       if (prev.theme === 'dark') nextTheme = 'light';
       else if (prev.theme === 'light') nextTheme = 'system';
       else nextTheme = 'dark';
-      
+
       return { ...prev, theme: nextTheme };
     });
   };
@@ -246,28 +259,23 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Password must be at least 6 characters');
     }
 
-    // Check if known team member
-    const knownMember = state.teamMembers.find(
-      (member) => member.email.toLowerCase() === email.toLowerCase()
-    );
-
-    // Check if known client
-    const knownClient = state.clients.find(
-      (client) => client.email.toLowerCase() === email.toLowerCase()
-    );
-
+    const userId = createId('USER');
     const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
-    const displayName = knownMember?.name ?? knownClient?.name ?? nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
+    const displayName = nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
 
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
       user: {
+        id: userId,
         name: displayName,
         email,
-        role: (knownMember?.role as Role) ?? (knownClient ? 'Customer' : 'Operations'),
-        authProvider: 'email'
-      }
+        role: 'Operations',
+        authProvider: 'email',
+        userMode: 'real'
+      },
+      shipments: [],
+      notifications: []
     }));
 
     console.log('User logged in with email:', email);
@@ -288,15 +296,21 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Name is required');
     }
 
+    const userId = createId('USER');
+
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
       user: {
+        id: userId,
         name: name.trim() || 'New User',
         email,
         role: 'Operations',
-        authProvider: 'email'
-      }
+        authProvider: 'email',
+        userMode: 'real'
+      },
+      shipments: [],
+      notifications: []
     }));
 
     console.log('New user registered:', email);
@@ -307,22 +321,23 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
    * Only use this for demo purposes via demo buttons - NOT real Google OAuth!
    */
   const loginWithDemoAccount = () => {
-    // Create demo user session
+    // Create demo user session with fixed ID
     const demoUser = {
+      id: 'DEMO-USER',
       name: 'Demo User',
       email: 'demo@exportrack.ai',
-      role: 'Admin' as Role
+      role: 'Admin' as Role,
+      userMode: 'demo' as const
     };
 
     setState((prev) => ({
       ...prev,
       isAuthenticated: true,
       user: {
-        name: demoUser.name,
-        email: demoUser.email,
-        role: demoUser.role,
+        ...demoUser,
         authProvider: 'demo' as any
       }
+      // Demo users keep the seed data (shipments, notifications)
     }));
 
     console.warn('⚠️ Demo account loaded for testing - this is NOT real Google OAuth authentication');
@@ -342,27 +357,27 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         throw new Error('Invalid token or missing email');
       }
 
-      // Check if user is in team members (optional - for role assignment)
-      const knownMember = state.teamMembers.find(
-        (member) => member.email.toLowerCase() === payload.email.toLowerCase()
-      );
-
       // Extract user information from Google token
       const userName = payload.name || payload.given_name || 'Google User';
       const userEmail = payload.email;
       const profilePicture = payload.picture;
+      const userId = createId('USER');
 
       // Create user session with Google data
       setState((prev) => ({
         ...prev,
         isAuthenticated: true,
         user: {
+          id: userId,
           name: userName,
           email: userEmail,
-          role: knownMember?.role ?? prev.user?.role ?? 'Operations',
+          role: 'Operations',
           authProvider: 'google',
-          profilePicture: profilePicture
-        }
+          profilePicture: profilePicture,
+          userMode: 'real' as const
+        },
+        shipments: [],
+        notifications: []
       }));
 
       // Store the token for future API calls (if needed) - Use localStorage for persistence
@@ -416,6 +431,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     const now = new Date().toISOString();
     const shipment: Shipment = {
       id: input.shipmentId,
+      userId: state.user?.id,
       clientName: input.clientName,
       destinationCountry: input.destinationCountry,
       shipmentDate: input.shipmentDate,
@@ -439,6 +455,11 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ]
     };
 
+    setState(prev => ({
+      ...prev,
+      shipments: [shipment, ...prev.shipments]
+    }));
+
     const addNotif = (t: any) => {
       setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
     };
@@ -450,6 +471,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const addDocument = (shipmentId: string, input: UploadDocumentInput) => {
     const newDocument: ShipmentDocument = {
       id: createId('DOC'),
+      userId: state.user?.id,
       type: input.type,
       fileName: input.fileName,
       fileFormat: input.fileFormat,
@@ -520,9 +542,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     setState((prev) => {
       const shipment = prev.shipments.find(s => s.id === shipmentId);
       if (!shipment) return prev;
-      
+
       const updatedShipment = { ...shipment, status };
-      const shipments = prev.shipments.map(s => 
+      const shipments = prev.shipments.map(s =>
         s.id === shipmentId ? updatedShipment : s
       );
 
@@ -530,7 +552,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       const addNotif = (t: any) => {
         setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
       };
-      
+
       if (status === 'In Transit' && shipment.status !== 'In Transit') {
         NotificationService.trigger('shipment_dispatched', updatedShipment, addNotif);
       } else if (status === 'Delivered' && shipment.status !== 'Delivered') {
@@ -621,7 +643,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       if (!shipment) return prev;
 
       const updatedShipment = { ...shipment, delayed: true, priority: 'High' as const };
-      const updatedShipments = prev.shipments.map(s => 
+      const updatedShipments = prev.shipments.map(s =>
         s.id === shipmentId ? updatedShipment : s
       );
 
@@ -636,7 +658,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         'High',
         `Delay Detected: ${shipment.clientName}`,
         `AI Engine predicts a ${daysDelayed}-day delay for Container ${shipment.containerNumber}. Network re-routing advised.`,
-        new Date().toISOString()
+        new Date().toISOString(),
+        state.user?.id
       );
 
       return {
@@ -657,45 +680,45 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         shipments: prev.shipments.map((s) =>
           s.id === shipmentId
             ? {
-                ...s,
-                status: 'In Transit' as ShipmentStatus,
-                comments: [
-                  {
-                    id: createId('COM'),
-                    author: 'AI Route Optimizer',
-                    role: 'Admin',
-                    message: 'AI Optimized Route applied. Vessel coordinates updated to reflect high-efficiency path.',
-                    createdAt: new Date().toISOString(),
-                    internal: true,
-                  },
-                  ...s.comments,
-                ],
-              }
+              ...s,
+              status: 'In Transit' as ShipmentStatus,
+              comments: [
+                {
+                  id: createId('COM'),
+                  author: 'AI Route Optimizer',
+                  role: 'Admin',
+                  message: 'AI Optimized Route applied. Vessel coordinates updated to reflect high-efficiency path.',
+                  createdAt: new Date().toISOString(),
+                  internal: true,
+                },
+                ...s.comments,
+              ],
+            }
             : s
         ),
       };
     });
   };
-  
+
   const inviteTeamMember = async (input: InviteTeamMemberInput) => {
     // Check for duplicates
     const existingMember = state.teamMembers.find(m => m.email.toLowerCase() === input.email.toLowerCase());
     const existingInvite = state.invites.find(i => i.email.toLowerCase() === input.email.toLowerCase() && i.status === 'Pending');
-    
+
     if (existingMember) {
       throw new Error('This user is already a member of the workspace.');
     }
-    
+
     if (existingInvite) {
       throw new Error('An active invitation for this email already exists.');
     }
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     const inviteId = createId('INV');
     const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    
+
     const newInvite: TeamInvite = {
       id: inviteId,
       name: input.name,
@@ -706,12 +729,12 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       status: 'Pending',
       createdAt: new Date().toISOString()
     };
-    
+
     setState(prev => ({
       ...prev,
       invites: [newInvite, ...prev.invites]
     }));
-    
+
     // Mock Email Dispatch
     console.log('Sending Invitation Email...', {
       to: newInvite.email,
@@ -719,19 +742,20 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       role: newInvite.role,
       link: `https://exportrack.ai/invite/${newInvite.token}`
     });
-    
+
     // Add internal notification
     const addNotif = (t: any) => {
       setState(current => ({ ...current, notifications: [t, ...current.notifications] }));
     };
-    
+
     const notification = buildNotification(
       'SYSTEM',
       'Deadline',
       'Low',
       'Invitation Sent',
       `Team invitation sent to ${newInvite.name} (${newInvite.email}) as ${newInvite.role}.`,
-      new Date().toISOString()
+      new Date().toISOString(),
+      state.user?.id
     );
     addNotif(notification);
   };
@@ -763,7 +787,115 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       user: prev.user ? { ...prev.user, ...updates } : prev.user
     }));
   };
-  
+
+  const createTeam = (teamName: string): Team => {
+    if (!state.user) throw new Error('Must be authenticated');
+
+    const teamId = createId('TEAM');
+    const team: Team = {
+      id: teamId,
+      ownerId: state.user.id,
+      name: teamName,
+      createdAt: new Date().toISOString(),
+      members: []
+    };
+
+    setState(prev => ({
+      ...prev,
+      userTeams: [team, ...prev.userTeams]
+    }));
+
+    return team;
+  };
+
+  const addTeamMember = (teamId: string, email: string, permission: TeamPermission) => {
+    if (!state.user) throw new Error('Must be authenticated');
+
+    setState(prev => {
+      const teams = prev.userTeams.map(t => {
+        if (t.id !== teamId) return t;
+
+        // Create new team member
+        const newMember: TeamMemberWithPermissions = {
+          id: createId('TMEM'),
+          userId: createId('USER'),
+          name: email.split('@')[0],
+          email,
+          role: 'Staff',
+          permission,
+          joinedAt: new Date().toISOString()
+        };
+
+        return {
+          ...t,
+          members: [newMember, ...t.members]
+        };
+      });
+
+      return { ...prev, userTeams: teams };
+    });
+  };
+
+  const removeTeamMemberFromTeam = (teamId: string, memberId: string) => {
+    if (!state.user) throw new Error('Must be authenticated');
+
+    setState(prev => {
+      const teams = prev.userTeams.map(t => {
+        if (t.id !== teamId) return t;
+        return {
+          ...t,
+          members: t.members.filter(m => m.id !== memberId)
+        };
+      });
+
+      return { ...prev, userTeams: teams };
+    });
+  };
+
+  const updateTeamMemberPermission = (teamId: string, memberId: string, permission: TeamPermission) => {
+    if (!state.user) throw new Error('Must be authenticated');
+
+    setState(prev => {
+      const teams = prev.userTeams.map(t => {
+        if (t.id !== teamId) return t;
+        return {
+          ...t,
+          members: t.members.map(m =>
+            m.id === memberId ? { ...m, permission } : m
+          )
+        };
+      });
+
+      return { ...prev, userTeams: teams };
+    });
+  };
+
+  const getUserTeams = (): Team[] => {
+    if (!state.user) return [];
+    return state.user.userMode === 'demo' ? [] : state.userTeams;
+  };
+
+  const deleteShipment = (shipmentId: string) => {
+    if (!state.user || state.user.userMode === 'demo') throw new Error('Cannot delete demo shipments');
+
+    setState(prev => ({
+      ...prev,
+      shipments: prev.shipments.filter(s => s.id !== shipmentId),
+      notifications: prev.notifications.filter(n => n.shipmentId !== shipmentId)
+    }));
+  };
+
+  const editShipment = (shipmentId: string, updates: Partial<Shipment>) => {
+    if (!state.user || state.user.userMode === 'demo') throw new Error('Cannot edit demo shipments');
+
+    setState(prev => ({
+      ...prev,
+      shipments: prev.shipments.map(s =>
+        s.id === shipmentId ? { ...s, ...updates } : s
+      )
+    }));
+  };
+
   const value = useMemo<AppContextValue>(
     () => ({
       state,
@@ -791,13 +923,20 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       removeTeamMember,
       updateUserProfile,
       deleteInvite,
+      createTeam,
+      addTeamMember,
+      removeTeamMemberFromTeam,
+      updateTeamMemberPermission,
+      getUserTeams,
+      deleteShipment,
+      editShipment,
       getAnalytics: () => {
         const total = state.shipments.length;
         const verifiedDocs = state.shipments.flatMap(s => s.documents).filter(d => d.status === 'Verified').length;
         const totalDocs = state.shipments.flatMap(s => s.documents).length || 1;
         const onTimeRate = Math.round((verifiedDocs / totalDocs) * 100);
         const delayed = state.shipments.filter(s => s.delayed).length;
-        
+
         return {
           totalShipments: total,
           onTimeDeliveryRate: onTimeRate,
