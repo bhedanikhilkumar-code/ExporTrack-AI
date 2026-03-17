@@ -4,6 +4,7 @@ import PageHeader from '../components/PageHeader';
 import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import { ShipmentStatus } from '../types';
+import jsPDF from 'jspdf';
 
 const statuses: ShipmentStatus[] = ['Shipment Created', 'In Transit', 'Under Verification', 'Customs Hold', 'Delivered', 'Delayed'];
 
@@ -48,6 +49,37 @@ export default function CreateShipmentPage() {
       status,
       assignedTo
     });
+    navigate(`/shipments/${created.id}`);
+  };
+
+  const handleSaveAndExportPdf = () => {
+    const created = createShipment({
+      shipmentId,
+      clientName,
+      destinationCountry,
+      shipmentDate,
+      containerNumber,
+      status,
+      assignedTo
+    });
+
+    const doc = new jsPDF();
+    doc.setFontSize(22);
+    doc.text('ExporTrack AI - Shipment Manifest', 20, 20);
+    
+    doc.setFontSize(12);
+    doc.text(`Shipment ID: ${shipmentId}`, 20, 40);
+    doc.text(`Client Name: ${clientName}`, 20, 50);
+    doc.text(`Destination: ${destinationCountry}`, 20, 60);
+    doc.text(`Date: ${shipmentDate}`, 20, 70);
+    doc.text(`Container #: ${containerNumber}`, 20, 80);
+    doc.text(`Status: ${status}`, 20, 90);
+    doc.text(`Assigned To: ${assignedTo}`, 20, 100);
+    
+    doc.text('Authorized by ExporTrack AI Neural Core', 20, 130);
+    
+    doc.save(`shipment-${shipmentId}.pdf`);
+    
     navigate(`/shipments/${created.id}`);
   };
 
@@ -124,9 +156,17 @@ export default function CreateShipmentPage() {
             <span>Tip: Assign an owner so approvals and reminders have clear accountability.</span>
             <span className="font-semibold">Hackathon-ready workflow</span>
           </div>
-          <div className="md:col-span-2">
-            <button type="submit" className="btn-primary">
+          <div className="md:col-span-2 flex gap-4">
+            <button type="submit" className="btn-primary flex-1">
               Save Shipment
+            </button>
+            <button 
+              type="button" 
+              onClick={handleSaveAndExportPdf}
+              className="btn-secondary flex-1 border-teal-500 text-teal-600 hover:bg-teal-50"
+            >
+              <AppIcon name="file" className="mr-2 h-4 w-4" />
+              Save & Export PDF
             </button>
           </div>
         </form>

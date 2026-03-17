@@ -137,9 +137,8 @@ const saveState = (state: AppState, userMode?: 'demo' | 'real', userId?: string)
       const userKey = `${USER_DATA_PREFIX}${userId}`;
       localStorage.setItem(userKey, JSON.stringify(state));
     } else if (userMode === 'demo') {
-      // For demo users, save to demo storage (but don't persist across sessions)
-      // Demo data is intentionally not persisted long-term
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      // Consistent with loadState, use localStorage for demo persistence
+      localStorage.setItem(DEMO_STORAGE_KEY, JSON.stringify(state));
     } else {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     }
