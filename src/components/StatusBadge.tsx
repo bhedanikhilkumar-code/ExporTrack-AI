@@ -103,14 +103,18 @@ export default function StatusBadge({ value }: StatusBadgeProps) {
     dot: 'bg-slate-300' 
   };
 
+  const isLive = ['In Transit', 'Out For Delivery', 'Driver Assigned'].includes(value);
+
   return (
-    <span className={`inline-flex shrink-0 items-center rounded-md border px-1.5 py-0.5 text-[11px] md:text-[10px] font-bold tracking-tight transition-all ${styles.tone}`}>
+    <span className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 text-[10px] sm:text-[9px] font-black tracking-widest uppercase shadow-sm transition-all duration-300 ${styles.tone}`}>
       {styles.icon ? (
-        <AppIcon name={styles.icon as any} className="mr-1 h-3 w-3 opacity-80" />
+        <div className={`relative flex items-center justify-center mr-1.5 ${isLive ? 'animate-status-pulse' : ''}`}>
+          <AppIcon name={styles.icon as any} className="h-3 w-3" strokeWidth={2.5} />
+        </div>
       ) : (
-        <span className={`mr-1.5 h-1.5 w-1.5 rounded-full ${styles.dot}`} aria-hidden />
+        <span className={`mr-2 h-1.5 w-1.5 rounded-full ring-2 ring-white/10 dark:ring-black/10 ${styles.dot} ${isLive ? 'animate-status-pulse' : ''}`} aria-hidden />
       )}
-      <span className="truncate">{value}</span>
+      <span className="truncate leading-none">{value}</span>
     </span>
   );
 }
