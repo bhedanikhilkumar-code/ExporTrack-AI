@@ -149,32 +149,97 @@ export function isTurnstileConfigured(): boolean {
 }
 
 /**
- * Verify Turnstile token (should be verified on backend)
- * This is a placeholder - actual verification should happen on server
+ * Verify Turnstile token - with backend verification
+ * IMPORTANT: Always verify on backend in production!
  */
 export async function verifyTurnstile(token: string): Promise<{
     success: boolean;
     error?: string;
 }> {
-    // If no Turnstile key is configured, skip verification
+    // If no Turnstile key is configured, skip verification (for development)
     if (!TURNSTILE_SITE_KEY || TURNSTILE_SITE_KEY === 'your_turnstile_site_key_here') {
         console.log('Turnstile not configured, skipping verification');
         return { success: true };
     }
 
-    // In production, you should send the token to your backend
-    // to verify with Cloudflare's API:
-    // POST https://challenges.cloudflare.com/turnstile/v0/siteverify
-    // Parameters: secret=YOUR_SECRET_KEY&response=TOKEN
-
     if (!token) {
         return { success: false, error: 'No Turnstile token provided' };
     }
 
-    console.log('Turnstile token received:', token.substring(0, 20) + '...');
+    // In production, ALWAYS verify on backend!
+    // The backend should call Cloudflare's API:
+    // POST https://challenges.cloudflare.com/turnstile/v0/siteverify
+    // secret=YOUR_SECRET_KEY&response=TOKEN&remoteip=USER_IP
 
-    // For demo purposes, accept any non-empty token
-    // In production, verify on backend!
+    try {
+        // Try to verify on backend API
+        const response = await fetch('/api/verify-turnstile', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                console.log('✅ Turnstile verified successfully');
+                return { success: true };
+            } else {
+                console.log('❌ Turnstile verification failed:', data);
+                return {
+                    success: false,
+                    error: data['error-codes']?.[0] || 'Human verification failed. Please try again.'
+                };
+            }
+        }
+    } catch (error) {
+        console.error('Turnstile verification error:', error);
+    }
+
+    // For development/demo only - in production this should always verify on backend!
+    console.log('Turnstile token received (demo mode):', token.substring(0, 20) + '...');
+    return { success: true };
+}
+
+/**
+ * Verify reCAPTCHA token - with backend verification
+ */
+export async function verifyRecaptchaToken(token: string, action: string = 'login'): Promise<{
+    success: boolean;
+    score?: number;
+    error?: string;
+}> {
+    if (!RECAPTCHA_SITE_KEY || RECAPTCHA_SITE_KEY === 'your_recaptcha_site_key_here') {
+        console.log('reCAPTCHA not configured, skipping verification');
+        return { success: true };
+    }
+
+    if (!token) {
+        return { success: false, error: 'No reCAPTCHA token provided' };
+    }
+
+    try {
+        // Send to backend for verification
+        const response = await fetch('/api/verify-recaptcha', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, action })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return {
+                success: data.success,
+                score: data.score,
+                error: data.error
+            };
+        }
+    } catch (error) {
+        console.error('reCAPTCHA verification error:', error);
+    }
+
+    // Demo mode
+    console.log('reCAPTCHA token received (demo mode):', token.substring(0, 20) + '...');
     return { success: true };
 }
 

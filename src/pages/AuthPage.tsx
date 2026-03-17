@@ -825,20 +825,30 @@ export default function AuthPage() {
 
                 {/* Cloudflare Turnstile CAPTCHA - Only show when enabled */}
                 {captchaEnabled && (
-                  <div className="flex justify-center">
+                  <div className="flex flex-col items-center">
                     <div
                       id="turnstile-container"
-                      className={`g-recaptcha ${captchaSuccess ? 'border-2 border-emerald-500 rounded-lg' : ''}`}
+                      className={`g-recaptcha transition-all duration-300 ${captchaSuccess ? 'border-2 border-emerald-500 rounded-lg' : ''}`}
                       data-sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAA_TestSiteKey'}
                     />
                     {/* Hidden input to store token */}
                     <input type="hidden" id="turnstile-token" />
 
-                    {/* Success indicator */}
+                    {/* Success indicator - shown after verification */}
                     {captchaSuccess && (
-                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mt-2">
-                        <AppIcon name="check" className="h-4 w-4" />
-                        <span className="text-xs font-medium">Success!</span>
+                      <div className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 mt-3 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-900/20 rounded-full border border-emerald-200 dark:border-emerald-800">
+                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span className="text-sm font-semibold">Success!</span>
+                      </div>
+                    )}
+
+                    {/* Error indicator */}
+                    {captchaError && !captchaSuccess && (
+                      <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 mt-3 px-3 py-1.5 bg-rose-50 dark:bg-rose-900/20 rounded-lg border border-rose-200 dark:border-rose-800">
+                        <AppIcon name="warning" className="h-4 w-4" />
+                        <span className="text-xs font-medium">Please complete human verification</span>
                       </div>
                     )}
                   </div>
@@ -846,8 +856,8 @@ export default function AuthPage() {
 
                 <button
                   type="submit"
-                  className="btn-primary w-full mt-5 md:mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={isLoading || isGoogleLoading}
+                  className={`btn-primary w-full mt-5 md:mt-6 ${captchaEnabled && !captchaVerified ? 'opacity-75' : ''}`}
+                  disabled={isLoading || isGoogleLoading || (captchaEnabled && !captchaVerified)}
                 >
                   {isLoading ? (
                     <span className="flex items-center gap-2 justify-center">
