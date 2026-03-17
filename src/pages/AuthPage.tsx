@@ -1,6 +1,6 @@
 /// <reference types="vite/client" />
 import { FormEvent, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
 
@@ -8,6 +8,7 @@ type Mode = 'login' | 'signup';
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, signup, loginWithGoogleToken, logout, state } = useAppContext();
   const { isAuthenticated, user } = state;
   const [mode, setMode] = useState<Mode>('login');
@@ -112,8 +113,9 @@ export default function AuthPage() {
       setIsGoogleLoading(true);
       loginWithGoogleToken(response.credential);
 
+      const from = location.state?.from || '/dashboard';
       setTimeout(() => {
-        navigate('/dashboard', { replace: true });
+        navigate(from, { replace: true });
       }, 500);
     } catch (err: any) {
       console.error('❌ Callback error:', err);
@@ -146,8 +148,9 @@ export default function AuthPage() {
       }
 
       // Small delay for UX
+      const from = location.state?.from || '/dashboard';
       setTimeout(() => {
-        navigate('/dashboard', { replace: true });
+        navigate(from, { replace: true });
       }, 300);
     } catch (err: any) {
       const errorMessage = err.message || 'An error occurred. Please try again.';
@@ -171,10 +174,13 @@ export default function AuthPage() {
           </p>
           <div className="space-y-4">
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => {
+                const from = location.state?.from || '/dashboard';
+                navigate(from);
+              }}
               className="btn-primary w-full py-3"
             >
-              Go to Dashboard
+              Go to App
             </button>
             <button
               onClick={() => {

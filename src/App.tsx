@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from 'react-router-dom';
+import { Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AppLayout from './components/AppLayout';
 import NotificationPermissionBanner from './components/NotificationPermissionBanner';
 import PWAUpdateBanner from './components/PWAUpdateBanner';
@@ -41,9 +41,10 @@ function ProtectedLayout() {
   const {
     state: { isAuthenticated }
   } = useAppContext();
+  const location = useLocation();
 
   if (!isAuthenticated) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/auth" state={{ from: location.pathname + location.search }} replace />;
   }
 
   return <AppLayout />;
