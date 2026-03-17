@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, PropsWithChildren, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { createEmptyState, createSeedState } from '../data/seedData';
 import {
   AppState,
@@ -60,6 +60,7 @@ interface AppContextValue {
   removeLegacyTeamMember: (memberId: string) => void;
   updateUserProfile: (updates: { name?: string; region?: string }) => void;
   deleteInvite: (inviteId: string) => void;
+  acceptInvite: (inviteId: string) => void;
   // Dispatch for state management
   dispatch: (action: { type: string; payload?: any }) => void;
   // Tracking features
@@ -656,6 +657,11 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Must be logged in to create a team');
     }
 
+    if (isDemoUser) {
+      console.warn('Demo users cannot create teams');
+      throw new Error('Demo users cannot create teams. Please sign up for a real account.');
+    }
+
     const team: Team = {
       id: createId('TEAM'),
       ownerId: state.user.id,
@@ -689,7 +695,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     role: Role,
     permission: TeamPermission
   ): TeamMemberWithPermissions | null => {
-    if (!state.user) {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot add team members');
       return null;
     }
 
@@ -727,7 +734,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const removeTeamMember = (teamId: string, memberId: string) => {
-    if (!state.user) {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot remove team members');
       return;
     }
 
@@ -752,7 +760,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const updateTeamMemberPermission = (teamId: string, memberId: string, permission: TeamPermission) => {
-    if (!state.user) {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot update team member permissions');
       return;
     }
 
@@ -782,7 +791,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const leaveTeam = (teamId: string) => {
-    if (!state.user) {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot leave teams');
       return;
     }
 
@@ -867,6 +877,44 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
+  const acceptInvite = (inviteId: string) => {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot accept invites');
+      return;
+    }
+
+    const invite = state.invites.find(i => i.id === inviteId);
+    if (!invite) {
+      console.warn('Invite not found');
+      return;
+    }
+
+    // Add the user to the team's members
+    const newMember: TeamMemberWithPermissions = {
+      id: createId('TM'),
+      userId: state.user.id,
+      name: state.user.name,
+      email: state.user.email,
+      role: invite.role,
+      permission: 'edit' as TeamPermission,
+      joinedAt: new Date().toISOString()
+    };
+
+    setState(prev => ({
+      ...prev,
+      // Add member to the team
+      userTeams: prev.userTeams.map(team =>
+        team.id === invite.workspaceId
+          ? { ...team, members: [...team.members, newMember] }
+          : team
+      ),
+      // Update invite status to Accepted
+      invites: prev.invites.map(i =>
+        i.id === inviteId ? { ...i, status: 'Accepted' as const } : i
+      )
+    }));
+  };
+
   // Helper properties
   const isDemoUser = state.user?.userMode === 'demo' || state.user?.authProvider === 'demo';
   const isRealUser = state.user?.userMode === 'real' || state.user?.authProvider === 'email' || state.user?.authProvider === 'google';
@@ -878,17 +926,17 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const canCreateShipment = state.isAuthenticated && state.user !== null;
 
   // Permission checker - use a different name to avoid conflict with imported function
-  const checkUserPermission = (permission: Permission): boolean => {
+  const checkUserPermission = useCallback((permission: Permission): boolean => {
     if (!state.user) return false;
     // Demo users have limited permissions
     if (isDemoUser) {
       return permission === 'view_shipments' || permission === 'view_documents';
     }
     return checkPermission(state.user.role, permission);
-  };
+  }, [state.user, isDemoUser]);
 
-  // Get analytics for shipments
-  const getAnalytics = useMemo((): ShipmentAnalyticsMetrics => {
+  // Get analytics for shipments - Memoized to prevent unnecessary re-renders in Dashboard
+  const getAnalytics = useCallback((): ShipmentAnalyticsMetrics => {
     return computeAnalytics(state.shipments);
   }, [state.shipments]);
 
@@ -954,6 +1002,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       removeLegacyTeamMember,
       updateUserProfile,
       deleteInvite,
+      acceptInvite,
       dispatch: (action: { type: string; payload?: any }) => {
         console.log('Dispatch action:', action);
         // Handle common actions
