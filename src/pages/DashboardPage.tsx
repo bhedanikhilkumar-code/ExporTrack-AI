@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, memo } from 'react';
 import { Link } from 'react-router-dom';
 import KpiCard from '../components/KpiCard';
+import DashboardCharts from '../components/DashboardCharts';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
@@ -238,6 +239,9 @@ export default function DashboardPage() {
           <DashboardKpiCard title="Avg. Lead Time" value={analyticsData.averageDeliveryTimeDays} subtitle="Global average" accent="amber" icon="clock" suffix="d" />
           <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread notifications" accent="slate" icon="bell" />
         </section>
+
+        {/* ── Live Dashboard Charts ── */}
+        <DashboardCharts shipments={shipments} isDemo={isDemoUser} />
 
         {/* ── Analytics Dashboard ── */}
         <ShipmentAnalytics data={analyticsData} />
