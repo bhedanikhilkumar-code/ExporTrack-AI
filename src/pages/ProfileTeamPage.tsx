@@ -2,9 +2,12 @@ import { useState, memo, useMemo } from 'react';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
 import UserAvatar from '../components/UserAvatar';
+import RoleBadge from '../components/RoleBadge';
+import ShowForPermission from '../components/ShowForPermission';
 import { useAppContext } from '../context/AppContext';
 import { Role } from '../types';
-import { toWorkspaceRole, ROLE_COLORS, ROLE_DESCRIPTIONS } from '../utils/permissions';
+import { toWorkspaceRole, ROLE_COLORS, ROLE_DESCRIPTIONS, hasPermission } from '../utils/permissions';
+import { useHasPermission } from '../hooks/useHasPermission';
 
 const permissionMatrix = [
   { action: 'View Shipment Analytics', Admin: true, Manager: true, Operations: true, Broker: true, Auditor: true, Customer: true },
@@ -156,6 +159,12 @@ export default function ProfileTeamPage() {
   };
 
   const handleDeleteShipment = (shipmentId: string) => {
+    // Permission check - only Admin can delete shipments
+    if (!hasPermission(user?.role || 'Viewer', 'manage_users')) {
+      alert('❌ You do not have permission to delete shipments. Only Admins can delete shipments.');
+      return;
+    }
+
     if (confirm(`⚠️ Are you sure you want to permanently delete shipment ${shipmentId}? This action cannot be undone and will remove it globally from the dashboard.`)) {
       deleteShipment(shipmentId);
       alert(`✅ Shipment ${shipmentId} deleted successfully.`);
@@ -244,10 +253,10 @@ export default function ProfileTeamPage() {
                   name={
                     (tab === 'team' ? 'team' :
                       tab === 'all-shipments' ? 'shipments' :
-                      tab === 'settings' ? 'settings' :
-                        tab === 'security' ? 'clock' :
-                          tab === 'billing' ? 'credit' :
-                            'activity') as any
+                        tab === 'settings' ? 'settings' :
+                          tab === 'security' ? 'clock' :
+                            tab === 'billing' ? 'credit' :
+                              'activity') as any
                   }
                   className="h-3.5 w-3.5"
                 />
@@ -444,16 +453,15 @@ export default function ProfileTeamPage() {
                           <span className="text-xs text-slate-600 dark:text-slate-400 tabular-nums">{s.shipmentDate}</span>
                         </td>
                         <td className="px-4 py-4">
-                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
-                            s.status === 'Delivered' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${s.status === 'Delivered' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
                             s.status === 'In Transit' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
-                            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
-                          }`}>
+                              'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                            }`}>
                             {s.status}
                           </span>
                         </td>
                         <td className="px-4 py-4 text-right">
-                          <button 
+                          <button
                             onClick={() => handleDeleteShipment(s.id)}
                             className="inline-flex items-center gap-1 h-8 px-3 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 dark:border-rose-900/50 dark:bg-rose-900/20 dark:hover:bg-rose-600 dark:hover:border-rose-600 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider"
                             title="Delete Shipment"
