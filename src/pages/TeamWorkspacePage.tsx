@@ -1,6 +1,7 @@
 import { useState, memo, useMemo } from 'react';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
+import UserAvatar from '../components/UserAvatar';
 import { useAppContext } from '../context/AppContext';
 import { TeamMember, Role } from '../types';
 import {
@@ -46,12 +47,11 @@ const MemberCard = memo(({ member, colors, wsRole, isOnline, isSelected, onClick
   >
     <div className="flex items-start justify-between gap-3 mb-4">
       <div className="flex items-center gap-3">
-        <div className="relative">
-          <div className="h-11 w-11 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-800 flex items-center justify-center text-sm font-extrabold text-slate-600 dark:text-slate-300">
-            {member.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
-          </div>
-          <div className={`absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white dark:border-slate-900 ${isOnline ? 'bg-emerald-500' : 'bg-slate-300 dark:bg-slate-600'}`} />
-        </div>
+        <UserAvatar 
+          name={member.name} 
+          size="lg" 
+          status={isOnline ? 'online' : 'offline'} 
+        />
         <div>
           <p className="text-sm font-bold text-slate-900 dark:text-white">{member.name}</p>
           <p className="text-[11px] text-slate-500">{member.email}</p>

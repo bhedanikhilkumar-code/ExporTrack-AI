@@ -1,6 +1,7 @@
 import { useState, memo, useMemo } from 'react';
 import AppIcon from '../components/AppIcon';
 import StatusBadge from '../components/StatusBadge';
+import UserAvatar from '../components/UserAvatar';
 import { useAppContext } from '../context/AppContext';
 import { Role } from '../types';
 import { toWorkspaceRole, ROLE_COLORS, ROLE_DESCRIPTIONS } from '../utils/permissions';
@@ -67,7 +68,7 @@ export default function ProfileTeamPage() {
       assignedCount: assigned.length,
       pendingDocs: pending,
       wsRole: toWorkspaceRole(member.role),
-      status: Math.random() > 0.3 ? 'online' : 'away'
+      status: Math.random() > 0.3 ? 'online' : 'offline'
     };
   }), [teamMembers, shipments]);
 
@@ -139,11 +140,13 @@ export default function ProfileTeamPage() {
           <article className="card-premium overflow-hidden group">
             <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-r from-teal-500 to-indigo-600 opacity-20 group-hover:opacity-30 transition-opacity" />
             <div className="relative pt-12 text-center">
-               <div className="mx-auto h-20 w-20 rounded-full bg-white dark:bg-slate-900 shadow-xl flex items-center justify-center border-4 border-white dark:border-slate-800 transition-transform group-hover:scale-110">
-                  <div className="h-16 w-16 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-xl font-black text-white">
-                    {user?.name?.slice(0, 2).toUpperCase()}
-                  </div>
-               </div>
+               <UserAvatar 
+                 name={user?.name || ''} 
+                 src={user?.profilePicture} 
+                 size="xl" 
+                 status="online" 
+                 className="shadow-xl ring-4 ring-white dark:ring-slate-800"
+               />
                <h2 className="mt-4 text-lg font-black text-slate-900 dark:text-white">{user?.name}</h2>
                <p className="text-xs font-bold text-slate-500">{user?.email}</p>
                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
@@ -204,16 +207,15 @@ export default function ProfileTeamPage() {
                  </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                  {memberStats.map(member => (
                    <div key={member.id} className="relative p-5 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-100 dark:border-slate-800/60 hover:border-teal-500/50 hover:shadow-xl hover:shadow-slate-200/40 dark:hover:shadow-black/40 transition-all duration-300 group/member">
                       <div className="flex items-center gap-4">
-                         <div className="relative">
-                            <div className="h-12 w-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-xs font-black text-slate-400 uppercase group-hover/member:bg-teal-500/10 group-hover/member:text-teal-600 transition-colors">
-                               {member.name.slice(0, 2)}
-                            </div>
-                            <div className={`absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full border-2 border-white dark:border-slate-900 ${member.status === 'online' ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`} />
-                         </div>
+                         <UserAvatar 
+                           name={member.name} 
+                           status={member.status as any} 
+                           size="lg" 
+                         />
                          <div className="min-w-0">
                             <p className="text-sm font-black text-slate-900 dark:text-white truncate">{member.name}</p>
                             <p className="text-[10px] font-bold text-slate-400 truncate">{member.email}</p>

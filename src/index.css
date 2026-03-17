@@ -481,6 +481,30 @@
   animation: pulse-subtle 2s ease-in-out infinite;
 }
 
+.status-indicator {
+  position: absolute;
+  border-radius: 9999px;
+  border-width: 2px;
+  border-color: #fff;
+}
+
+.dark .status-indicator {
+  border-color: #0f172a; /* slate-900 */
+}
+
+.status-indicator-online {
+  background-color: #10b981; /* emerald-500 */
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+}
+
+.status-indicator-offline {
+  background-color: #cbd5e1; /* slate-300 */
+}
+
+.dark .status-indicator-offline {
+  background-color: #475569; /* slate-600 */
+}
+
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }

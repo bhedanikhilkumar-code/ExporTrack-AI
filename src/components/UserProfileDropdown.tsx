@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import AppIcon from './AppIcon';
+import UserAvatar from './UserAvatar';
 
 export default function UserProfileDropdown() {
     const { state: { user, theme }, logout, setTheme } = useAppContext();
@@ -39,22 +40,13 @@ export default function UserProfileDropdown() {
                 aria-expanded={isOpen}
             >
                 {/* Profile Picture */}
-                {user.profilePicture ? (
-                    <img
-                        src={user.profilePicture}
-                        alt={user.name}
-                        className="h-8 w-8 rounded-full object-cover shadow-sm transition-transform group-hover:scale-105"
-                        loading="lazy"
-                        onError={(e) => {
-                            const img = e.target as HTMLImageElement;
-                            img.style.display = 'none';
-                        }}
-                    />
-                ) : (
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-blue-600 text-white text-xs font-black shadow-sm transition-transform group-hover:scale-105">
-                        {user.name.charAt(0).toUpperCase()}
-                    </div>
-                )}
+                <UserAvatar 
+                    name={user.name} 
+                    src={user.profilePicture} 
+                    size="sm" 
+                    status="online" 
+                    className="transition-transform group-hover:scale-105"
+                />
 
                 {/* User Name */}
                 <div className="hidden sm:flex flex-col items-start px-1 mr-1">
@@ -85,20 +77,13 @@ export default function UserProfileDropdown() {
                     {/* Header Section */}
                     <div className="flex items-start gap-4 p-4 border-b border-slate-100 dark:border-slate-800/40 mb-1">
                         {/* Avatar */}
-                        <div className="relative group/avatar">
-                            {user.profilePicture ? (
-                                <img
-                                    src={user.profilePicture}
-                                    alt={user.name}
-                                    className="h-10 w-10 rounded-full object-cover shadow-sm ring-2 ring-white dark:ring-slate-800 transition-transform duration-300 group-hover/avatar:scale-105"
-                                    loading="lazy"
-                                />
-                            ) : (
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-teal-500 to-indigo-600 text-white text-base font-black shadow-sm ring-2 ring-white dark:ring-slate-800">
-                                    {user.name.charAt(0).toUpperCase()}
-                                </div>
-                            )}
-                        </div>
+                        <UserAvatar 
+                            name={user.name} 
+                            src={user.profilePicture} 
+                            size="lg" 
+                            status="online" 
+                            className="transition-transform duration-300 group-hover/avatar:scale-105"
+                        />
 
                         <div className="flex flex-col min-w-0">
                             <span className="text-sm font-black text-slate-900 dark:text-white truncate tracking-tight">

@@ -3,6 +3,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
+import UserAvatar from '../components/UserAvatar';
 import { useAppContext } from '../context/AppContext';
 import { REQUIRED_DOCUMENT_TYPES, ShipmentStatus } from '../types';
 import AiDelayPrediction from '../components/AiDelayPrediction';
@@ -377,9 +378,11 @@ export default function ShipmentDetailsPage() {
           {shipment.driverName ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-xl bg-slate-900 flex items-center justify-center text-xs font-bold text-teal-400 shadow-sm border border-white/10">
-                  {shipment.driverName.charAt(0)}
-                </div>
+                <UserAvatar 
+                  name={shipment.driverName} 
+                  size="md" 
+                  status="online" 
+                />
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-white">{shipment.driverName}</p>
                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{shipment.vehicleNumber}</p>
