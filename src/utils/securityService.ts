@@ -182,23 +182,27 @@ export async function verifyTurnstile(token: string): Promise<{
         if (response.ok) {
             const data = await response.json();
             if (data.success) {
-                console.log('✅ Turnstile verified successfully');
+                console.log('✅ Turnstile verified successfully on backend');
                 return { success: true };
             } else {
                 console.log('❌ Turnstile verification failed:', data);
                 return {
                     success: false,
-                    error: data['error-codes']?.[0] || 'Human verification failed. Please try again.'
+                    error: data['error-codes']?.[0] || 'Human verification failed on backend. Please try again.'
                 };
             }
+        } else {
+             // Handle 400/500 backend responses cleanly
+             const errorData = await response.json().catch(() => ({}));
+             return { success: false, error: errorData.error || 'Server error during verification' };
         }
     } catch (error) {
-        console.error('Turnstile verification error:', error);
+        console.error('Turnstile verification network error:', error);
+        return { 
+            success: false, 
+            error: 'Network error communicating with verification server. Please try again.' 
+        };
     }
-
-    // For development/demo only - in production this should always verify on backend!
-    console.log('Turnstile token received (demo mode):', token.substring(0, 20) + '...');
-    return { success: true };
 }
 
 /**

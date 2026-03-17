@@ -178,21 +178,24 @@ export default function AppLayout() {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 transition-colors duration-300 dark:bg-slate-950 dark:text-slate-100">
       {/* Desktop Sidebar */}
-      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200/60 bg-white/90 backdrop-blur-2xl dark:border-slate-800/60 dark:bg-slate-950/90 md:flex md:flex-col transition-all duration-300 ease-in-out shadow-sm ${sidebarExpanded ? 'w-64' : 'w-20'
+      <aside className={`fixed inset-y-0 left-0 z-20 hidden border-r border-slate-200/60 bg-white/95 backdrop-blur-xl dark:border-slate-800/60 dark:bg-slate-950/95 md:flex md:flex-col transition-all duration-500 ease-out shadow-xl ${sidebarExpanded ? 'w-64' : 'w-20'
         }`}>
         {/* Sidebar Header with Collapse Button */}
-        <div className="flex h-16 items-center justify-between px-5 border-b border-slate-200/60 dark:border-slate-800/60">
+        <div className="flex h-16 items-center justify-between px-5 border-b border-slate-200/60 dark:border-slate-800/60 bg-gradient-to-r from-white to-slate-50 dark:from-slate-950 dark:to-slate-900">
           {sidebarExpanded ? (
-            <div className="flex items-center gap-3">
-              <div className="flex h-8 w-8 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
+            <div className="flex items-center gap-3 animate-in fade-in slide-in-from-left-2 duration-300">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl shadow-lg overflow-hidden bg-white ring-2 ring-slate-100 dark:ring-slate-800">
                 <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
               </div>
-              <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100 truncate">
-                ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span>
-              </h1>
+              <div className="flex flex-col">
+                <h1 className="text-sm font-extrabold tracking-tight text-slate-900 dark:text-slate-100">
+                  ExporTrack<span className="text-teal-600 dark:text-teal-400">AI</span>
+                </h1>
+                <span className="text-[9px] font-medium text-slate-400 dark:text-slate-500 tracking-wider">LOGISTICS</span>
+              </div>
             </div>
           ) : (
-            <div className="mx-auto flex h-8 w-8 items-center justify-center rounded-xl shadow-md overflow-hidden bg-white">
+            <div className="mx-auto flex h-9 w-9 items-center justify-center rounded-xl shadow-lg overflow-hidden bg-white ring-2 ring-slate-100 dark:ring-slate-800">
               <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
             </div>
           )}
@@ -203,34 +206,49 @@ export default function AppLayout() {
           <div className="mb-4 px-3 text-[10px] font-bold uppercase tracking-widest text-slate-400/70">
             {sidebarExpanded && "Main Menu"}
           </div>
-          {filteredNavItems.map((item) => {
+          {filteredNavItems.map((item, index) => {
             const isActive = isRouteActive(location.pathname, item.to);
             return (
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`focus-ring group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-xs font-semibold transition-all duration-300 ease-in-out ${isActive
-                    ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white dark:from-slate-800 dark:to-slate-900 shadow-lg shadow-slate-900/20'
-                    : 'text-slate-500 hover:bg-slate-100/80 hover:text-slate-900 hover:scale-[1.02] dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-100'
+                className={`focus-ring group relative flex items-center gap-3 rounded-2xl px-3 py-3 text-xs font-bold transition-all duration-300 ease-out hover:scale-[1.02] ${isActive
+                  ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-lg shadow-teal-600/25 scale-[1.02]'
+                  : 'text-slate-500 hover:bg-gradient-to-r hover:from-slate-100 hover:to-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-gradient-to-r dark:hover:from-slate-800 dark:hover:to-slate-900 dark:hover:text-slate-100'
                   }`}
                 title={!sidebarExpanded ? item.label : ''}
+                style={{ animationDelay: `${index * 50}ms` }}
               >
-                {/* Active indicator bar */}
+                {/* Active indicator */}
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-teal-400 to-emerald-500 rounded-r-full shadow-lg shadow-teal-500/50" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white/30 rounded-r-full" />
                 )}
-                <AppIcon
-                  name={item.icon as any}
-                  className={`h-4 w-4 shrink-0 transition-all duration-300 ${!sidebarExpanded ? 'mx-auto' : ''} ${isActive ? 'text-teal-400 scale-110 drop-shadow-lg' : 'group-hover:scale-110'}`}
-                />
-                {sidebarExpanded && (
-                  <span className="min-w-0 flex-1 truncate font-bold flex items-center justify-between">
-                    <span className="flex-1 text-left">{item.label}</span>
-                    {item.badge && unreadCount > 0 && (
-                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white shadow-sm">
-                        {unreadCount}
-                      </span>
-                    )}
+                {/* Glow effect for active items */}
+                {isActive && (
+                  <div className="absolute inset-0 rounded-2xl bg-white/10 animate-pulse" />
+                )}
+                <div className={`relative z-10 flex items-center gap-3 ${!sidebarExpanded ? 'justify-center w-full' : ''}`}>
+                  <AppIcon
+                    name={item.icon as any}
+                    className={`h-5 w-5 shrink-0 transition-all duration-300 ${isActive ? 'text-white drop-shadow-md' : 'group-hover:text-teal-600 dark:group-hover:text-teal-400'} ${!sidebarExpanded ? '' : 'group-hover:scale-110 group-hover:rotate-3'}`}
+                  />
+                  {sidebarExpanded && (
+                    <span className="min-w-0 flex-1 truncate flex items-center justify-between">
+                      <span className="flex-1 text-left">{item.label}</span>
+                      {item.badge && unreadCount > 0 && (
+                        <span className="flex h-5 min-w-5 px-1.5 items-center justify-center rounded-full bg-rose-500 text-[10px] font-black text-white shadow-sm animate-pulse">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </span>
+                  )}
+                </div>
+                {/* Hover arrow indicator */}
+                {!isActive && sidebarExpanded && (
+                  <span className="absolute right-3 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200 text-slate-400">
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
                   </span>
                 )}
               </NavLink>
@@ -239,16 +257,18 @@ export default function AppLayout() {
         </nav>
 
         {/* Sidebar Footer - User Info */}
-        <div className="p-4 mt-auto border-t border-slate-200/60 dark:border-slate-800/60">
+        <div className="p-4 mt-auto border-t border-slate-200/60 dark:border-slate-800/60 bg-gradient-to-b from-white to-slate-50 dark:from-slate-950 dark:to-slate-900">
           <button
             type="button"
             onClick={() => setSidebarExpanded(!sidebarExpanded)}
-            className="flex items-center gap-3 w-full rounded-lg h-10 px-3 text-slate-400 hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors group"
+            className="flex items-center gap-3 w-full rounded-xl h-11 px-3 text-slate-400 hover:bg-gradient-to-r hover:from-slate-100 hover:to-slate-50 hover:text-slate-800 dark:hover:bg-gradient-to-r dark:hover:from-slate-800 dark:hover:to-slate-900 dark:hover:text-slate-200 transition-all duration-300 group"
           >
-            <AppIcon
-              name={sidebarExpanded ? 'chevron-left' : 'chevron-right'}
-              className="h-4 w-4 shrink-0"
-            />
+            <div className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 group-hover:bg-white dark:group-hover:bg-slate-700 transition-colors duration-300">
+              <AppIcon
+                name={sidebarExpanded ? 'chevron-left' : 'chevron-right'}
+                className="h-4 w-4 shrink-0 group-hover:scale-110 transition-transform duration-300"
+              />
+            </div>
             {sidebarExpanded && <span className="text-xs font-bold uppercase tracking-widest">Collapse</span>}
           </button>
         </div>

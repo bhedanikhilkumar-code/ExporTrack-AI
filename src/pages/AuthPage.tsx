@@ -18,7 +18,8 @@ import {
   isEmailRegistered,
   verifyEmailExists,
   isEmailVerificationConfigured,
-  hashPassword
+  hashPassword,
+  verifyTurnstile
 } from '../utils/securityService';
 
 type Mode = 'login' | 'signup';
@@ -64,6 +65,7 @@ export default function AuthPage() {
   const [captchaVerified, setCaptchaVerified] = useState(false);
   const [captchaSuccess, setCaptchaSuccess] = useState(false);
   const [captchaError, setCaptchaError] = useState('');
+  const [captchaToken, setCaptchaToken] = useState('');
   const turnstileRef = useRef<any>(null);
 
   // Email verification
@@ -119,14 +121,17 @@ export default function AuthPage() {
               setCaptchaVerified(true);
               setCaptchaSuccess(true);
               setCaptchaError('');
+              setCaptchaToken(token);
             },
             'expired-callback': () => {
               setCaptchaVerified(false);
               setCaptchaSuccess(false);
+              setCaptchaToken('');
             },
             'error-callback': () => {
               setCaptchaVerified(false);
               setCaptchaSuccess(false);
+              setCaptchaToken('');
               setCaptchaError('CAPTCHA verification failed. Please try again.');
             }
           });
@@ -390,11 +395,26 @@ export default function AuthPage() {
           return;
         }
 
-        // Verify CAPTCHA for login
-        if (captchaEnabled && !captchaVerified) {
-          setCaptchaError('Please complete the CAPTCHA verification');
-          setIsLoading(false);
-          return;
+        // Verify CAPTCHA with Backend for login
+        if (captchaEnabled) {
+          if (!captchaVerified || !captchaToken) {
+            setCaptchaError('Please complete the human verification');
+            setIsLoading(false);
+            return;
+          }
+
+          const verificationResult = await verifyTurnstile(captchaToken);
+          if (!verificationResult.success) {
+            setCaptchaError(verificationResult.error || 'Human verification failed on server');
+            setCaptchaVerified(false);
+            setCaptchaSuccess(false);
+            setCaptchaToken('');
+            if ((window as any).turnstile) {
+              (window as any).turnstile.reset();
+            }
+            setIsLoading(false);
+            return;
+          }
         }
 
         // Attempt login
@@ -459,11 +479,26 @@ export default function AuthPage() {
           return;
         }
 
-        // Verify CAPTCHA for signup
-        if (captchaEnabled && !captchaVerified) {
-          setCaptchaError('Please complete the CAPTCHA verification');
-          setIsLoading(false);
-          return;
+        // Verify CAPTCHA with Backend for signup
+        if (captchaEnabled) {
+          if (!captchaVerified || !captchaToken) {
+            setCaptchaError('Please complete the human verification');
+            setIsLoading(false);
+            return;
+          }
+
+          const verificationResult = await verifyTurnstile(captchaToken);
+          if (!verificationResult.success) {
+            setCaptchaError(verificationResult.error || 'Human verification failed on server');
+            setCaptchaVerified(false);
+            setCaptchaSuccess(false);
+            setCaptchaToken('');
+            if ((window as any).turnstile) {
+              (window as any).turnstile.reset();
+            }
+            setIsLoading(false);
+            return;
+          }
         }
 
         // Hash password before storing (for demo purposes)
@@ -547,6 +582,10 @@ export default function AuthPage() {
     setCaptchaVerified(false);
     setCaptchaSuccess(false);
     setCaptchaError('');
+    setCaptchaToken('');
+    if ((window as any).turnstile) {
+      (window as any).turnstile.reset();
+    }
   };
 
   return (
