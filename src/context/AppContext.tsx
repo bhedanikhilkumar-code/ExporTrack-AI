@@ -1,20 +1,31 @@
 import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
-import { createSeedState } from '../data/seedData';
+import { createEmptyState, createSeedState } from '../data/seedData';
 import {
   AppState,
   CreateShipmentInput,
   DocStatus,
   DocumentType,
+  InviteTeamMemberInput,
   NotificationItem,
   OCRExtraction,
   Role,
   Shipment,
   ShipmentDocument,
-  UploadDocumentInput
+  Team,
+  TeamInvite,
+  TeamMemberWithPermissions,
+  TeamPermission,
+  UploadDocumentInput,
+  UserSession
 } from '../types';
 import { decodeJWT } from '../utils/googleAuth';
+import { hasPermission as checkPermission, Permission } from '../utils/permissions';
+import { computeAnalytics, ShipmentAnalyticsMetrics } from '../services/analyticsService';
 
+// Storage keys
 const STORAGE_KEY = 'exportrack-ai-state-v1';
+const DEMO_STORAGE_KEY = 'exportrack-ai-demo-state';
+const USER_DATA_PREFIX = 'exportrack-ai-user-';
 
 interface AppContextValue {
   state: AppState;
@@ -26,10 +37,31 @@ interface AppContextValue {
   switchRole: (role: Role) => void;
   toggleTheme: () => void;
   createShipment: (input: CreateShipmentInput) => Shipment;
+  updateShipment: (shipmentId: string, updates: Partial<Shipment>) => void;
+  deleteShipment: (shipmentId: string) => void;
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
+  // Team management
+  createTeam: (teamName: string) => Team;
+  addTeamMember: (teamId: string, name: string, email: string, role: Role, permission: TeamPermission) => TeamMemberWithPermissions | null;
+  removeTeamMember: (teamId: string, memberId: string) => void;
+  updateTeamMemberPermission: (teamId: string, memberId: string, permission: TeamPermission) => void;
+  leaveTeam: (teamId: string) => void;
+  // Legacy team management (for ProfileTeamPage)
+  inviteTeamMember: (input: InviteTeamMemberInput) => void;
+  updateMemberRole: (memberId: string, role: Role) => void;
+  removeLegacyTeamMember: (memberId: string) => void;
+  updateUserProfile: (updates: { name?: string; region?: string }) => void;
+  deleteInvite: (inviteId: string) => void;
+  // Helpers
+  isDemoUser: boolean;
+  isRealUser: boolean;
+  canManageTeam: boolean;
+  canCreateShipment: boolean;
+  hasPermission: (permission: Permission) => boolean;
+  getAnalytics: () => ShipmentAnalyticsMetrics;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -39,19 +71,70 @@ const createId = (prefix: string): string =>
     .toString()
     .padStart(4, '0')}`;
 
-const loadState = (): AppState => {
+// Load state based on user mode
+const loadState = (userMode?: 'demo' | 'real', userId?: string): AppState => {
   if (typeof globalThis.window === 'undefined') {
-    return createSeedState();
+    return createEmptyState();
   }
 
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return createSeedState();
+    // For real users, load user-specific data
+    if (userMode === 'real' && userId) {
+      const userKey = `${USER_DATA_PREFIX}${userId}`;
+      const raw = localStorage.getItem(userKey);
+      if (raw) {
+        const userState = JSON.parse(raw) as AppState;
+        // Ensure user data is present
+        return {
+          ...createEmptyState(),
+          ...userState,
+          isAuthenticated: true
+        };
+      }
     }
-    return JSON.parse(raw) as AppState;
+
+    // For demo users, load demo data
+    if (userMode === 'demo') {
+      const raw = localStorage.getItem(DEMO_STORAGE_KEY);
+      if (raw) {
+        const demoState = JSON.parse(raw) as AppState;
+        return {
+          ...demoState,
+          isAuthenticated: true
+        };
+      }
+      // Return fresh demo state
+      return {
+        ...createSeedState(),
+        isAuthenticated: true
+      };
+    }
+
+    // Default: return empty state
+    return createEmptyState();
   } catch {
-    return createSeedState();
+    return createEmptyState();
+  }
+};
+
+// Save state based on user mode
+const saveState = (state: AppState, userMode?: 'demo' | 'real', userId?: string): void => {
+  if (typeof globalThis.window === 'undefined') return;
+
+  try {
+    // For real users, save to user-specific storage
+    if (userMode === 'real' && userId) {
+      const userKey = `${USER_DATA_PREFIX}${userId}`;
+      localStorage.setItem(userKey, JSON.stringify(state));
+    } else if (userMode === 'demo') {
+      // For demo users, save to demo storage (but don't persist across sessions)
+      // Demo data is intentionally not persisted long-term
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } else {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+  } catch (e) {
+    console.warn('Failed to save state:', e);
   }
 };
 
@@ -91,46 +174,59 @@ const buildNotification = (
 });
 
 export const AppProvider = ({ children }: PropsWithChildren) => {
+  // Track user mode and ID for data isolation
+  const [userMode, setUserMode] = useState<'demo' | 'real' | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
   const [state, setState] = useState<AppState>(() => {
-    const initialState = loadState();
+    // Try to restore session from sessionStorage
+    if (typeof globalThis.window !== 'undefined') {
+      try {
+        const savedMode = sessionStorage.getItem('exportrack-user-mode');
+        const savedId = sessionStorage.getItem('exportrack-user-id');
 
-    // Clean up invalid or demo sessions on app load
-    if (initialState.isAuthenticated && initialState.user) {
-      // Remove demo sessions - force re-login
-      if (initialState.user.authProvider === 'demo') {
-        console.log('Demo session cleared on app load');
-        return {
-          ...initialState,
-          isAuthenticated: false,
-          user: null
-        };
-      }
-
-      // Validate Google sessions
-      if (initialState.user.authProvider === 'google') {
-        const token = sessionStorage.getItem('google_auth_token');
-        const userEmail = sessionStorage.getItem('google_user_email');
-
-        if (!token || !userEmail) {
-          console.warn('Invalid Google session detected, logging out');
-          return {
-            ...initialState,
-            isAuthenticated: false,
-            user: null
-          };
+        if (savedMode && savedId) {
+          setUserMode(savedMode as 'demo' | 'real');
+          setUserId(savedId);
+          return loadState(savedMode as 'demo' | 'real', savedId);
         }
+      } catch (e) {
+        console.warn('Failed to restore session:', e);
       }
     }
-
-    return initialState;
+    return createEmptyState();
   });
-  // Restore user session on app load if authenticated
+
+  // Persist user mode and ID
+  useEffect(() => {
+    if (userMode && userId && state.isAuthenticated) {
+      sessionStorage.setItem('exportrack-user-mode', userMode);
+      sessionStorage.setItem('exportrack-user-id', userId);
+    }
+  }, [userMode, userId, state.isAuthenticated]);
+
+  // Save state when it changes
+  useEffect(() => {
+    if (state.isAuthenticated && userMode && userId) {
+      saveState(state, userMode, userId);
+    }
+  }, [state, userMode, userId]);
+
+  // Sync theme with document class
+  useEffect(() => {
+    if (state.theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [state.theme]);
+
+  // Restore session on app load
   useEffect(() => {
     if (typeof globalThis.window !== 'undefined' && state.isAuthenticated && state.user?.authProvider === 'google') {
       const token = sessionStorage.getItem('google_auth_token');
       const userEmail = sessionStorage.getItem('google_user_email');
 
-      // Verify session is still valid
       if (!token || !userEmail) {
         console.warn('Google session expired or invalid, logging out');
         setState(prev => ({
@@ -138,20 +234,11 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           isAuthenticated: false,
           user: null
         }));
+        setUserMode(null);
+        setUserId(null);
       }
     }
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-
-    // Sync theme with document class
-    if (state.theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  }, [state]);
 
   const toggleTheme = () => {
     setState(prev => ({
@@ -161,7 +248,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const login = (email: string, password: string) => {
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       throw new Error('Invalid email format');
@@ -171,24 +257,29 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Password must be at least 6 characters');
     }
 
-    // Check if known team member
-    const knownMember = state.teamMembers.find(
-      (member) => member.email.toLowerCase() === email.toLowerCase()
-    );
+    // For real users, start with empty state
+    const emptyState = createEmptyState();
+    const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
+    const displayName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+    const newUserId = `email-${email}`;
 
-    const nameFromEmail = email.split('@')[0].replaceAll(/[._]/g, ' ');
-    const displayName = knownMember?.name ?? nameFromEmail.replaceAll(/\b\w/g, (char) => char.toUpperCase());
+    const newUser: UserSession = {
+      id: newUserId,
+      name: displayName,
+      email,
+      role: 'Staff',
+      authProvider: 'email',
+      userMode: 'real'
+    };
 
-    setState((prev) => ({
-      ...prev,
+    setUserMode('real');
+    setUserId(newUserId);
+
+    setState({
+      ...emptyState,
       isAuthenticated: true,
-      user: {
-        name: displayName,
-        email,
-        role: knownMember?.role ?? prev.user?.role ?? 'Staff',
-        authProvider: 'email'
-      }
-    }));
+      user: newUser
+    });
 
     if (typeof globalThis.window !== 'undefined') {
       console.log('User logged in with email:', email);
@@ -196,7 +287,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const signup = (name: string, email: string, password: string) => {
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       throw new Error('Invalid email format');
@@ -210,88 +300,96 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Name is required');
     }
 
-    setState((prev) => ({
-      ...prev,
+    const emptyState = createEmptyState();
+    const newUserId = `email-${email}`;
+
+    const newUser: UserSession = {
+      id: newUserId,
+      name: name.trim(),
+      email,
+      role: 'Staff',
+      authProvider: 'email',
+      userMode: 'real'
+    };
+
+    setUserMode('real');
+    setUserId(newUserId);
+
+    setState({
+      ...emptyState,
       isAuthenticated: true,
-      user: {
-        name: name.trim() || 'New User',
-        email,
-        role: 'Staff',
-        authProvider: 'email'
-      }
-    }));
+      user: newUser
+    });
 
     if (typeof globalThis.window !== 'undefined') {
       console.log('New user registered:', email);
     }
   };
 
-  /**
-   * Demo login - creates a demo account session
-   * Only use this for demo purposes via demo buttons - NOT real Google OAuth!
-   */
   const loginWithDemoAccount = () => {
-    // Create demo user session
-    const demoUser = {
+    // Create demo user session with full seed data
+    const demoState = createSeedState();
+    const demoUserId = 'demo-user';
+
+    const demoUser: UserSession = {
+      id: demoUserId,
       name: 'Demo User',
       email: 'demo@exportrack.ai',
-      role: 'Staff' as const
+      role: 'Staff',
+      authProvider: 'demo',
+      userMode: 'demo'
     };
 
-    setState((prev) => ({
-      ...prev,
-      isAuthenticated: true,
-      user: {
-        name: demoUser.name,
-        email: demoUser.email,
-        role: demoUser.role,
-        authProvider: 'demo' as any
-      }
-    }));
+    setUserMode('demo');
+    setUserId(demoUserId);
 
-    console.warn('⚠️ Demo account loaded for testing - this is NOT real Google OAuth authentication');
+    setState({
+      ...demoState,
+      isAuthenticated: true,
+      user: demoUser
+    });
+
+    console.warn('Demo account loaded for testing');
   };
 
   const loginWithGoogleToken = (token: string) => {
     try {
-      // Decode the JWT token from Google
       const payload = decodeJWT(token);
 
       if (!payload?.email) {
         throw new Error('Invalid token or missing email');
       }
 
-      // Check if user is in team members (optional - for role assignment)
-      const knownMember = state.teamMembers.find(
-        (member) => member.email.toLowerCase() === payload.email.toLowerCase()
-      );
-
-      // Extract user information from Google token
+      const emptyState = createEmptyState();
       const userName = payload.name || payload.given_name || 'Google User';
       const userEmail = payload.email;
       const profilePicture = payload.picture;
+      const newUserId = payload.sub || `google-${userEmail}`;
 
-      // Create user session with Google data
-      setState((prev) => ({
-        ...prev,
+      const newUser: UserSession = {
+        id: newUserId,
+        name: userName,
+        email: userEmail,
+        role: 'Staff',
+        authProvider: 'google',
+        profilePicture: profilePicture,
+        userMode: 'real'
+      };
+
+      setUserMode('real');
+      setUserId(newUserId);
+
+      setState({
+        ...emptyState,
         isAuthenticated: true,
-        user: {
-          name: userName,
-          email: userEmail,
-          role: knownMember?.role ?? prev.user?.role ?? 'Staff',
-          authProvider: 'google',
-          profilePicture: profilePicture
-        }
-      }));
+        user: newUser
+      });
 
-      // Store the token for future API calls (if needed)
       if (typeof globalThis.window !== 'undefined') {
-        // Use sessionStorage with expiry for security
         sessionStorage.setItem('google_auth_token', token);
         sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
         sessionStorage.setItem('google_user_email', userEmail);
 
-        // Log successful authentication
         console.log('User authenticated with Google:', {
           name: userName,
           email: userEmail,
@@ -301,7 +399,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     } catch (error) {
       console.error('Failed to login with Google token:', error);
 
-      // Clear any partial session data on error
       if (typeof globalThis.window !== 'undefined') {
         sessionStorage.removeItem('google_auth_token');
         sessionStorage.removeItem('google_token_expiry');
@@ -313,18 +410,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const logout = () => {
-    // Clear all authentication data
     if (typeof globalThis.window !== 'undefined') {
-      // Clear Google auth tokens
       sessionStorage.removeItem('google_auth_token');
       sessionStorage.removeItem('google_token_expiry');
       sessionStorage.removeItem('google_user_email');
-
-      // Log logout
+      sessionStorage.removeItem('exportrack-user-mode');
+      sessionStorage.removeItem('exportrack-user-id');
       console.log('User logged out');
     }
 
-    setState((prev) => ({
+    setUserMode(null);
+    setUserId(null);
+
+    setState(prev => ({
       ...prev,
       isAuthenticated: false,
       user: null
@@ -332,7 +430,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const switchRole = (role: Role) => {
-    setState((prev) => ({
+    setState(prev => ({
       ...prev,
       user: prev.user ? { ...prev.user, role } : prev.user
     }));
@@ -342,6 +440,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     const now = new Date().toISOString();
     const shipment: Shipment = {
       id: input.shipmentId,
+      userId: userId || undefined,
       clientName: input.clientName,
       destinationCountry: input.destinationCountry,
       shipmentDate: input.shipmentDate,
@@ -365,7 +464,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ]
     };
 
-    setState((prev) => ({
+    setState(prev => ({
       ...prev,
       shipments: [shipment, ...prev.shipments],
       notifications: [
@@ -384,9 +483,29 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     return shipment;
   };
 
+  const updateShipment = (shipmentId: string, updates: Partial<Shipment>) => {
+    setState(prev => ({
+      ...prev,
+      shipments: prev.shipments.map(shipment =>
+        shipment.id === shipmentId
+          ? { ...shipment, ...updates }
+          : shipment
+      )
+    }));
+  };
+
+  const deleteShipment = (shipmentId: string) => {
+    setState(prev => ({
+      ...prev,
+      shipments: prev.shipments.filter(shipment => shipment.id !== shipmentId),
+      notifications: prev.notifications.filter(n => n.shipmentId !== shipmentId)
+    }));
+  };
+
   const addDocument = (shipmentId: string, input: UploadDocumentInput) => {
     const newDocument: ShipmentDocument = {
       id: createId('DOC'),
+      userId: userId || undefined,
       type: input.type,
       fileName: input.fileName,
       fileFormat: input.fileFormat,
@@ -395,14 +514,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       uploadedBy: input.uploadedBy
     };
 
-    setState((prev) => {
-      const shipments = prev.shipments.map((shipment) => {
+    setState(prev => {
+      const shipments = prev.shipments.map(shipment => {
         if (shipment.id !== shipmentId) {
           return shipment;
         }
 
         const withoutPlaceholder = shipment.documents.filter(
-          (doc) => !(doc.type === input.type && doc.fileName === 'Not uploaded')
+          doc => !(doc.type === input.type && doc.fileName === 'Not uploaded')
         );
 
         return {
@@ -431,14 +550,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const updateDocumentStatus = (shipmentId: string, documentType: DocumentType, status: DocStatus) => {
-    setState((prev) => {
-      const shipments = prev.shipments.map((shipment) => {
+    setState(prev => {
+      const shipments = prev.shipments.map(shipment => {
         if (shipment.id !== shipmentId) {
           return shipment;
         }
 
         const nextDocuments = [...shipment.documents];
-        const documentIndex = nextDocuments.findIndex((doc) => doc.type === documentType);
+        const documentIndex = nextDocuments.findIndex(doc => doc.type === documentType);
 
         if (documentIndex >= 0) {
           nextDocuments[documentIndex] = {
@@ -490,9 +609,9 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       return;
     }
 
-    setState((prev) => ({
+    setState(prev => ({
       ...prev,
-      shipments: prev.shipments.map((shipment) =>
+      shipments: prev.shipments.map(shipment =>
         shipment.id !== shipmentId
           ? shipment
           : {
@@ -514,12 +633,259 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   };
 
   const markNotificationRead = (notificationId: string) => {
-    setState((prev) => ({
+    setState(prev => ({
       ...prev,
-      notifications: prev.notifications.map((notification) =>
+      notifications: prev.notifications.map(notification =>
         notification.id === notificationId ? { ...notification, read: true } : notification
       )
     }));
+  };
+
+  // Team management functions
+  const createTeam = (teamName: string): Team => {
+    if (!state.user) {
+      throw new Error('Must be logged in to create a team');
+    }
+
+    const team: Team = {
+      id: createId('TEAM'),
+      ownerId: state.user.id,
+      name: teamName,
+      createdAt: new Date().toISOString(),
+      members: [
+        {
+          id: createId('TM'),
+          userId: state.user.id,
+          name: state.user.name,
+          email: state.user.email,
+          role: state.user.role,
+          permission: 'admin',
+          joinedAt: new Date().toISOString()
+        }
+      ]
+    };
+
+    setState(prev => ({
+      ...prev,
+      userTeams: [...prev.userTeams, team]
+    }));
+
+    return team;
+  };
+
+  const addTeamMember = (
+    teamId: string,
+    name: string,
+    email: string,
+    role: Role,
+    permission: TeamPermission
+  ): TeamMemberWithPermissions | null => {
+    if (!state.user) {
+      return null;
+    }
+
+    // Check if user is admin of the team
+    const team = state.userTeams.find(t => t.id === teamId);
+    if (!team) {
+      return null;
+    }
+
+    const currentMember = team.members.find(m => m.userId === state.user?.id);
+    if (!currentMember || currentMember.permission !== 'admin') {
+      return null;
+    }
+
+    const newMember: TeamMemberWithPermissions = {
+      id: createId('TM'),
+      userId: `member-${email}`,
+      name,
+      email,
+      role,
+      permission,
+      joinedAt: new Date().toISOString()
+    };
+
+    setState(prev => ({
+      ...prev,
+      userTeams: prev.userTeams.map(t =>
+        t.id === teamId
+          ? { ...t, members: [...t.members, newMember] }
+          : t
+      )
+    }));
+
+    return newMember;
+  };
+
+  const removeTeamMember = (teamId: string, memberId: string) => {
+    if (!state.user) {
+      return;
+    }
+
+    const team = state.userTeams.find(t => t.id === teamId);
+    if (!team) {
+      return;
+    }
+
+    const currentMember = team.members.find(m => m.userId === state.user?.id);
+    if (!currentMember || currentMember.permission !== 'admin') {
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      userTeams: prev.userTeams.map(t =>
+        t.id === teamId
+          ? { ...t, members: t.members.filter(m => m.id !== memberId) }
+          : t
+      )
+    }));
+  };
+
+  const updateTeamMemberPermission = (teamId: string, memberId: string, permission: TeamPermission) => {
+    if (!state.user) {
+      return;
+    }
+
+    const team = state.userTeams.find(t => t.id === teamId);
+    if (!team) {
+      return;
+    }
+
+    const currentMember = team.members.find(m => m.userId === state.user?.id);
+    if (!currentMember || currentMember.permission !== 'admin') {
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      userTeams: prev.userTeams.map(t =>
+        t.id === teamId
+          ? {
+            ...t,
+            members: t.members.map(m =>
+              m.id === memberId ? { ...m, permission } : m
+            )
+          }
+          : t
+      )
+    }));
+  };
+
+  const leaveTeam = (teamId: string) => {
+    if (!state.user) {
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      userTeams: prev.userTeams.map(t =>
+        t.id === teamId
+          ? { ...t, members: t.members.filter(m => m.userId !== state.user?.id) }
+          : t
+      ).filter(t => t.members.length > 0) // Remove team if no members left
+    }));
+  };
+
+  // Legacy team management for ProfileTeamPage
+  const inviteTeamMember = (input: InviteTeamMemberInput) => {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot invite team members');
+      return;
+    }
+
+    const invite: TeamInvite = {
+      id: createId('INV'),
+      name: input.name,
+      email: input.email,
+      role: input.role,
+      workspaceId: input.workspaceId || 'default',
+      token: `invite-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      status: 'Pending',
+      createdAt: new Date().toISOString()
+    };
+
+    setState(prev => ({
+      ...prev,
+      invites: [...prev.invites, invite]
+    }));
+  };
+
+  const updateMemberRole = (memberId: string, role: Role) => {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot update member roles');
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      teamMembers: prev.teamMembers.map(member =>
+        member.id === memberId ? { ...member, role } : member
+      )
+    }));
+  };
+
+  const removeLegacyTeamMember = (memberId: string) => {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot remove team members');
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      teamMembers: prev.teamMembers.filter(member => member.id !== memberId)
+    }));
+  };
+
+  const updateUserProfile = (updates: { name?: string; region?: string }) => {
+    if (!state.user) return;
+
+    setState(prev => ({
+      ...prev,
+      user: prev.user ? { ...prev.user, ...updates } : prev.user
+    }));
+  };
+
+  const deleteInvite = (inviteId: string) => {
+    if (!state.user || isDemoUser) {
+      console.warn('Demo users cannot delete invites');
+      return;
+    }
+
+    setState(prev => ({
+      ...prev,
+      invites: prev.invites.filter(invite => invite.id !== inviteId)
+    }));
+  };
+
+  // Helper properties
+  const isDemoUser = state.user?.userMode === 'demo' || state.user?.authProvider === 'demo';
+  const isRealUser = state.user?.userMode === 'real' || state.user?.authProvider === 'email' || state.user?.authProvider === 'google';
+
+  // Demo users cannot manage teams
+  const canManageTeam = isRealUser && state.user !== null;
+
+  // All authenticated users can create shipments
+  const canCreateShipment = state.isAuthenticated && state.user !== null;
+
+  // Permission checker - use a different name to avoid conflict with imported function
+  const checkUserPermission = (permission: Permission): boolean => {
+    if (!state.user) return false;
+    // Demo users have limited permissions
+    if (isDemoUser) {
+      return permission === 'view_shipments' || permission === 'view_documents';
+    }
+    return checkPermission(state.user.role, permission);
+  };
+
+  // Get analytics for shipments
+  const getAnalytics = useMemo((): ShipmentAnalyticsMetrics => {
+    return computeAnalytics(state.shipments);
+  }, [state.shipments]);
+
+  // Wrap getAnalytics as a function for backward compatibility
+  const getAnalyticsFn = (): ShipmentAnalyticsMetrics => {
+    return computeAnalytics(state.shipments);
   };
 
   const value = useMemo<AppContextValue>(
@@ -527,18 +893,46 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       state,
       login,
       signup,
-      loginWithGoogle,
+      loginWithDemoAccount,
       loginWithGoogleToken,
       logout,
       switchRole,
       toggleTheme,
       createShipment,
+      updateShipment,
+      deleteShipment,
       addDocument,
       updateDocumentStatus,
       addComment,
-      markNotificationRead
+      markNotificationRead,
+      createTeam,
+      addTeamMember,
+      removeTeamMember,
+      updateTeamMemberPermission,
+      leaveTeam,
+      inviteTeamMember,
+      updateMemberRole,
+      removeLegacyTeamMember,
+      updateUserProfile,
+      deleteInvite,
+      isDemoUser,
+      isRealUser,
+      canManageTeam,
+      canCreateShipment,
+      hasPermission: checkUserPermission,
+      getAnalytics: getAnalyticsFn
     }),
-    [state]
+    [
+      state,
+      userMode,
+      userId,
+      isDemoUser,
+      isRealUser,
+      canManageTeam,
+      canCreateShipment,
+      checkUserPermission,
+      getAnalytics
+    ]
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
@@ -552,3 +946,4 @@ export const useAppContext = (): AppContextValue => {
   return context;
 };
 
+export default AppContext;

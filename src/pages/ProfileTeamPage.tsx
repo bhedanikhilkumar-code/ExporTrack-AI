@@ -23,7 +23,7 @@ export default function ProfileTeamPage() {
     switchRole,
     inviteTeamMember,
     updateMemberRole,
-    removeTeamMember,
+    removeLegacyTeamMember,
     updateUserProfile,
     deleteInvite,
     isDemoUser
@@ -102,7 +102,7 @@ export default function ProfileTeamPage() {
 
   const handleRemoveMember = (memberId: string, memberName: string) => {
     if (confirm(`Are you sure you want to remove ${memberName} from the workspace?`)) {
-      removeTeamMember(memberId);
+      removeLegacyTeamMember(memberId);
       alert(`✅ ${memberName} has been removed from the team.`);
     }
   };
@@ -196,20 +196,19 @@ export default function ProfileTeamPage() {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${
-                activeTab === tab
-                  ? 'bg-teal-500 text-white shadow-mg'
-                  : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-              }`}
+              className={`px-4 py-2.5 rounded-lg text-xs font-bold uppercase tracking-wide transition-all ${activeTab === tab
+                ? 'bg-teal-500 text-white shadow-mg'
+                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
+                }`}
             >
               <div className="flex items-center gap-2">
                 <AppIcon
                   name={
                     tab === 'team' ? 'team' :
-                    tab === 'settings' ? 'settings' :
-                    tab === 'security' ? 'lock' :
-                    tab === 'billing' ? 'credit' :
-                    'plugin'
+                      tab === 'settings' ? 'settings' :
+                        tab === 'security' ? 'lock' :
+                          tab === 'billing' ? 'credit' :
+                            'plugin'
                   }
                   className="h-3.5 w-3.5"
                 />
@@ -341,9 +340,8 @@ export default function ProfileTeamPage() {
                     {(['Admin', 'Manager', 'Operations', 'Broker', 'Auditor', 'Customer'] as const).map(role => (
                       <div
                         key={role}
-                        className={`h-5 w-5 rounded-md flex items-center justify-center text-[10px] font-black ${
-                          row[role] ? 'bg-teal-500/10 text-teal-600 border border-teal-200 dark:border-teal-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-300'
-                        }`}
+                        className={`h-5 w-5 rounded-md flex items-center justify-center text-[10px] font-black ${row[role] ? 'bg-teal-500/10 text-teal-600 border border-teal-200 dark:border-teal-800' : 'bg-slate-100 dark:bg-slate-800 text-slate-300'
+                          }`}
                         title={role}
                       >
                         {row[role] && '✓'}
@@ -502,8 +500,8 @@ export default function ProfileTeamPage() {
             <h3 className="text-lg font-black mb-4">Pricing Plans</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {[{ name: 'Starter', price: '$99', features: ['5 Users', '10 Shipments'] },
-                { name: 'Professional', price: '$299', features: ['20 Users', '100 Shipments'], active: true },
-                { name: 'Enterprise', price: 'Custom', features: ['Unlimited', 'API Access'] }].map((plan) => (
+              { name: 'Professional', price: '$299', features: ['20 Users', '100 Shipments'], active: true },
+              { name: 'Enterprise', price: 'Custom', features: ['Unlimited', 'API Access'] }].map((plan) => (
                 <div key={plan.name} className={`p-4 rounded-lg border-2 transition-all ${plan.active ? 'border-teal-500 bg-teal-50 dark:bg-teal-950/20' : 'border-slate-200 dark:border-slate-800'}`}>
                   <h4 className="font-bold text-slate-900 dark:text-white">{plan.name}</h4>
                   <p className="text-2xl font-black text-slate-900 dark:text-white mt-2">{plan.price}</p>
@@ -664,11 +662,10 @@ export default function ProfileTeamPage() {
                 <button
                   key={role}
                   onClick={() => handleMemberRoleChange(selectedMember.id, role)}
-                  className={`w-full p-3 rounded-lg text-left transition-all ${
-                    selectedMember.role === role
-                      ? 'bg-teal-500/10 border-2 border-teal-500 text-teal-600 dark:text-teal-400'
-                      : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-teal-500'
-                  }`}
+                  className={`w-full p-3 rounded-lg text-left transition-all ${selectedMember.role === role
+                    ? 'bg-teal-500/10 border-2 border-teal-500 text-teal-600 dark:text-teal-400'
+                    : 'bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 hover:border-teal-500'
+                    }`}
                 >
                   <p className="font-bold">{role}</p>
                   <p className="text-xs text-slate-600 dark:text-slate-400">{ROLE_DESCRIPTIONS[role] || 'Team role'}</p>
