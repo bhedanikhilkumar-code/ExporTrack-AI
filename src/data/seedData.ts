@@ -38,7 +38,11 @@ const scan = (
   confidence
 });
 
-export const createSeedState = (): AppState => ({
+/**
+ * Creates the demo seed state with pre-filled sample data
+ * Used for demo users (demo@exportrack.ai) - data resets on page refresh
+ */
+export const getDemoSeedState = (): AppState => ({
   isAuthenticated: false,
   user: null,
   theme: 'system',
@@ -562,3 +566,25 @@ export const createSeedState = (): AppState => ({
   ],
   invites: []
 });
+
+/**
+ * Creates an empty state for real (non-demo) users.
+ * New authenticated users start with a clean slate — no shipments, no demo data.
+ */
+export const createEmptyState = (): AppState => ({
+  isAuthenticated: false,
+  user: null,
+  theme: 'system',
+  userTeams: [],
+  teamMembers: [],
+  shipments: [],
+  notifications: [],
+  clients: [],
+  invites: []
+});
+
+/**
+ * Alias for getDemoSeedState — used by AppContext.tsx for initial/fallback state.
+ * Keeping this for backwards compatibility.
+ */
+export const createSeedState = getDemoSeedState;

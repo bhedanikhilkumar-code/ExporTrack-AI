@@ -125,7 +125,8 @@ export default function TeamWorkspacePage() {
     switchRole,
     inviteTeamMember,
     updateMemberRole,
-    deleteInvite
+    deleteInvite,
+    isDemoUser
   } = useAppContext();
 
   const [loading, setLoading] = useState(true);
@@ -221,6 +222,45 @@ export default function TeamWorkspacePage() {
         @keyframes tw-fade-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .tw-animate { animation: tw-fade-in 0.4s cubic-bezier(.4,0,.2,1) both; }
       `}</style>
+
+      {/* Demo User Lock Overlay */}
+      {isDemoUser ? (
+        <main className="page-stack">
+          <div className="flex flex-col items-center justify-center py-24 text-center animate-in fade-in slide-in-from-bottom duration-700">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 shadow-lg">
+              <AppIcon name="shield" className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+            </div>
+            <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Team Management</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-8">
+              Team management is available for registered users only. Create an account to invite team members, manage roles, and control access permissions.
+            </p>
+            <a href="/auth" className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-sm shadow-xl shadow-teal-500/20 hover:shadow-teal-500/30 transition-all">
+              <AppIcon name="team" className="h-5 w-5" />
+              Sign Up to Unlock
+            </a>
+            <div className="mt-8 grid grid-cols-3 gap-6 max-w-md w-full">
+              <div className="text-center">
+                <div className="mx-auto mb-2 h-10 w-10 rounded-xl bg-teal-50 dark:bg-teal-900/20 flex items-center justify-center">
+                  <AppIcon name="team" className="h-5 w-5 text-teal-500" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Add Members</p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto mb-2 h-10 w-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
+                  <AppIcon name="shield" className="h-5 w-5 text-indigo-500" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Role Control</p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto mb-2 h-10 w-10 rounded-xl bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+                  <AppIcon name="share" className="h-5 w-5 text-amber-500" />
+                </div>
+                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Invite System</p>
+              </div>
+            </div>
+          </div>
+        </main>
+      ) : (
 
       <main className="page-stack skeleton-fade-in">
         {/* ── Header ── */}
@@ -510,6 +550,7 @@ export default function TeamWorkspacePage() {
            </article>
         )}
       </main>
+      )}
 
       {/* ── Invite Modal ── */}
       {showInviteModal && (

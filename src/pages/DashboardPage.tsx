@@ -19,9 +19,10 @@ DashboardKpiCard.displayName = 'DashboardKpiCard';
 
 export default function DashboardPage() {
   const {
-    state: { shipments, notifications },
+    state: { shipments, notifications, user },
     getAnalytics,
-    hasPermission
+    hasPermission,
+    isDemoUser
   } = useAppContext();
 
   const [loading, setLoading] = useState(true);
@@ -154,6 +155,19 @@ export default function DashboardPage() {
 
   return (
     <main className="page-stack skeleton-fade-in">
+      {/* ── Demo Mode Banner ── */}
+      {isDemoUser && (
+        <div className="mb-4 flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 backdrop-blur-sm px-5 py-3.5 dark:border-amber-800/50 dark:bg-amber-950/30 animate-in fade-in slide-in-from-top duration-500">
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-900/50">
+            <AppIcon name="warning" className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          </div>
+          <div className="flex-1">
+            <p className="text-xs font-bold text-amber-800 dark:text-amber-300">Demo Mode Active</p>
+            <p className="text-[11px] text-amber-700/80 dark:text-amber-400/70">You're viewing sample data. Changes won't be saved. <a href="/auth" className="font-bold underline hover:text-amber-900 dark:hover:text-amber-200">Sign up</a> for a full account.</p>
+          </div>
+        </div>
+      )}
+
       {/* ── Dashboard Header ── */}
       <header className="dashboard-grid-header mb-2">
         <div className="animate-in fade-in slide-in-from-left duration-700">
@@ -169,7 +183,7 @@ export default function DashboardPage() {
             <div className="h-2 w-2 animate-pulse rounded-full bg-teal-500 shadow-[0_0_6px_rgb(13_148_136/0.4)]" />
             <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">{dateLabel}</span>
           </div>
-          {hasPermission('create_shipments') && (
+          {!isDemoUser && hasPermission('create_shipments') && (
             <Link to="/shipments/create" className="btn-primary inline-flex items-center gap-2">
               <AppIcon name="create" className="h-4 w-4" />
               New Shipment
@@ -178,6 +192,28 @@ export default function DashboardPage() {
         </div>
       </header>
 
+      {/* ── Empty State for New Real Users ── */}
+      {!isDemoUser && shipments.length === 0 && (
+        <section className="flex flex-col items-center justify-center py-20 text-center animate-in fade-in slide-in-from-bottom duration-700">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-teal-50 to-teal-100 dark:from-teal-900/30 dark:to-teal-800/20 shadow-lg">
+            <AppIcon name="shipments" className="h-10 w-10 text-teal-600 dark:text-teal-400" />
+          </div>
+          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Welcome to ExporTrack AI</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-8">
+            Your dashboard is ready. Create your first shipment to start managing documents, tracking, and AI-powered logistics.
+          </p>
+          <Link to="/shipments/create" className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-sm shadow-xl shadow-teal-500/20 hover:shadow-teal-500/30 transition-all">
+            <AppIcon name="create" className="h-5 w-5" />
+            Create Your First Shipment
+          </Link>
+          <p className="mt-6 text-[11px] text-slate-400 dark:text-slate-500">
+            All your shipments, documents, and analytics will appear here
+          </p>
+        </section>
+      )}
+
+      {/* Only show full dashboard content when user has shipments or is in demo mode */}
+      {(isDemoUser || shipments.length > 0) && (<>
       {/* Top Stats Row with Staggered Entry */}
       <section className="dashboard-grid-kpi stagger-in">
         <KpiCard
@@ -317,6 +353,7 @@ export default function DashboardPage() {
           </table>
         </div>
       </article>
+      </>)}
     </main>
   );
 }

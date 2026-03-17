@@ -25,7 +25,8 @@ export default function ProfileTeamPage() {
     updateMemberRole,
     removeTeamMember,
     updateUserProfile,
-    deleteInvite
+    deleteInvite,
+    isDemoUser
   } = useAppContext();
 
   // State
@@ -147,6 +148,26 @@ export default function ProfileTeamPage() {
         </header>
         <div className="grid gap-6">
           <SkeletonCard count={5} />
+        </div>
+      </main>
+    );
+  }
+
+  if (isDemoUser) {
+    return (
+      <main className="page-stack animate-in fade-in duration-500">
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-700 shadow-lg">
+            <AppIcon name="shield" className="h-10 w-10 text-slate-400 dark:text-slate-500" />
+          </div>
+          <h2 className="text-2xl font-black tracking-tight text-slate-900 dark:text-white mb-2">Pro Team Management</h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mb-8">
+            Team management, workspace settings, security, and billing are available for registered users only.
+          </p>
+          <a href="/auth" className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-sm shadow-xl shadow-teal-500/20 hover:shadow-teal-500/30 transition-all">
+            <AppIcon name="team" className="h-5 w-5" />
+            Sign Up to Unlock
+          </a>
         </div>
       </main>
     );

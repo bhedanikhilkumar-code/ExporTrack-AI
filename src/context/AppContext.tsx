@@ -1,5 +1,5 @@
-import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react';
-import { createSeedState } from '../data/seedData';
+import { createContext, PropsWithChildren, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { createSeedState, createEmptyState, getDemoSeedState } from '../data/seedData';
 import {
   AnalyticsMetrics,
   AppState,
@@ -23,10 +23,20 @@ import { decodeJWT } from '../utils/googleAuth';
 import { safeStorage } from '../utils/storage';
 import { NotificationService } from '../services/NotificationService';
 
-const STORAGE_KEY = 'exportrack-ai-state-v1';
+const STORAGE_KEY_PREFIX = 'exportrack-ai-state';
+const DEMO_STORAGE_KEY = 'exportrack-ai-state-v1'; // Legacy key for backwards compat
+
+/** Generate a per-user storage key */
+const getUserStorageKey = (userId: string): string =>
+  `${STORAGE_KEY_PREFIX}-${userId}`;
+
+/** Get the best storage key for the current session */
+const getActiveStorageKey = (userId?: string): string =>
+  userId ? getUserStorageKey(userId) : DEMO_STORAGE_KEY;
 
 interface AppContextValue {
   state: AppState;
+  isDemoUser: boolean;
   login: (email: string, password: string) => void;
   signup: (name: string, email: string, password: string) => void;
   // Backwards-compatible alias (some UI may still call this)
@@ -71,10 +81,18 @@ const createId = (prefix: string): string =>
     .toString()
     .padStart(4, '0')}`;
 
-const loadState = (): AppState => {
+/**
+ * Load state from localStorage.
+ * For demo users or initial load: returns demo seed data.
+ * For real users: loads from per-user storage key, or returns empty state.
+ */
+const loadState = (userId?: string): AppState => {
   try {
-    const raw = safeStorage.getItem(STORAGE_KEY);
+    // Try user-specific key first, then legacy fallback
+    const storageKey = getActiveStorageKey(userId);
+    const raw = safeStorage.getItem(storageKey);
     if (!raw) {
+      // No existing data — for initial app load, use demo seed data (splash page needs it)
       return createSeedState();
     }
     return {
@@ -84,6 +102,30 @@ const loadState = (): AppState => {
   } catch (error) {
     console.warn('[AppContext] Failed to load state, using seed data:', error);
     return createSeedState();
+  }
+};
+
+/**
+ * Load state for a specific real user from their own storage key.
+ * Returns empty state if no data found (new user).
+ */
+const loadUserState = (userId: string): Partial<AppState> => {
+  try {
+    const key = getUserStorageKey(userId);
+    const raw = safeStorage.getItem(key);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw) as AppState;
+    return {
+      shipments: parsed.shipments ?? [],
+      notifications: parsed.notifications ?? [],
+      teamMembers: parsed.teamMembers ?? [],
+      clients: parsed.clients ?? [],
+      invites: parsed.invites ?? [],
+      userTeams: parsed.userTeams ?? [],
+      theme: parsed.theme ?? 'system'
+    };
+  } catch {
+    return {};
   }
 };
 
@@ -199,8 +241,22 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }
   }, []);
 
+  // Track current user ID for storage key resolution
+  const currentUserIdRef = useRef<string | undefined>(state.user?.id);
   useEffect(() => {
-    safeStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    currentUserIdRef.current = state.user?.id;
+  }, [state.user?.id]);
+
+  // Persist state — skip for demo users (demo data resets on refresh)
+  useEffect(() => {
+    if (state.user?.userMode === 'demo') {
+      // Demo users: don't persist state to localStorage
+      return;
+    }
+    const key = state.user?.id
+      ? getUserStorageKey(state.user.id)
+      : DEMO_STORAGE_KEY;
+    safeStorage.setItem(key, JSON.stringify(state));
   }, [state]);
 
   useEffect(() => {
@@ -259,26 +315,30 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Password must be at least 6 characters');
     }
 
-    const userId = createId('USER');
+    // Deterministic userId from email for data persistence across sessions
+    const userId = `USER-${email.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
     const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
     const displayName = nameFromEmail.replace(/\b\w/g, (char) => char.toUpperCase());
 
-    setState((prev) => ({
-      ...prev,
+    // Load existing user data if any
+    const existingData = loadUserState(userId);
+    const hasExistingData = Object.keys(existingData).length > 0 && (existingData.shipments?.length ?? 0) > 0;
+
+    setState(() => ({
+      ...(hasExistingData ? { ...createEmptyState(), ...existingData } : createEmptyState()),
       isAuthenticated: true,
       user: {
         id: userId,
-        name: displayName,
+        name: existingData.teamMembers ? displayName : displayName,
         email,
         role: 'Operations',
         authProvider: 'email',
         userMode: 'real'
       },
-      shipments: [],
-      notifications: []
+      theme: existingData.theme ?? 'system'
     }));
 
-    console.log('User logged in with email:', email);
+    console.log('User logged in with email:', email, hasExistingData ? '(restored data)' : '(new user)');
   };
 
   const signup = (name: string, email: string, password: string) => {
@@ -296,10 +356,11 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       throw new Error('Name is required');
     }
 
-    const userId = createId('USER');
+    // Deterministic userId from email for data persistence across sessions
+    const userId = `USER-${email.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
-    setState((prev) => ({
-      ...prev,
+    setState(() => ({
+      ...createEmptyState(),
       isAuthenticated: true,
       user: {
         id: userId,
@@ -308,9 +369,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         role: 'Operations',
         authProvider: 'email',
         userMode: 'real'
-      },
-      shipments: [],
-      notifications: []
+      }
     }));
 
     console.log('New user registered:', email);
@@ -321,7 +380,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
    * Only use this for demo purposes via demo buttons - NOT real Google OAuth!
    */
   const loginWithDemoAccount = () => {
-    // Create demo user session with fixed ID
+    // Create demo user session with fixed ID and fresh seed data
+    const demoState = getDemoSeedState();
     const demoUser = {
       id: 'DEMO-USER',
       name: 'Demo User',
@@ -330,14 +390,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       userMode: 'demo' as const
     };
 
-    setState((prev) => ({
-      ...prev,
+    setState(() => ({
+      ...demoState,
       isAuthenticated: true,
       user: {
         ...demoUser,
-        authProvider: 'demo' as any
+        authProvider: 'demo' as const
       }
-      // Demo users keep the seed data (shipments, notifications)
+      // Demo users always get fresh seed data (never persisted)
     }));
 
     console.warn('⚠️ Demo account loaded for testing - this is NOT real Google OAuth authentication');
@@ -361,11 +421,16 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       const userName = payload.name || payload.given_name || 'Google User';
       const userEmail = payload.email;
       const profilePicture = payload.picture;
-      const userId = createId('USER');
+      // Deterministic userId from email for data persistence across sessions
+      const userId = `USER-${userEmail.toLowerCase().replace(/[^a-z0-9]/g, '-')}`;
 
-      // Create user session with Google data
-      setState((prev) => ({
-        ...prev,
+      // Load existing user data if any
+      const existingData = loadUserState(userId);
+      const hasExistingData = Object.keys(existingData).length > 0 && (existingData.shipments?.length ?? 0) > 0;
+
+      // Create user session with Google data + restore or empty state
+      setState(() => ({
+        ...(hasExistingData ? { ...createEmptyState(), ...existingData } : createEmptyState()),
         isAuthenticated: true,
         user: {
           id: userId,
@@ -376,8 +441,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           profilePicture: profilePicture,
           userMode: 'real' as const
         },
-        shipments: [],
-        notifications: []
+        theme: existingData.theme ?? 'system'
       }));
 
       // Store the token for future API calls (if needed) - Use localStorage for persistence
@@ -389,7 +453,8 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       console.log('User authenticated with Google:', {
         name: userName,
         email: userEmail,
-        hasProfilePicture: !!profilePicture
+        hasProfilePicture: !!profilePicture,
+        restoredData: hasExistingData
       });
     } catch (error) {
       console.error('Failed to login with Google token:', error);
@@ -408,13 +473,16 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     safeStorage.removeItem('google_auth_token');
     safeStorage.removeItem('google_token_expiry');
     safeStorage.removeItem('google_user_email');
-    safeStorage.removeItem(STORAGE_KEY); // Also clear persisted state
+    // Note: Don't clear user-specific storage on logout (preserves data for next login)
+    // Only clear the legacy key
+    safeStorage.removeItem(DEMO_STORAGE_KEY);
 
     // Log logout
     console.log('User logged out');
 
-    setState((prev) => ({
-      ...prev,
+    // Reset to initial demo seed data for splash page display
+    setState(() => ({
+      ...createSeedState(),
       isAuthenticated: false,
       user: null
     }));
@@ -896,9 +964,12 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   };
 
+  const isDemoUser = state.user?.userMode === 'demo';
+
   const value = useMemo<AppContextValue>(
     () => ({
       state,
+      isDemoUser: state.user?.userMode === 'demo',
       login,
       signup,
       loginWithGoogle,
