@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { FormEvent, useState, useEffect, useMemo } from 'react';
+import { FormEvent, useState, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
@@ -7,8 +7,6 @@ import {
   validateEmailFormat,
   validatePasswordStrength,
   getPasswordStrength,
-  validateLoginForm,
-  validateSignupForm,
   recordFailedAttempt,
   clearLoginAttempts,
   isAccountLockedOut
@@ -16,9 +14,11 @@ import {
 import {
   verifyRecaptcha,
   isRecaptchaConfigured,
+  isTurnstileConfigured,
   isEmailRegistered,
-  validateLoginSecurity,
-  validateSignupSecurity
+  verifyEmailExists,
+  isEmailVerificationConfigured,
+  hashPassword
 } from '../utils/securityService';
 
 type Mode = 'login' | 'signup';
@@ -32,32 +32,118 @@ export default function AuthPage() {
   const { login, signup, loginWithGoogleToken, logout, state } = useAppContext();
   const { isAuthenticated, user } = state;
   const [mode, setMode] = useState<Mode>('login');
-  const [name, setName] = useState('');
+
+  // Form fields
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [googleError, setGoogleError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Error states - inline errors only
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [firstNameError, setFirstNameError] = useState('');
+  const [lastNameError, setLastNameError] = useState('');
+
+  // Track touched fields
+  const [touched, setTouched] = useState({
+    email: false,
+    password: false,
+    firstName: false,
+    lastName: false
+  });
+
+  // Loading states
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleInitialized, setGoogleInitialized] = useState(false);
-  const [captchaVerified, setCaptchaVerified] = useState(false);
-  const [captchaError, setCaptchaError] = useState('');
-  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [googleError, setGoogleError] = useState('');
 
-  // Validation states
-  const [emailError, setEmailError] = useState('');
-  const [passwordError, setPasswordError] = useState('');
-  const [nameError, setNameError] = useState('');
-  const [touched, setTouched] = useState({ email: false, password: false, name: false });
+  // Captcha states
+  const [captchaVerified, setCaptchaVerified] = useState(false);
+  const [captchaSuccess, setCaptchaSuccess] = useState(false);
+  const [captchaError, setCaptchaError] = useState('');
+  const turnstileRef = useRef<any>(null);
+
+  // Email verification
+  const [isVerifyingEmail, setIsVerifyingEmail] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   // Get password strength for signup
   const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
 
-  // Check lockout status
-  const lockoutStatus = useMemo(() => isAccountLockedOut(email), [email]);
+  // Check lockout status - ONLY for login mode
+  const lockoutStatus = useMemo(() => {
+    if (mode !== 'login') return { locked: false, remainingAttempts: 5 };
+    return isAccountLockedOut(email);
+  }, [email, mode]);
 
-  // Check if CAPTCHA is configured
-  const captchaEnabled = useMemo(() => isRecaptchaConfigured(), []);
+  // Check if CAPTCHA is configured (Turnstile or reCAPTCHA)
+  const captchaEnabled = useMemo(() => isTurnstileConfigured() || isRecaptchaConfigured(), []);
+
+  // Initialize Cloudflare Turnstile
+  useEffect(() => {
+    let mounted = true;
+
+    const loadTurnstile = async () => {
+      // Check if Turnstile is already loaded
+      if ((window as any).turnstile) {
+        renderTurnstile();
+        return;
+      }
+
+      // Load Turnstile script
+      const script = document.createElement('script');
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js';
+      script.async = true;
+      script.defer = true;
+      script.id = 'turnstile-script';
+
+      script.onload = () => {
+        if (mounted) renderTurnstile();
+      };
+
+      document.head.appendChild(script);
+    };
+
+    const renderTurnstile = () => {
+      const container = document.getElementById('turnstile-container');
+      const tokenInput = document.getElementById('turnstile-token');
+
+      if (container && (window as any).turnstile && tokenInput) {
+        try {
+          (window as any).turnstile.render(container, {
+            sitekey: import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAA_TestSiteKey',
+            callback: (token: string) => {
+              setCaptchaVerified(true);
+              setCaptchaSuccess(true);
+              setCaptchaError('');
+            },
+            'expired-callback': () => {
+              setCaptchaVerified(false);
+              setCaptchaSuccess(false);
+            },
+            'error-callback': () => {
+              setCaptchaVerified(false);
+              setCaptchaSuccess(false);
+              setCaptchaError('CAPTCHA verification failed. Please try again.');
+            }
+          });
+        } catch (err) {
+          console.error('Turnstile render error:', err);
+        }
+      }
+    };
+
+    if (captchaEnabled) {
+      loadTurnstile();
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [captchaEnabled, mode]);
 
   // Initialize Google Sign-In
   useEffect(() => {
@@ -68,7 +154,6 @@ export default function AuthPage() {
       try {
         console.log('🔍 Initializing Google Sign-In (Attempts:', attempts, ')...');
 
-        // Wait for SDK and Button element
         while (attempts < 50) {
           if (!mounted) return;
 
@@ -111,7 +196,6 @@ export default function AuthPage() {
         throw new Error('Google Client ID is missing. Please check configuration.');
       }
 
-      // Initialize Google Accounts
       (window as any).google.accounts.id.initialize({
         client_id: clientId,
         callback: handleGoogleCallback,
@@ -119,7 +203,6 @@ export default function AuthPage() {
         itp_support: true,
       });
 
-      // Render button
       const buttonElement = document.getElementById('google-signin-button');
       if (buttonElement) {
         (window as any).google.accounts.id.renderButton(
@@ -162,13 +245,33 @@ export default function AuthPage() {
     }
   };
 
-  // Handle form field changes with validation
+  // Handle form field changes with real-time validation
+  const handleFirstNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFirstName(e.target.value);
+    if (firstNameError) setFirstNameError('');
+  };
+
+  const handleLastNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setLastName(e.target.value);
+    if (lastNameError) setLastNameError('');
+  };
+
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setEmail(e.target.value);
+    const value = e.target.value;
+    setEmail(value);
+    setEmailVerified(false);
+
+    // Clear errors on type
     if (emailError) setEmailError('');
-    // Clear email registered error when user types
-    if (error && error.includes('not registered')) {
-      setError('');
+
+    // Real-time validation as user types
+    if (value) {
+      const result = validateEmailFormat(value);
+      if (!result.isValid) {
+        setEmailError(result.error || 'Invalid email format');
+      } else {
+        setEmailError('');
+      }
     }
   };
 
@@ -177,17 +280,59 @@ export default function AuthPage() {
     if (passwordError) setPasswordError('');
   };
 
-  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setName(e.target.value);
-    if (nameError) setNameError('');
+  // Validate on blur
+  const handleFirstNameBlur = () => {
+    setTouched(prev => ({ ...prev, firstName: true }));
+    if (mode === 'signup') {
+      if (!firstName.trim()) {
+        setFirstNameError('First name is required');
+      } else if (firstName.trim().length < 2) {
+        setFirstNameError('First name must be at least 2 characters');
+      } else {
+        setFirstNameError('');
+      }
+    }
   };
 
-  // Validate on blur
-  const handleEmailBlur = () => {
+  const handleLastNameBlur = () => {
+    setTouched(prev => ({ ...prev, lastName: true }));
+    if (mode === 'signup') {
+      if (!lastName.trim()) {
+        setLastNameError('Last name is required');
+      } else if (lastName.trim().length < 2) {
+        setLastNameError('Last name must be at least 2 characters');
+      } else {
+        setLastNameError('');
+      }
+    }
+  };
+
+  const handleEmailBlur = async () => {
     setTouched(prev => ({ ...prev, email: true }));
     if (email) {
       const result = validateEmailFormat(email);
-      setEmailError(result.isValid ? '' : result.error || '');
+      if (!result.isValid) {
+        setEmailError(result.error || 'Invalid email format');
+      } else {
+        setEmailError('');
+
+        // Optional: Verify email exists using API
+        if (mode === 'signup' && isEmailVerificationConfigured()) {
+          setIsVerifyingEmail(true);
+          try {
+            const verifyResult = await verifyEmailExists(email);
+            if (!verifyResult.isValid) {
+              setEmailError(verifyResult.error || 'Email domain is invalid');
+            } else {
+              setEmailVerified(true);
+            }
+          } catch (err) {
+            // Allow email if verification fails
+            setEmailVerified(true);
+          }
+          setIsVerifyingEmail(false);
+        }
+      }
     }
   };
 
@@ -195,76 +340,60 @@ export default function AuthPage() {
     setTouched(prev => ({ ...prev, password: true }));
     if (password && mode === 'signup') {
       const result = validatePasswordStrength(password);
-      setPasswordError(result.isValid ? '' : result.error || '');
-    }
-  };
-
-  const handleNameBlur = () => {
-    setTouched(prev => ({ ...prev, name: true }));
-    if (mode === 'signup' && !name.trim()) {
-      setNameError('Full name is required');
-    } else {
-      setNameError('');
+      if (!result.isValid) {
+        setPasswordError(result.error || 'Password is too weak');
+      } else {
+        setPasswordError('');
+      }
     }
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError('');
-    setGoogleError('');
     setIsLoading(true);
-    setCaptchaError('');
 
     // Get the redirect path
     const from = location.state?.from || '/dashboard';
 
-    // Check lockout
-    if (isAccountLockedOut(email)) {
-      setError('Account is temporarily locked due to too many failed attempts. Please try again in 15 minutes.');
-      setIsLoading(false);
-      return;
-    }
-
-    // Verify CAPTCHA before processing
-    if (captchaEnabled && !captchaVerified) {
-      try {
-        const captchaResult = await verifyRecaptcha(mode === 'login' ? 'login' : 'signup');
-        if (!captchaResult.success) {
-          setCaptchaError('Please complete the CAPTCHA verification to continue');
-          setIsLoading(false);
-          return;
-        }
-        setCaptchaVerified(true);
-      } catch (err) {
-        setCaptchaError('CAPTCHA verification failed. Please try again.');
-        setIsLoading(false);
-        return;
-      }
-    }
-
     try {
       if (mode === 'login') {
-        if (!email || !password) {
-          setError('Please enter email and password');
+        // ========== LOGIN MODE ==========
+
+        // Validate email format
+        if (!email) {
+          setEmailError('Email is required');
           setIsLoading(false);
           return;
         }
 
-        // Validate email format
         const emailValidation = validateEmailFormat(email);
         if (!emailValidation.isValid) {
-          setError(emailValidation.error || 'Please enter a valid email address');
+          setEmailError(emailValidation.error || 'Please enter a valid email address');
           setIsLoading(false);
+          return;
+        }
+
+        // Check lockout - ONLY for login
+        if (lockoutStatus.locked) {
+          setIsLoading(false);
+          // Show inline error, not global
           return;
         }
 
         // Check if email is registered
         const emailExists = isEmailRegistered(email) || registeredEmails.includes(email.toLowerCase());
         if (!emailExists) {
-          setError('Email not registered. Please sign up or use a registered email.');
+          setEmailError('Email not registered. Please sign up first.');
           setIsLoading(false);
           // Record failed attempt for brute force protection
           recordFailedAttempt(email);
+          return;
+        }
+
+        // Verify CAPTCHA for login
+        if (captchaEnabled && !captchaVerified) {
+          setCaptchaError('Please complete the CAPTCHA verification');
+          setIsLoading(false);
           return;
         }
 
@@ -274,58 +403,75 @@ export default function AuthPage() {
         // Clear failed attempts on successful login
         clearLoginAttempts(email);
 
-        // Small delay for UX
         setTimeout(() => {
           navigate(from, { replace: true });
         }, 300);
+
       } else {
-        // Signup mode - enhanced validation
-        if (!name.trim()) {
-          setNameError('Full name is required');
-          setError('Please fill in all required fields');
+        // ========== SIGNUP MODE ==========
+
+        // Validate first name
+        if (!firstName.trim()) {
+          setFirstNameError('First name is required');
           setIsLoading(false);
           return;
         }
 
+        // Validate last name
+        if (!lastName.trim()) {
+          setLastNameError('Last name is required');
+          setIsLoading(false);
+          return;
+        }
+
+        // Validate email
         if (!email) {
-          setError('Please enter your email address');
+          setEmailError('Email is required');
           setIsLoading(false);
           return;
         }
 
-        if (!password) {
-          setError('Please enter a password');
-          setIsLoading(false);
-          return;
-        }
-
-        // Validate email format
         const emailValidation = validateEmailFormat(email);
         if (!emailValidation.isValid) {
-          setError(emailValidation.error || 'Please enter a valid email address');
-          setIsLoading(false);
-          return;
-        }
-
-        // Validate password strength
-        const passwordValidation = validatePasswordStrength(password);
-        if (!passwordValidation.isValid) {
-          setError(passwordValidation.error || 'Password does not meet security requirements');
+          setEmailError(emailValidation.error || 'Please enter a valid email address');
           setIsLoading(false);
           return;
         }
 
         // Check if email already registered
         if (registeredEmails.includes(email.toLowerCase())) {
-          setError('This email is already registered. Please login instead.');
+          setEmailError('This email is already registered. Please login instead.');
           setIsLoading(false);
           return;
         }
 
-        // Attempt signup
-        signup(name.trim(), email, password);
+        // Validate password strength
+        if (!password) {
+          setPasswordError('Password is required');
+          setIsLoading(false);
+          return;
+        }
 
-        // Small delay for UX
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+          setPasswordError(passwordValidation.error || 'Password does not meet security requirements');
+          setIsLoading(false);
+          return;
+        }
+
+        // Verify CAPTCHA for signup
+        if (captchaEnabled && !captchaVerified) {
+          setCaptchaError('Please complete the CAPTCHA verification');
+          setIsLoading(false);
+          return;
+        }
+
+        // Hash password before storing (for demo purposes)
+        const hashedPassword = await hashPassword(password);
+
+        // Attempt signup
+        signup(`${firstName.trim()} ${lastName.trim()}`, email, hashedPassword);
+
         setTimeout(() => {
           navigate(from, { replace: true });
         }, 300);
@@ -334,24 +480,21 @@ export default function AuthPage() {
       // Record failed attempt for brute force protection (login only)
       if (mode === 'login') {
         recordFailedAttempt(email);
-        const attempts = parseInt(localStorage.getItem('login_attempts_' + email) || '0');
-        const remainingAttempts = 5 - attempts;
+        const remainingAttempts = 5 - (parseInt(localStorage.getItem('login_attempts_' + email) || '0'));
 
         if (remainingAttempts <= 0) {
-          setError('Account is temporarily locked due to too many failed attempts. Please try again in 15 minutes.');
+          // Lockout will be shown via lockoutStatus
+        } else if (remainingAttempts <= 2) {
+          setPasswordError(`Invalid credentials. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining.`);
         } else {
-          setError(`Invalid credentials. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining before lockout.`);
+          setPasswordError('Invalid email or password');
         }
-      } else {
-        const errorMessage = err.message || 'An error occurred. Please try again.';
-        setError(errorMessage);
       }
       setIsLoading(false);
     }
   };
 
-  /* Existing logic for Google Sign-In and local login */
-
+  // Already authenticated view
   if (isAuthenticated && user) {
     return (
       <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 items-center justify-center p-6">
@@ -388,18 +531,22 @@ export default function AuthPage() {
     );
   }
 
+  // Toggle between login and signup
   const toggleMode = () => {
     setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
-    setError('');
-    setGoogleError('');
-    setName('');
+    // Clear all errors and form fields
+    setFirstName('');
+    setLastName('');
     setEmail('');
     setPassword('');
-    // Clear validation states
     setEmailError('');
     setPasswordError('');
-    setNameError('');
-    setTouched({ email: false, password: false, name: false });
+    setFirstNameError('');
+    setLastNameError('');
+    setTouched({ email: false, password: false, firstName: false, lastName: false });
+    setCaptchaVerified(false);
+    setCaptchaSuccess(false);
+    setCaptchaError('');
   };
 
   return (
@@ -407,21 +554,21 @@ export default function AuthPage() {
       <div className="w-full max-w-5xl">
         <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl grid md:grid-cols-[1.2fr_1fr]">
           {/* Left Section - Info Panel */}
-          <section className="hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-700 dark:from-slate-950 dark:via-slate-900 dark:to-teal-900 p-12 text-white md:flex flex-col justify-between relative overflow-hidden">
+          <section className="hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-700 dark:from-slate-950 dark:via-slate-900 dark:to-teal-900 p-8 md:p-12 text-white md:flex flex-col justify-between relative overflow-hidden">
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(45,212,191,0.15),transparent_60%)]" />
             <div className="relative">
-              <div className="flex items-center gap-3 mb-8">
+              <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg overflow-hidden bg-white">
                   <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
                 </div>
-                <h1 className="text-2xl font-extrabold tracking-tight">ExporTrack<span className="text-teal-300">AI</span></h1>
+                <h1 className="text-xl md:text-2xl font-extrabold tracking-tight">ExporTrack<span className="text-teal-300">AI</span></h1>
               </div>
               <p className="text-sm text-slate-100/90 leading-relaxed">
                 Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified in one powerful platform.
               </p>
             </div>
 
-            <ul className="space-y-4">
+            <ul className="space-y-3 md:space-y-4 mt-6 md:mt-0">
               <li className="flex items-start gap-3 text-sm">
                 <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
                   <AppIcon name="check" className="h-3 w-3 text-teal-300" />
@@ -442,7 +589,7 @@ export default function AuthPage() {
               </li>
             </ul>
 
-            <div className="pt-8 border-t border-white/10">
+            <div className="pt-6 md:pt-8 border-t border-white/10 mt-6 md:mt-0">
               <p className="text-xs text-slate-100/70">
                 Enterprise-grade logistics platform trusted by export operations
               </p>
@@ -450,10 +597,10 @@ export default function AuthPage() {
           </section>
 
           {/* Right Section - Auth Form */}
-          <section className="flex flex-col justify-center p-8 md:p-10">
+          <section className="flex flex-col justify-center p-6 md:p-8 lg:p-10">
             <div className="w-full max-w-sm mx-auto">
               {/* Header */}
-              <div className="mb-8">
+              <div className="mb-6 md:mb-8">
                 <h2 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-slate-100" style={{ letterSpacing: '-0.02em' }}>
                   {mode === 'login' ? 'Welcome back' : 'Create your account'}
                 </h2>
@@ -464,31 +611,11 @@ export default function AuthPage() {
                 </p>
               </div>
 
-              {/* Error Messages */}
-              {error && (
-                <div className="mb-6 p-3 rounded-lg bg-rose-50 border border-rose-200 dark:bg-rose-900/20 dark:border-rose-800/50">
-                  <p className="text-sm text-rose-700 dark:text-rose-400">{error}</p>
-                </div>
-              )}
-
-              {/* CAPTCHA Error Message */}
-              {captchaError && (
-                <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
-                  <div className="flex items-start gap-2">
-                    <AppIcon name="warning" className="h-5 w-5 text-amber-500 mt-0.5" />
-                    <div>
-                      <p className="text-sm text-amber-800 dark:text-amber-300">CAPTCHA Required</p>
-                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">{captchaError}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Lockout Warning Banner */}
+              {/* Lockout Warning Banner - ONLY show on Login */}
               {lockoutStatus.locked && mode === 'login' && (
-                <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
+                <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
                   <div className="flex items-start gap-2">
-                    <AppIcon name="warning" className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <AppIcon name="warning" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
                     <div>
                       <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Account Temporarily Locked</p>
                       <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
@@ -499,35 +626,72 @@ export default function AuthPage() {
                 </div>
               )}
 
-              {/* Form level error was handled above */}
+              {/* CAPTCHA Error Message */}
+              {captchaError && (
+                <div className="mb-4 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
+                  <div className="flex items-start gap-2">
+                    <AppIcon name="warning" className="h-5 w-5 text-amber-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm text-amber-800 dark:text-amber-300">CAPTCHA Required</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">{captchaError}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* Form */}
               <form className="space-y-4" onSubmit={handleSubmit}>
+                {/* First Name + Last Name for Signup */}
                 {mode === 'signup' && (
-                  <div>
-                    <label htmlFor="full-name" className="input-label">
-                      Full Name
-                    </label>
-                    <input
-                      id="full-name"
-                      type="text"
-                      value={name}
-                      onChange={handleNameChange}
-                      onBlur={handleNameBlur}
-                      required={mode === 'signup'}
-                      className={`input-field ${nameError && touched.name ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
-                      placeholder="Jane Doe"
-                      disabled={isLoading || isGoogleLoading}
-                    />
-                    {nameError && touched.name && (
-                      <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                        <AppIcon name="warning" className="h-3 w-3" />
-                        {nameError}
-                      </p>
-                    )}
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label htmlFor="first-name" className="input-label">
+                        First Name
+                      </label>
+                      <input
+                        id="first-name"
+                        type="text"
+                        value={firstName}
+                        onChange={handleFirstNameChange}
+                        onBlur={handleFirstNameBlur}
+                        className={`input-field ${firstNameError && touched.firstName ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
+                        placeholder="Jane"
+                        disabled={isLoading || isGoogleLoading}
+                        autoComplete="given-name"
+                      />
+                      {firstNameError && touched.firstName && (
+                        <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                          <AppIcon name="warning" className="h-3 w-3 flex-shrink-0" />
+                          {firstNameError}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label htmlFor="last-name" className="input-label">
+                        Last Name
+                      </label>
+                      <input
+                        id="last-name"
+                        type="text"
+                        value={lastName}
+                        onChange={handleLastNameChange}
+                        onBlur={handleLastNameBlur}
+                        className={`input-field ${lastNameError && touched.lastName ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
+                        placeholder="Doe"
+                        disabled={isLoading || isGoogleLoading}
+                        autoComplete="family-name"
+                      />
+                      {lastNameError && touched.lastName && (
+                        <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                          <AppIcon name="warning" className="h-3 w-3 flex-shrink-0" />
+                          {lastNameError}
+                        </p>
+                      )}
+                    </div>
                   </div>
                 )}
 
+                {/* Email Field */}
                 <div>
                   <label htmlFor="email" className="input-label">
                     Email Address
@@ -543,21 +707,28 @@ export default function AuthPage() {
                       className={`input-field pr-10 ${emailError && touched.email ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
                       placeholder="ops@company.com"
                       disabled={isLoading || isGoogleLoading}
+                      autoComplete="email"
                     />
-                    {touched.email && email && !emailError && (
+                    {touched.email && email && !emailError && !isVerifyingEmail && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2">
                         <AppIcon name="check" className="h-5 w-5 text-emerald-500" />
+                      </div>
+                    )}
+                    {isVerifyingEmail && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-slate-600"></span>
                       </div>
                     )}
                   </div>
                   {emailError && touched.email && (
                     <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                      <AppIcon name="warning" className="h-3 w-3" />
+                      <AppIcon name="warning" className="h-3 w-3 flex-shrink-0" />
                       {emailError}
                     </p>
                   )}
                 </div>
 
+                {/* Password Field with Eye Toggle */}
                 <div>
                   <label htmlFor="password" className="input-label">
                     Password
@@ -567,21 +738,42 @@ export default function AuthPage() {
                       </span>
                     )}
                   </label>
-                  <input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={handlePasswordChange}
-                    onBlur={handlePasswordBlur}
-                    required
-                    minLength={mode === 'signup' ? 8 : 6}
-                    className={`input-field ${passwordError && touched.password ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
-                    placeholder={mode === 'signup' ? 'Create a strong password' : 'Enter your password'}
-                    disabled={isLoading || isGoogleLoading}
-                  />
+                  <div className="relative">
+                    <input
+                      id="password"
+                      type={showPassword ? 'text' : 'password'}
+                      value={password}
+                      onChange={handlePasswordChange}
+                      onBlur={handlePasswordBlur}
+                      required
+                      minLength={mode === 'signup' ? 8 : 6}
+                      className={`input-field pr-10 ${passwordError && touched.password ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
+                      placeholder={mode === 'signup' ? 'Create a strong password' : 'Enter your password'}
+                      disabled={isLoading || isGoogleLoading}
+                      autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors p-0.5"
+                      tabIndex={-1}
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? (
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                        </svg>
+                      ) : (
+                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      )}
+                    </button>
+                  </div>
                   {passwordError && touched.password && (
                     <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
-                      <AppIcon name="warning" className="h-3 w-3" />
+                      <AppIcon name="warning" className="h-3 w-3 flex-shrink-0" />
                       {passwordError}
                     </p>
                   )}
@@ -589,26 +781,26 @@ export default function AuthPage() {
                   {/* Password Strength Indicator (Signup mode only) */}
                   {mode === 'signup' && password && (
                     <div className="mt-2">
-                      <div className="flex items-center gap-1 mb-1">
+                      <div className="flex items-center gap-2 mb-2">
                         <div className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                           <div
-                            className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score <= 1 ? 'bg-rose-500' :
-                              passwordStrength.score <= 2 ? 'bg-amber-500' :
-                                passwordStrength.score <= 3 ? 'bg-teal-500' :
+                            className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score <= 20 ? 'bg-rose-500' :
+                              passwordStrength.score <= 60 ? 'bg-amber-500' :
+                                passwordStrength.score <= 80 ? 'bg-teal-500' :
                                   'bg-emerald-500'
                               }`}
-                            style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                            style={{ width: `${Math.max(20, passwordStrength.score)}%` }}
                           />
                         </div>
-                        <span className={`text-xs font-medium ${passwordStrength.score <= 1 ? 'text-rose-500' :
-                          passwordStrength.score <= 2 ? 'text-amber-500' :
-                            passwordStrength.score <= 3 ? 'text-teal-500' :
+                        <span className={`text-xs font-medium whitespace-nowrap ${passwordStrength.score <= 20 ? 'text-rose-500' :
+                          passwordStrength.score <= 60 ? 'text-amber-500' :
+                            passwordStrength.score <= 80 ? 'text-teal-500' :
                               'text-emerald-500'
                           }`}>
                           {passwordStrength.label}
                         </span>
                       </div>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex flex-wrap gap-1.5">
                         {[
                           { label: 'A-Z', met: passwordStrength.hasUppercase },
                           { label: 'a-z', met: passwordStrength.hasLowercase },
@@ -618,7 +810,7 @@ export default function AuthPage() {
                         ].map((req) => (
                           <span
                             key={req.label}
-                            className={`text-[10px] px-1.5 py-0.5 rounded ${req.met
+                            className={`text-[10px] px-1.5 py-0.5 rounded transition-colors ${req.met
                               ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
                               : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
                               }`}
@@ -631,13 +823,34 @@ export default function AuthPage() {
                   )}
                 </div>
 
+                {/* Cloudflare Turnstile CAPTCHA - Only show when enabled */}
+                {captchaEnabled && (
+                  <div className="flex justify-center">
+                    <div
+                      id="turnstile-container"
+                      className={`g-recaptcha ${captchaSuccess ? 'border-2 border-emerald-500 rounded-lg' : ''}`}
+                      data-sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAA_TestSiteKey'}
+                    />
+                    {/* Hidden input to store token */}
+                    <input type="hidden" id="turnstile-token" />
+
+                    {/* Success indicator */}
+                    {captchaSuccess && (
+                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 mt-2">
+                        <AppIcon name="check" className="h-4 w-4" />
+                        <span className="text-xs font-medium">Success!</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
                 <button
                   type="submit"
-                  className="btn-primary w-full mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary w-full mt-5 md:mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading || isGoogleLoading}
                 >
                   {isLoading ? (
-                    <span className="flex items-center gap-2">
+                    <span className="flex items-center gap-2 justify-center">
                       <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-r-transparent"></span>
                       {mode === 'login' ? 'Signing in...' : 'Creating account...'}
                     </span>
@@ -655,7 +868,7 @@ export default function AuthPage() {
               </form>
 
               {/* Divider */}
-              <div className="my-6 flex items-center gap-3">
+              <div className="my-5 md:my-6 flex items-center gap-3">
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
                 <span className="text-xs font-medium text-slate-400 dark:text-slate-500">OR</span>
                 <div className="h-px flex-1 bg-slate-200 dark:bg-slate-700" />
@@ -682,18 +895,14 @@ export default function AuthPage() {
                   </div>
                 ) : null}
 
-                {/* 
-                  The Google button will be rendered into this specific div via the SDK.
-                  We use relative positioning so it sits on top if needed, and give it a class to ensure it's hidden if there's an error.
-                */}
                 <div
                   id="google-signin-button"
                   className={`w-full flex justify-center transition-opacity duration-300 ${googleError || !googleInitialized ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}
-                ></div>
+                />
               </div>
 
               {/* Toggle Mode */}
-              <div className="mt-6 text-center">
+              <div className="mt-5 md:mt-6 text-center">
                 <p className="text-sm text-slate-600 dark:text-slate-400">
                   {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
                   <button
@@ -709,16 +918,20 @@ export default function AuthPage() {
 
               {/* Security Footer */}
               <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                <div className="flex items-center justify-center gap-4 text-xs text-slate-500 dark:text-slate-400">
+                <div className="flex items-center justify-center gap-3 md:gap-4 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
                   {captchaEnabled && (
                     <div className="flex items-center gap-1">
                       <AppIcon name="shield" className="h-3.5 w-3.5 text-teal-500" />
-                      <span>reCAPTCHA</span>
+                      <span>Turnstile Protected</span>
                     </div>
                   )}
                   <div className="flex items-center gap-1">
-                    <AppIcon name="check" className="h-3.5 w-3.5 text-teal-500" />
+                    <AppIcon name="shield" className="h-3.5 w-3.5 text-teal-500" />
                     <span>Secure</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <AppIcon name="check" className="h-3.5 w-3.5 text-teal-500" />
+                    <span>Encrypted</span>
                   </div>
                 </div>
               </div>
@@ -727,11 +940,10 @@ export default function AuthPage() {
         </div>
 
         {/* Footer */}
-        <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400">
+        <p className="mt-6 text-center text-xs text-slate-500 dark:text-slate-400 px-4">
           Protected by enterprise-grade security • Privacy Policy • Terms of Service
         </p>
       </div>
     </div>
   );
 }
-

@@ -136,6 +136,49 @@ export function isRecaptchaConfigured(): boolean {
 }
 
 // ============================================================================
+// Cloudflare Turnstile Configuration
+// ============================================================================
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+
+/**
+ * Check if Cloudflare Turnstile is configured
+ */
+export function isTurnstileConfigured(): boolean {
+    return !!TURNSTILE_SITE_KEY && TURNSTILE_SITE_KEY !== 'your_turnstile_site_key_here';
+}
+
+/**
+ * Verify Turnstile token (should be verified on backend)
+ * This is a placeholder - actual verification should happen on server
+ */
+export async function verifyTurnstile(token: string): Promise<{
+    success: boolean;
+    error?: string;
+}> {
+    // If no Turnstile key is configured, skip verification
+    if (!TURNSTILE_SITE_KEY || TURNSTILE_SITE_KEY === 'your_turnstile_site_key_here') {
+        console.log('Turnstile not configured, skipping verification');
+        return { success: true };
+    }
+
+    // In production, you should send the token to your backend
+    // to verify with Cloudflare's API:
+    // POST https://challenges.cloudflare.com/turnstile/v0/siteverify
+    // Parameters: secret=YOUR_SECRET_KEY&response=TOKEN
+
+    if (!token) {
+        return { success: false, error: 'No Turnstile token provided' };
+    }
+
+    console.log('Turnstile token received:', token.substring(0, 20) + '...');
+
+    // For demo purposes, accept any non-empty token
+    // In production, verify on backend!
+    return { success: true };
+}
+
+// ============================================================================
 // Email Verification API
 // ============================================================================
 
