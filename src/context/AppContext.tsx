@@ -55,7 +55,7 @@ interface AppContextValue {
   updateTeamMemberPermission: (teamId: string, memberId: string, permission: TeamPermission) => void;
   leaveTeam: (teamId: string) => void;
   // Legacy team management (for ProfileTeamPage)
-  inviteTeamMember: (input: InviteTeamMemberInput) => void;
+  inviteTeamMember: (input: InviteTeamMemberInput) => boolean;
   updateMemberRole: (memberId: string, role: Role) => void;
   removeLegacyTeamMember: (memberId: string) => void;
   updateUserProfile: (updates: { name?: string; region?: string }) => void;
@@ -813,10 +813,10 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   }, [state.user, isDemoUser]);
 
   // Legacy team management for ProfileTeamPage
-  const inviteTeamMember = useCallback((input: InviteTeamMemberInput) => {
+  const inviteTeamMember = useCallback((input: InviteTeamMemberInput): boolean => {
     if (!state.user || isDemoUser) {
       console.warn('Demo users cannot invite team members');
-      return;
+      return false;
     }
 
     const invite: TeamInvite = {
@@ -834,6 +834,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ...prev,
       invites: [...prev.invites, invite]
     }));
+    return true;
   }, [state.user, isDemoUser]);
 
   const updateMemberRole = useCallback((memberId: string, role: Role) => {

@@ -82,16 +82,20 @@ export default function ProfileTeamPage() {
 
     try {
       setIsInviting(true);
-      await inviteTeamMember({
+      const success = await inviteTeamMember({
         name: inviteName,
         email: inviteEmail,
         role: inviteRole
       });
-      setShowInviteModal(false);
-      setInviteName('');
-      setInviteEmail('');
-      setInviteRole('Operations');
-      alert('✅ Team member invited successfully!');
+      if (success) {
+        setShowInviteModal(false);
+        setInviteName('');
+        setInviteEmail('');
+        setInviteRole('Operations');
+        alert('✅ Team member invited successfully!');
+      } else {
+        alert('❌ Failed to invite. Demo users cannot invite team members. Please sign up for a real account.');
+      }
     } finally {
       setIsInviting(false);
     }
@@ -492,7 +496,7 @@ export default function ProfileTeamPage() {
                     <p className="text-sm text-slate-600 dark:text-slate-400">Last active: {i === 1 ? 'Now' : '2 hours ago'}</p>
                   </div>
                   {i !== 1 && (
-                    <button 
+                    <button
                       onClick={() => handleRevokeSession(i)}
                       className="text-rose-500 hover:text-rose-700 font-bold text-sm"
                     >
@@ -621,7 +625,7 @@ export default function ProfileTeamPage() {
                       <p className="text-xs text-slate-600 dark:text-slate-400">{int.status}</p>
                     </div>
                   </div>
-                  <button 
+                  <button
                     onClick={() => handleIntegrations(int.name, int.status === 'Connected')}
                     className="btn-secondary btn-sm"
                   >
