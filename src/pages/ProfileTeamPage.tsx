@@ -205,7 +205,7 @@ export default function ProfileTeamPage() {
           {/* Profile Card */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <article className="card-premium overflow-hidden">
-              <div className="absolute top-0 inset-x-0 h-24 bg-gradient-to-r from-teal-500 to-indigo-600 opacity-20" />
+              <div className="absolute top-0 inset-x-0 h-1 bg-white dark:bg-white" />
               <div className="relative pt-12 text-center">
                 <UserAvatar name={user?.name || ''} src={user?.profilePicture} size="xl" status="online" className="shadow-xl ring-4 ring-white dark:ring-slate-800" />
                 <div className="flex items-center justify-center gap-2 mt-4 group">

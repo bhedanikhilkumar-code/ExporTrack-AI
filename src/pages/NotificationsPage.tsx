@@ -13,13 +13,13 @@ export default function NotificationsPage() {
   } = useAppContext();
   const [showUnreadOnly, setShowUnreadOnly] = useState(false);
 
-  const sorted = useMemo(() => 
+  const sorted = useMemo(() =>
     [...notifications].sort((a, b) => b.createdAt.localeCompare(a.createdAt)),
-  [notifications]);
+    [notifications]);
 
-  const filtered = useMemo(() => 
+  const filtered = useMemo(() =>
     showUnreadOnly ? sorted.filter((n) => !n.read) : sorted,
-  [sorted, showUnreadOnly]);
+    [sorted, showUnreadOnly]);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
@@ -46,11 +46,10 @@ export default function NotificationsPage() {
           <button
             type="button"
             onClick={() => setShowUnreadOnly((prev) => !prev)}
-            className={`btn-sm flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all border ${
-              showUnreadOnly 
-                ? 'bg-slate-900 text-white border-slate-900 dark:bg-teal-500/20 dark:text-teal-400 dark:border-teal-500/40' 
+            className={`btn-sm flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-bold transition-all border ${showUnreadOnly
+                ? 'bg-slate-900 text-white border-slate-900 dark:bg-teal-500/20 dark:text-teal-400 dark:border-teal-500/40'
                 : 'bg-white text-slate-600 border-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:border-slate-800'
-            }`}
+              }`}
           >
             <div className={`h-1.5 w-1.5 rounded-full ${showUnreadOnly ? 'bg-teal-400 animate-pulse' : 'bg-slate-400'}`} />
             {showUnreadOnly ? 'Unread Only' : 'Show All'}
@@ -60,37 +59,35 @@ export default function NotificationsPage() {
 
       {filtered.length === 0 ? (
         <section className="card-premium flex flex-col items-center justify-center py-20 opacity-60">
-           <div className="h-20 w-20 rounded-3xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-300 dark:text-slate-800 mb-6">
-             <AppIcon name="bell" className="h-10 w-10" />
-           </div>
-           <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No notifications found</p>
+          <div className="h-20 w-20 rounded-3xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-300 dark:text-slate-800 mb-6">
+            <AppIcon name="bell" className="h-10 w-10" />
+          </div>
+          <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No notifications found</p>
         </section>
       ) : (
         <section className="grid gap-4">
           {filtered.map((notification) => (
-            <article 
-              key={notification.id} 
-              className={`group relative overflow-hidden p-0 rounded-2xl border transition-all duration-300 hover:shadow-xl ${
-                notification.read 
-                  ? 'bg-white dark:bg-slate-900/40 border-slate-200/60 dark:border-slate-800/60 grayscale-[0.5] opacity-80' 
+            <article
+              key={notification.id}
+              className={`group relative overflow-hidden p-0 rounded-2xl border transition-all duration-300 hover:shadow-xl ${notification.read
+                  ? 'bg-white dark:bg-slate-900/40 border-slate-200/60 dark:border-slate-800/60 grayscale-[0.5] opacity-80'
                   : 'bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-700 shadow-md ring-1 ring-teal-500/10'
-              }`}
+                }`}
             >
               {/* New badge accent */}
               {!notification.read && (
-                <div className="absolute top-0 left-0 w-1 h-full bg-teal-500 shadow-[0_0_12px_rgba(20,184,166,0.4)]" />
+                <div className="absolute top-0 left-0 w-1 h-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.2)]" />
               )}
-              
+
               <div className="p-5 md:p-6 flex gap-5">
-                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:scale-110 ${
-                  notification.severity === 'High' ? 'bg-rose-500/10 text-rose-500' :
-                  notification.severity === 'Medium' ? 'bg-amber-500/10 text-amber-500' :
-                  'bg-teal-500/10 text-teal-500'
-                }`}>
-                  <AppIcon 
-                    name={notification.type === 'Deadline' ? 'clock' : notification.type === 'Missing Docs' ? 'file' : 'bell'} 
-                    className="h-6 w-6" 
-                    strokeWidth={2.5} 
+                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-sm transition-transform group-hover:scale-110 ${notification.severity === 'High' ? 'bg-rose-500/10 text-rose-500' :
+                    notification.severity === 'Medium' ? 'bg-amber-500/10 text-amber-500' :
+                      'bg-teal-500/10 text-teal-500'
+                  }`}>
+                  <AppIcon
+                    name={notification.type === 'Deadline' ? 'clock' : notification.type === 'Missing Docs' ? 'file' : 'bell'}
+                    className="h-6 w-6"
+                    strokeWidth={2.5}
                   />
                 </div>
 
@@ -109,7 +106,7 @@ export default function NotificationsPage() {
                       {new Date(notification.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
                     </time>
                   </div>
-                  
+
                   <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed max-w-3xl mb-4">
                     {notification.message}
                   </p>
