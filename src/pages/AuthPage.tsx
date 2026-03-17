@@ -1,10 +1,23 @@
 /// <reference types="vite/client" />
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAppContext } from '../context/AppContext';
 import AppIcon from '../components/AppIcon';
+import {
+  validateEmailFormat,
+  validatePasswordStrength,
+  getPasswordStrength,
+  validateLoginForm,
+  validateSignupForm,
+  recordFailedAttempt,
+  clearLoginAttempts,
+  isAccountLockedOut
+} from '../utils/authSecurity';
 
 type Mode = 'login' | 'signup';
+
+// Check if user exists in localStorage (mock registered users)
+const registeredEmails = ['admin@exportrack.com', 'demo@exportrack.com', 'user@example.com'];
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -21,6 +34,18 @@ export default function AuthPage() {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [googleInitialized, setGoogleInitialized] = useState(false);
 
+  // Validation states
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [touched, setTouched] = useState({ email: false, password: false, name: false });
+
+  // Get password strength for signup
+  const passwordStrength = useMemo(() => getPasswordStrength(password), [password]);
+
+  // Check lockout status
+  const lockoutStatus = useMemo(() => isAccountLockedOut(email), [email]);
+
   // Initialize Google Sign-In
   useEffect(() => {
     let mounted = true;
@@ -29,7 +54,7 @@ export default function AuthPage() {
     const initializeGoogleSDK = async () => {
       try {
         console.log('🔍 Initializing Google Sign-In (Attempts:', attempts, ')...');
-        
+
         // Wait for SDK and Button element
         while (attempts < 50) {
           if (!mounted) return;
@@ -124,11 +149,63 @@ export default function AuthPage() {
     }
   };
 
+  // Handle form field changes with validation
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setEmail(e.target.value);
+    if (emailError) setEmailError('');
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value);
+    if (passwordError) setPasswordError('');
+  };
+
+  const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setName(e.target.value);
+    if (nameError) setNameError('');
+  };
+
+  // Validate on blur
+  const handleEmailBlur = () => {
+    setTouched(prev => ({ ...prev, email: true }));
+    if (email) {
+      const result = validateEmailFormat(email);
+      setEmailError(result.isValid ? '' : result.error || '');
+    }
+  };
+
+  const handlePasswordBlur = () => {
+    setTouched(prev => ({ ...prev, password: true }));
+    if (password && mode === 'signup') {
+      const result = validatePasswordStrength(password);
+      setPasswordError(result.isValid ? '' : result.error || '');
+    }
+  };
+
+  const handleNameBlur = () => {
+    setTouched(prev => ({ ...prev, name: true }));
+    if (mode === 'signup' && !name.trim()) {
+      setNameError('Full name is required');
+    } else {
+      setNameError('');
+    }
+  };
+
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError('');
     setGoogleError('');
     setIsLoading(true);
+
+    // Get the redirect path
+    const from = location.state?.from || '/dashboard';
+
+    // Check lockout
+    if (isAccountLockedOut(email)) {
+      setError('Account is temporarily locked due to too many failed attempts. Please try again in 15 minutes.');
+      setIsLoading(false);
+      return;
+    }
 
     try {
       if (mode === 'login') {
@@ -137,24 +214,90 @@ export default function AuthPage() {
           setIsLoading(false);
           return;
         }
-        login(email, password);
-      } else {
-        if (!name.trim() || !email || !password) {
-          setError('Please fill in all fields');
+
+        // Validate email format
+        const emailValidation = validateEmailFormat(email);
+        if (!emailValidation.isValid) {
+          setError(emailValidation.error || 'Please enter a valid email address');
           setIsLoading(false);
           return;
         }
-        signup(name.trim(), email, password);
-      }
 
-      // Small delay for UX
-      const from = location.state?.from || '/dashboard';
-      setTimeout(() => {
-        navigate(from, { replace: true });
-      }, 300);
+        // Attempt login
+        login(email, password);
+
+        // Small delay for UX
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 300);
+      } else {
+        // Signup mode - enhanced validation
+        if (!name.trim()) {
+          setNameError('Full name is required');
+          setError('Please fill in all required fields');
+          setIsLoading(false);
+          return;
+        }
+
+        if (!email) {
+          setError('Please enter your email address');
+          setIsLoading(false);
+          return;
+        }
+
+        if (!password) {
+          setError('Please enter a password');
+          setIsLoading(false);
+          return;
+        }
+
+        // Validate email format
+        const emailValidation = validateEmailFormat(email);
+        if (!emailValidation.isValid) {
+          setError(emailValidation.error || 'Please enter a valid email address');
+          setIsLoading(false);
+          return;
+        }
+
+        // Validate password strength
+        const passwordValidation = validatePasswordStrength(password);
+        if (!passwordValidation.isValid) {
+          setError(passwordValidation.error || 'Password does not meet security requirements');
+          setIsLoading(false);
+          return;
+        }
+
+        // Check if email already registered
+        if (registeredEmails.includes(email.toLowerCase())) {
+          setError('This email is already registered. Please login instead.');
+          setIsLoading(false);
+          return;
+        }
+
+        // Attempt signup
+        signup(name.trim(), email, password);
+
+        // Small delay for UX
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 300);
+      }
     } catch (err: any) {
-      const errorMessage = err.message || 'An error occurred. Please try again.';
-      setError(errorMessage);
+      // Record failed attempt for brute force protection (login only)
+      if (mode === 'login') {
+        recordFailedAttempt(email);
+        const attempts = parseInt(localStorage.getItem('login_attempts_' + email) || '0');
+        const remainingAttempts = 5 - attempts;
+
+        if (remainingAttempts <= 0) {
+          setError('Account is temporarily locked due to too many failed attempts. Please try again in 15 minutes.');
+        } else {
+          setError(`Invalid credentials. ${remainingAttempts} attempt${remainingAttempts !== 1 ? 's' : ''} remaining before lockout.`);
+        }
+      } else {
+        const errorMessage = err.message || 'An error occurred. Please try again.';
+        setError(errorMessage);
+      }
       setIsLoading(false);
     }
   };
@@ -166,7 +309,7 @@ export default function AuthPage() {
       <div className="flex min-h-screen bg-slate-50 dark:bg-slate-950 items-center justify-center p-6">
         <div className="w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8 shadow-2xl text-center">
           <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-teal-50 dark:bg-teal-500/10 mb-6 font-bold text-teal-600">
-             {user.name.charAt(0)}
+            {user.name.charAt(0)}
           </div>
           <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Already Signed In</h2>
           <p className="mt-2 text-sm text-slate-500 mb-8 truncate">
@@ -204,6 +347,11 @@ export default function AuthPage() {
     setName('');
     setEmail('');
     setPassword('');
+    // Clear validation states
+    setEmailError('');
+    setPasswordError('');
+    setNameError('');
+    setTouched({ email: false, password: false, name: false });
   };
 
   return (
@@ -275,6 +423,21 @@ export default function AuthPage() {
                 </div>
               )}
 
+              {/* Lockout Warning Banner */}
+              {lockoutStatus.locked && mode === 'login' && (
+                <div className="mb-6 p-3 rounded-lg bg-amber-50 border border-amber-200 dark:bg-amber-900/20 dark:border-amber-800/50">
+                  <div className="flex items-start gap-2">
+                    <AppIcon name="warning" className="h-5 w-5 text-amber-500 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">Account Temporarily Locked</p>
+                      <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+                        Too many failed login attempts. Please try again in {lockoutStatus.remainingMinutes} minute{lockoutStatus.remainingMinutes !== 1 ? 's' : ''}.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {/* Form level error was handled above */}
 
               {/* Form */}
@@ -288,15 +451,19 @@ export default function AuthPage() {
                       id="full-name"
                       type="text"
                       value={name}
-                      onChange={(event) => {
-                        setName(event.target.value);
-                        setError('');
-                      }}
+                      onChange={handleNameChange}
+                      onBlur={handleNameBlur}
                       required={mode === 'signup'}
-                      className="input-field"
+                      className={`input-field ${nameError && touched.name ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
                       placeholder="Jane Doe"
                       disabled={isLoading || isGoogleLoading}
                     />
+                    {nameError && touched.name && (
+                      <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                        <AppIcon name="warning" className="h-3 w-3" />
+                        {nameError}
+                      </p>
+                    )}
                   </div>
                 )}
 
@@ -304,39 +471,103 @@ export default function AuthPage() {
                   <label htmlFor="email" className="input-label">
                     Email Address
                   </label>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(event) => {
-                      setEmail(event.target.value);
-                      setError('');
-                    }}
-                    required
-                    className="input-field"
-                    placeholder="ops@company.com"
-                    disabled={isLoading || isGoogleLoading}
-                  />
+                  <div className="relative">
+                    <input
+                      id="email"
+                      type="email"
+                      value={email}
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}
+                      required
+                      className={`input-field pr-10 ${emailError && touched.email ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
+                      placeholder="ops@company.com"
+                      disabled={isLoading || isGoogleLoading}
+                    />
+                    {touched.email && email && !emailError && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                        <AppIcon name="check" className="h-5 w-5 text-emerald-500" />
+                      </div>
+                    )}
+                  </div>
+                  {emailError && touched.email && (
+                    <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                      <AppIcon name="warning" className="h-3 w-3" />
+                      {emailError}
+                    </p>
+                  )}
                 </div>
 
                 <div>
                   <label htmlFor="password" className="input-label">
                     Password
+                    {mode === 'signup' && (
+                      <span className="ml-1 text-xs font-normal text-slate-400">
+                        (8+ chars, uppercase, lowercase, number, symbol)
+                      </span>
+                    )}
                   </label>
                   <input
                     id="password"
                     type="password"
                     value={password}
-                    onChange={(event) => {
-                      setPassword(event.target.value);
-                      setError('');
-                    }}
+                    onChange={handlePasswordChange}
+                    onBlur={handlePasswordBlur}
                     required
-                    minLength={6}
-                    className="input-field"
-                    placeholder="Minimum 6 characters"
+                    minLength={mode === 'signup' ? 8 : 6}
+                    className={`input-field ${passwordError && touched.password ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/20' : ''}`}
+                    placeholder={mode === 'signup' ? 'Create a strong password' : 'Enter your password'}
                     disabled={isLoading || isGoogleLoading}
                   />
+                  {passwordError && touched.password && (
+                    <p className="mt-1 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-1">
+                      <AppIcon name="warning" className="h-3 w-3" />
+                      {passwordError}
+                    </p>
+                  )}
+
+                  {/* Password Strength Indicator (Signup mode only) */}
+                  {mode === 'signup' && password && (
+                    <div className="mt-2">
+                      <div className="flex items-center gap-1 mb-1">
+                        <div className="flex-1 h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                          <div
+                            className={`h-full rounded-full transition-all duration-300 ${passwordStrength.score <= 1 ? 'bg-rose-500' :
+                              passwordStrength.score <= 2 ? 'bg-amber-500' :
+                                passwordStrength.score <= 3 ? 'bg-teal-500' :
+                                  'bg-emerald-500'
+                              }`}
+                            style={{ width: `${(passwordStrength.score / 4) * 100}%` }}
+                          />
+                        </div>
+                        <span className={`text-xs font-medium ${passwordStrength.score <= 1 ? 'text-rose-500' :
+                          passwordStrength.score <= 2 ? 'text-amber-500' :
+                            passwordStrength.score <= 3 ? 'text-teal-500' :
+                              'text-emerald-500'
+                          }`}>
+                          {passwordStrength.label}
+                        </span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {[
+                          { label: 'A-Z', met: passwordStrength.hasUppercase },
+                          { label: 'a-z', met: passwordStrength.hasLowercase },
+                          { label: '0-9', met: passwordStrength.hasNumber },
+                          { label: '!@#', met: passwordStrength.hasSpecial },
+                          { label: '8+', met: passwordStrength.hasMinLength }
+                        ].map((req) => (
+                          <span
+                            key={req.label}
+                            className={`text-[10px] px-1.5 py-0.5 rounded ${req.met
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+                              : 'bg-slate-100 text-slate-500 dark:bg-slate-800 dark:text-slate-500'
+                              }`}
+                          >
+                            {req.label}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -382,13 +613,13 @@ export default function AuthPage() {
                     <span className="text-sm font-medium">Loading Google...</span>
                   </div>
                 ) : null}
-                
+
                 {/* 
                   The Google button will be rendered into this specific div via the SDK.
                   We use relative positioning so it sits on top if needed, and give it a class to ensure it's hidden if there's an error.
                 */}
-                <div 
-                  id="google-signin-button" 
+                <div
+                  id="google-signin-button"
                   className={`w-full flex justify-center transition-opacity duration-300 ${googleError || !googleInitialized ? 'opacity-0 h-0 overflow-hidden' : 'opacity-100'}`}
                 ></div>
               </div>

@@ -3,8 +3,41 @@ import AppIcon from './AppIcon';
 
 // Helper function for route matching - supports nested routes
 const isRouteActive = (pathname: string, itemPath: string): boolean => {
-  if (pathname === itemPath) return true;
-  if (pathname.startsWith(itemPath) && itemPath !== '/') return true;
+  const current = pathname.toLowerCase().trim();
+  const target = itemPath.toLowerCase().trim();
+
+  // Debug logging
+  console.log("PATH:", current, "| CHECK:", target);
+
+  // 1. Exact match
+  if (current === target) return true;
+
+  // 2. Special cases for redirected routes
+  // Upload Docs: /documents/upload redirects to /shipments/:id/upload
+  if (target === '/documents/upload' && /^\/shipments\/[^/]+\/upload/.test(current)) {
+    return true;
+  }
+
+  // Verification: /verification redirects to /shipments/:id/checklist
+  if (target === '/verification' && /^\/shipments\/[^/]+\/checklist/.test(current)) {
+    return true;
+  }
+
+  // 3. Avoid overlapping highlights for "Shipments" parent tab
+  if (target === '/shipments') {
+    // Be active for /shipments or /shipments/123, but NOT for nested tabs (create/upload/checklist)
+    return /^\/shipments(\/[^/]+)?\/?$/.test(current) && !current.includes('/create');
+  }
+
+  if (target === '/shipments/create') {
+    return current.startsWith('/shipments/create') || current.startsWith('/shipments/new');
+  }
+
+  // 4. Fallback for other nested routes
+  if (current.startsWith(target) && target !== '/') {
+    return true;
+  }
+
   return false;
 };
 
