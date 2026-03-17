@@ -90,19 +90,19 @@ ExporTrack AI is a comprehensive export logistics document management system des
 ┌─────────────────────────────────────────────────────────┐
 │                    ExporTrack AI                        │
 ├─────────────────────────────────────────────────────────┤
-│  Authentication Layer                                    │
+│  Authentication Layer                                   │
 │  ├── Google OAuth                                       │
 │  └── Email/Password                                     │
 ├─────────────────────────────────────────────────────────┤
 │  Core Features                                          │
 │  ├── Shipment Management (CRUD)                         │
-│  ├── Document Upload & Verification                      │
+│  ├── Document Upload & Verification                     │
 │  ├── Status Automation Engine                           │
 │  ├── RBAC Permission System                             │
 │  └── Notification Service                               │
 ├─────────────────────────────────────────────────────────┤
 │  UI Layer                                               │
-│  ├── Dashboard (KPIs + Charts)                         │
+│  ├── Dashboard (KPIs + Charts)                          │
 │  ├── Shipment Details                                   │
 │  ├── Team Management                                    │
 │  └── Analytics                                          │

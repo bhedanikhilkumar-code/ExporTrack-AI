@@ -1,5 +1,12 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useLocation } from 'react-router-dom';
 import AppIcon from './AppIcon';
+
+// Helper function for route matching - supports nested routes
+const isRouteActive = (pathname: string, itemPath: string): boolean => {
+  if (pathname === itemPath) return true;
+  if (pathname.startsWith(itemPath) && itemPath !== '/') return true;
+  return false;
+};
 
 interface NavItem {
   to: string;
@@ -14,6 +21,8 @@ interface MobileSidebarProps {
 }
 
 export default function MobileSidebar({ isOpen, onClose, navItems }: MobileSidebarProps) {
+  const location = useLocation();
+
   return (
     <>
       {/* Overlay */}
@@ -46,36 +55,33 @@ export default function MobileSidebar({ isOpen, onClose, navItems }: MobileSideb
         </div>
 
         <nav className="flex-1 overflow-y-auto px-4 py-6 space-y-1">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={onClose}
-              className={({ isActive }) =>
-                `group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ease-in-out min-h-[48px] overflow-hidden ${isActive
-                  ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white dark:from-slate-800 dark:to-slate-900 shadow-lg shadow-slate-900/20'
-                  : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 hover:scale-[1.02]'
-                }`
-              }
-            >
-              {/* Active indicator bar */}
-              {({ isActive }) => (
-                <>
-                  {isActive && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-teal-400 to-emerald-500 rounded-r-full shadow-lg shadow-teal-500/50" />
-                  )}
-                  <AppIcon
-                    name={item.icon}
-                    className={`h-5 w-5 shrink-0 transition-all duration-300 ${isActive
-                        ? 'text-teal-400 scale-110 drop-shadow-lg'
-                        : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
-                      }`}
-                  />
-                  <span className={isActive ? 'text-white' : ''}>{item.label}</span>
-                </>
-              )}
-            </NavLink>
-          ))}
+          {navItems.map((item) => {
+            const isActive = isRouteActive(location.pathname, item.to);
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                onClick={onClose}
+                className={`group relative flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-bold transition-all duration-300 ease-in-out min-h-[48px] overflow-hidden ${isActive
+                    ? 'bg-gradient-to-r from-slate-900 to-slate-800 text-white dark:from-slate-800 dark:to-slate-900 shadow-lg shadow-slate-900/20'
+                    : 'text-slate-500 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800/50 hover:scale-[1.02]'
+                  }`}
+              >
+                {/* Active indicator bar */}
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-teal-400 to-emerald-500 rounded-r-full shadow-lg shadow-teal-500/50" />
+                )}
+                <AppIcon
+                  name={item.icon}
+                  className={`h-5 w-5 shrink-0 transition-all duration-300 ${isActive
+                      ? 'text-teal-400 scale-110 drop-shadow-lg'
+                      : 'text-slate-400 group-hover:text-slate-600 dark:group-hover:text-slate-300'
+                    }`}
+                />
+                <span className={isActive ? 'text-white' : ''}>{item.label}</span>
+              </NavLink>
+            );
+          })}
         </nav>
 
         <div className="p-4 border-t border-slate-200/60 dark:border-slate-800/60">
