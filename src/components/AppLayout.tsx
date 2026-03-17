@@ -257,7 +257,7 @@ export default function AppLayout() {
                           <button
                             key={i}
                             onClick={() => handleResultClick(res.path)}
-                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left group"
+                            className="w-full flex items-center justify-between p-3 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors text-left group active-press"
                           >
                             <div className="flex flex-col min-w-0 flex-1">
                               <span className="text-xs font-bold text-slate-900 dark:text-slate-100 group-hover:text-teal-600 dark:group-hover:text-teal-400 truncate">
@@ -295,7 +295,7 @@ export default function AppLayout() {
             <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
               <button
                 onClick={toggleTheme}
-                className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm"
+                className="focus-ring flex h-11 w-11 sm:h-9 sm:w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-slate-100 transition-all shadow-sm active-press"
                 title={theme === 'dark' ? 'Switch to Light' : theme === 'light' ? 'Switch to System' : 'Switch to Dark'}
                 aria-label={theme === 'dark' ? 'Switch to light mode' : theme === 'light' ? 'Switch to system mode' : 'Switch to dark mode'}
               >
@@ -306,7 +306,7 @@ export default function AppLayout() {
                 <button
                   type="button"
                   onClick={() => setNotificationPanelOpen(!notificationPanelOpen)}
-                  className="flex items-center gap-2 h-9 px-4 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all shadow-sm group"
+                  className="flex items-center gap-2 h-9 px-4 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all shadow-sm group active-press"
                   aria-label="Notifications"
                 >
                   <span className="text-[11px] font-black uppercase tracking-widest text-slate-500 group-hover:text-slate-900 transition-colors">Alerts</span>

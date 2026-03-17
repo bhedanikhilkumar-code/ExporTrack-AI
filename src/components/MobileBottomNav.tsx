@@ -24,7 +24,7 @@ export default function MobileBottomNav() {
           key={item.to}
           to={item.to}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center gap-1 py-1 transition-all duration-200 ${
+            `flex flex-col items-center justify-center gap-1 py-1 transition-all duration-200 active-press ${
               item.isCenter 
                 ? '!-mt-8 h-14 w-14 rounded-full bg-slate-900 dark:bg-teal-500 text-white shadow-lg active:scale-95'
                 : isActive

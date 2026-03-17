@@ -9,7 +9,7 @@ export default function MobileFAB() {
   return (
     <button
       onClick={() => navigate('/shipments/create')}
-      className={`fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-slate-900 text-white shadow-[0_8px_25px_rgba(0,0,0,0.3)] transition-all duration-500 active:scale-90 hover:scale-105 dark:bg-teal-500 dark:text-slate-950 dark:shadow-[0_8px_25px_rgba(20,184,166,0.3)] md:hidden border border-white/10 ${
+      className={`fixed right-6 z-40 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-lg shadow-slate-900/20 active:scale-95 active:shadow-sm dark:bg-teal-500 dark:shadow-teal-500/20 transition-all duration-200 active-press md:hidden border border-white/10 ${
         isVisible ? 'bottom-24 opacity-100 translate-y-0' : 'bottom-24 opacity-0 translate-y-20 pointer-events-none'
       }`}
       aria-label="Create Shipment"

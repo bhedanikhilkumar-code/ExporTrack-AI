@@ -107,7 +107,7 @@ export default function AppIcon({ name, className, strokeWidth, 'aria-hidden': a
       strokeWidth={strokeWidth ?? 1.8}
       strokeLinecap="round"
       strokeLinejoin="round"
-      className={className ?? 'h-4 w-4'}
+      className={className ?? 'h-4 w-4 transition-transform duration-200'}
       aria-hidden={ariaHidden ?? true}
     >
       <path d={iconMap[name]} />

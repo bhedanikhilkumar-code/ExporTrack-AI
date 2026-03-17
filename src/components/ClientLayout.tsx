@@ -24,7 +24,7 @@ export default function ClientLayout() {
     <div className={`min-h-screen bg-slate-50 dark:bg-slate-950 font-sans antialiased text-slate-900 transition-colors duration-300 ${theme === 'dark' ? 'dark' : ''}`}>
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm lg:hidden animate-in fade-in"
           onClick={closeSidebar}
         />
@@ -55,11 +55,10 @@ export default function ClientLayout() {
                 key={item.to}
                 to={item.to}
                 onClick={closeSidebar}
-                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                  isActive
+                className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${isActive
                     ? 'bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900 dark:text-slate-400 dark:hover:bg-slate-800/50 dark:hover:text-slate-200'
-                }`}
+                  }`}
               >
                 <AppIcon name={item.icon as any} className={`h-5 w-5 transition-transform group-hover:scale-110 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 group-hover:text-slate-500 dark:group-hover:text-slate-300'}`} />
                 {item.label}
@@ -69,7 +68,7 @@ export default function ClientLayout() {
         </nav>
 
         <div className="p-4 border-t border-slate-200/60 dark:border-slate-800/60">
-          <button onClick={logout} className="w-full group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10 transition-all">
+          <button onClick={logout} className="w-full group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-500/10 transition-all active-press">
             <AppIcon name="logout" className="h-5 w-5" />
             Sign Out
           </button>
@@ -78,10 +77,9 @@ export default function ClientLayout() {
 
       {/* Main Content */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
-        <header className={`sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/80 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/80 sm:px-6 transition-transform duration-300 ease-in-out ${
-          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-        }`}>
-          <button 
+        <header className={`sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b border-slate-200/60 bg-white/80 px-4 shadow-sm backdrop-blur-md dark:border-slate-800/60 dark:bg-slate-900/80 sm:px-6 transition-transform duration-300 ease-in-out ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+          }`}>
+          <button
             type="button"
             className="lg:hidden flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 dark:border-slate-700 sm:h-10 sm:w-10"
             onClick={() => setIsSidebarOpen(true)}
@@ -90,7 +88,7 @@ export default function ClientLayout() {
           </button>
 
           <div className="flex flex-1 items-center justify-end gap-x-4 lg:gap-x-6">
-            <button onClick={toggleTheme} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-500 dark:hover:bg-slate-800 transition-colors">
+            <button onClick={toggleTheme} className="rounded-full p-2 text-slate-400 hover:bg-slate-100 hover:text-slate-500 dark:hover:bg-slate-800 transition-colors active-press">
               <AppIcon name={theme === 'dark' ? 'sun' : 'moon'} className="h-5 w-5" />
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-slate-800">
