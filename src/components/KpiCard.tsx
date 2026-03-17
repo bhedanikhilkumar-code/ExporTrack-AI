@@ -57,7 +57,7 @@ const icons: Record<KpiCardProps['accent'], any> = {
 export default function KpiCard({ title, value, subtitle, accent, icon, suffix, trend }: KpiCardProps) {
   const colors = colorMap[accent];
   return (
-    <article className="kpi-card group hover-premium cursor-default p-4 sm:p-5">
+    <article className="kpi-card group glass-premium hover-premium cursor-default p-4 sm:p-5 transition-all duration-500">
       <div className="flex flex-col gap-3 sm:gap-4">
         <div className="flex items-center justify-between">
           <span className={`inline-flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br ${colors.gradient} spring-transition duration-500 group-hover:scale-110 group-hover:rotate-3 group-hover:shadow-lg ring-1 ring-inset ring-slate-900/5 dark:ring-white/10`}>
@@ -80,6 +80,10 @@ export default function KpiCard({ title, value, subtitle, accent, icon, suffix, 
                 <span>{trend.value}</span>
               </div>
             )}
+          </div>
+          <div className="h-10 w-10 shrink-0 rounded-xl bg-slate-800 flex items-center justify-center border border-teal-500 shadow-[0_0_20px_-3px_rgba(20,184,166,0.6)] relative overflow-hidden group-hover:shadow-[0_0_30px_-3px_rgba(20,184,166,0.8)] transition-all duration-700">
+            <div className="absolute inset-0 bg-teal-400/20 animate-pulse" />
+            <AppIcon name="ai-extract" className="h-5 w-5 text-teal-400 relative z-10 animate-glow" strokeWidth={2.5} />
           </div>
           <div className="flex items-center gap-1">
             <div className="h-1 w-1 rounded-full bg-teal-500/50 animate-pulse" />

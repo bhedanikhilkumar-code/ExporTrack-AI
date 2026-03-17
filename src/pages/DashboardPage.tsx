@@ -7,7 +7,9 @@ import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
 import ShipmentAnalytics from '../components/ShipmentAnalytics';
+import TrackingMap from '../components/TrackingMap';
 import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard, SkeletonLine } from '../components/SkeletonLoader';
+import { ShipmentTracking } from '../types';
 
 /* ─── Sub-Components ─────────────────────────────────────────────────── */
 const DashboardKpiCard = memo(({ title, value, icon, accent, suffix, subtitle }: any) => (
@@ -44,6 +46,18 @@ export default function DashboardPage() {
       recentShipments: recent,
     };
   }, [shipments, notifications]);
+  
+  const mockTrackingData: ShipmentTracking = useMemo(() => ({
+    shipmentId: 'EXP-992',
+    currentStatus: 'In Transit',
+    currentLocation: 'Panvel Hub, MH',
+    latitude: 18.9894,
+    longitude: 73.1175,
+    lastUpdatedTime: new Date().toISOString(),
+    trackingHistory: [
+      { timestamp: new Date(Date.now() - 3600000).toISOString(), locationName: 'Nhava Sheva Port', lat: 18.95, lng: 72.95, status: 'Departed' }
+    ]
+  }), []);
 
   const now = new Date();
   const dateLabel = now.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
@@ -97,9 +111,11 @@ export default function DashboardPage() {
   return (
     <main className="page-stack skeleton-fade-in">
       {/* ── Dashboard Header ── */}
-      <header className="dashboard-grid-header">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.03em' }}>Enterprise Logistics Hub</h1>
+      <header className="dashboard-grid-header mb-2">
+        <div className="animate-in fade-in slide-in-from-left duration-700">
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 dark:text-white" style={{ letterSpacing: '-0.04em' }}>
+            Operational Control
+          </h1>
           <p className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">
             Advanced analytics and AI-powered logistics insights.
           </p>
@@ -118,9 +134,16 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* ── KPI Section ── */}
-      <section className="dashboard-grid-kpi">
-        <DashboardKpiCard title="Total Volume" value={analyticsData.totalShipments} subtitle="Shipments processed" accent="indigo" icon="shipments" />
+      {/* Top Stats Row with Staggered Entry */}
+      <section className="dashboard-grid-kpi stagger-in">
+        <KpiCard
+          title="Total Shipments"
+          value={analyticsData.totalShipments} // Changed from metrics.totalShipments to analyticsData.totalShipments
+          subtitle="+12% from last month"
+          accent="navy"
+          icon="shipments"
+          trend={{ value: '12%', isPositive: true }}
+        />
         <DashboardKpiCard title="On-Time Rate" value={analyticsData.onTimeDeliveryRate} subtitle="Compliance benchmark" accent="teal" icon="check" suffix="%" />
         <DashboardKpiCard title="Delayed Units" value={analyticsData.delayedShipments} subtitle="Requires attention" accent="rose" icon="warning" />
         <DashboardKpiCard title="Avg. Lead Time" value={analyticsData.averageDeliveryTime} subtitle="Global average" accent="amber" icon="clock" suffix="d" />
@@ -167,6 +190,35 @@ export default function DashboardPage() {
             ))}
           </div>
         </article>
+      </div>
+
+      <div className="dashboard-grid-section stagger-in">
+        {/* Real-time Tracking Map */}
+        <div className="col-span-1 lg:col-span-2 space-y-4">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
+              Live Fleet Intelligence
+            </h2>
+            <Link to="/tracking" className="text-xs font-bold text-teal-600 hover:text-teal-500 flex items-center gap-1 transition-all hover:gap-2">
+              Deep View <AppIcon name="arrow-right" className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50">
+            <TrackingMap 
+              tracking={mockTrackingData} 
+              className="h-[420px] w-full"
+            />
+          </div>
+        </div>
+
+        {/* AI Assistant */}
+        <div className="col-span-1 flex flex-col space-y-4">
+           <h2 className="text-lg font-black tracking-tight px-1">Predictive Ops Assistant</h2>
+           <div className="flex-1 glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50">
+             <AiLogisticsAssistant />
+           </div>
+        </div>
       </div>
 
       <div className="dashboard-grid-wide">

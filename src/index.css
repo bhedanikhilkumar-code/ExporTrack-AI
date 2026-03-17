@@ -67,6 +67,9 @@
     --border-base: #1e293b;
     --border-strong: #334155;
     --shadow-glow-teal: 0 0 25px -5px rgb(45 212 191 / 0.2);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   }
 
   html,
@@ -101,8 +104,12 @@
   .dark body {
     background-color: #020617;
     background-image:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(45, 212, 191, 0.07), transparent 60%),
-      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(30, 64, 175, 0.05), transparent 50%);
+      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(45, 212, 191, 0.08), transparent 65%),
+      radial-gradient(ellipse 60% 40% at 100% 100%, rgba(30, 64, 175, 0.05), transparent 50%),
+      radial-gradient(circle at 0% 0%, rgba(20, 184, 166, 0.03), transparent 40%);
+    --glass-bg: rgba(15, 23, 42, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
   }
 
   * {
@@ -361,6 +368,14 @@
     @apply bg-white/70 backdrop-blur-md dark:bg-slate-900/70;
   }
 
+  .glass-premium {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+  }
+
   .glass-dark {
     @apply bg-slate-900/80 backdrop-blur-xl border border-white/5;
   }
@@ -430,6 +445,32 @@
   position: relative;
   width: 100%;
   min-height: 100%;
+}
+
+/* Staggered Entry System */
+.stagger-in > * {
+  opacity: 0;
+  animation: elite-entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-in > *:nth-child(1) { animation-delay: 50ms; }
+.stagger-in > *:nth-child(2) { animation-delay: 100ms; }
+.stagger-in > *:nth-child(3) { animation-delay: 150ms; }
+.stagger-in > *:nth-child(4) { animation-delay: 200ms; }
+.stagger-in > *:nth-child(5) { animation-delay: 250ms; }
+.stagger-in > *:nth-child(6) { animation-delay: 300ms; }
+
+@keyframes elite-entrance {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.98);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════ */
