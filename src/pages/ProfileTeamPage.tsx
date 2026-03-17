@@ -38,12 +38,13 @@ export default function ProfileTeamPage() {
     removeLegacyTeamMember,
     updateUserProfile,
     deleteInvite,
+    deleteShipment,
     isDemoUser
   } = useAppContext();
 
   // State
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'team' | 'settings' | 'security' | 'billing' | 'integrations'>('team');
+  const [activeTab, setActiveTab] = useState<'team' | 'settings' | 'security' | 'billing' | 'integrations' | 'all-shipments'>('team');
 
   // Modals
   const [showInviteModal, setShowInviteModal] = useState(false);
@@ -154,6 +155,13 @@ export default function ProfileTeamPage() {
     }
   };
 
+  const handleDeleteShipment = (shipmentId: string) => {
+    if (confirm(`⚠️ Are you sure you want to permanently delete shipment ${shipmentId}? This action cannot be undone and will remove it globally from the dashboard.`)) {
+      deleteShipment(shipmentId);
+      alert(`✅ Shipment ${shipmentId} deleted successfully.`);
+    }
+  };
+
   const memberStats = useMemo<MemberStat[]>(() => teamMembers.map((member) => {
     const assigned = shipments.filter((s) => s.assignedTo === member.name);
     const pending = assigned.reduce((sum, s) => sum + s.documents.filter((d) => d.status === 'Pending').length, 0);
@@ -222,7 +230,7 @@ export default function ProfileTeamPage() {
       {/* Tab Navigation */}
       <div className="card-premium mb-6 overflow-x-auto">
         <div className="flex gap-1 p-1">
-          {(['team', 'settings', 'security', 'billing', 'integrations'] as const).map((tab) => (
+          {(['team', 'all-shipments', 'settings', 'security', 'billing', 'integrations'] as const).map((tab) => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
@@ -235,6 +243,7 @@ export default function ProfileTeamPage() {
                 <AppIcon
                   name={
                     (tab === 'team' ? 'team' :
+                      tab === 'all-shipments' ? 'shipments' :
                       tab === 'settings' ? 'settings' :
                         tab === 'security' ? 'clock' :
                           tab === 'billing' ? 'credit' :
@@ -242,7 +251,7 @@ export default function ProfileTeamPage() {
                   }
                   className="h-3.5 w-3.5"
                 />
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
               </div>
             </button>
           ))}
@@ -381,6 +390,84 @@ export default function ProfileTeamPage() {
                 </div>
               ))}
             </div>
+          </article>
+        </div>
+      )}
+
+      {/* ALL SHIPMENTS TAB */}
+      {activeTab === 'all-shipments' && (
+        <div className="space-y-6">
+          <article className="card-premium overflow-hidden">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 dark:text-white">Shipment Management</h3>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
+                  View and manage all active and historical shipments. Deleting a shipment here removes it globally.
+                </p>
+              </div>
+              <div className="text-xs font-bold text-slate-400 bg-slate-50 dark:bg-slate-800/50 px-3 py-1.5 rounded-lg">
+                Total: {shipments.length}
+              </div>
+            </div>
+
+            {shipments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center text-slate-500 dark:text-slate-400">
+                <AppIcon name="shipments" className="h-12 w-12 mb-4 opacity-50" />
+                <p className="text-sm font-medium">No shipments found in the workspace.</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID</th>
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Client</th>
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden sm:table-cell">Destination</th>
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400 hidden md:table-cell">Date</th>
+                      <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                      <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {shipments.map(s => (
+                      <tr key={s.id} className="group hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                        <td className="px-4 py-4">
+                          <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">{s.id}</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{s.clientName}</span>
+                        </td>
+                        <td className="px-4 py-4 hidden sm:table-cell">
+                          <span className="text-xs text-slate-600 dark:text-slate-400">{s.destinationCountry}</span>
+                        </td>
+                        <td className="px-4 py-4 hidden md:table-cell">
+                          <span className="text-xs text-slate-600 dark:text-slate-400 tabular-nums">{s.shipmentDate}</span>
+                        </td>
+                        <td className="px-4 py-4">
+                          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
+                            s.status === 'Delivered' ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' :
+                            s.status === 'In Transit' ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' :
+                            'bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-400'
+                          }`}>
+                            {s.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-4 text-right">
+                          <button 
+                            onClick={() => handleDeleteShipment(s.id)}
+                            className="inline-flex items-center gap-1 h-8 px-3 rounded-lg border border-rose-200 bg-rose-50 text-rose-600 hover:bg-rose-500 hover:text-white hover:border-rose-500 dark:border-rose-900/50 dark:bg-rose-900/20 dark:hover:bg-rose-600 dark:hover:border-rose-600 dark:hover:text-white transition-colors text-[10px] font-bold uppercase tracking-wider"
+                            title="Delete Shipment"
+                          >
+                            <AppIcon name="x" className="h-3 w-3" />
+                            <span className="hidden sm:inline">Delete</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </article>
         </div>
       )}
