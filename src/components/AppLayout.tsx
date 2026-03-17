@@ -56,7 +56,7 @@ export default function AppLayout() {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   const filteredNavItems = useMemo(() => {
-    return navItems.filter(item => !('action' in item) || hasPermission(item.action as string));
+    return navItems.filter(item => !('action' in item) || hasPermission(item.action as any));
   }, [user, hasPermission]);
 
   const { isVisible: isHeaderVisible, isScrolled } = useScrollDirection();
@@ -206,13 +206,11 @@ export default function AppLayout() {
 
       <div className={`transition-all duration-300 ease-in-out ${sidebarExpanded ? 'md:pl-64' : 'md:pl-20'
         }`}>
-        <header className={`sticky top-0 z-40 transition-all duration-500 ease-in-out will-change-transform pt-[env(safe-area-inset-top)] ${
-          isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
-        } ${
-          isScrolled 
-            ? 'mx-4 mt-3 rounded-2xl glass-premium shadow-2xl border-white/20 dark:border-slate-800/50 h-14' 
+        <header className={`sticky top-0 z-40 transition-all duration-500 ease-in-out will-change-transform pt-[env(safe-area-inset-top)] ${isHeaderVisible ? 'translate-y-0' : '-translate-y-full'
+          } ${isScrolled
+            ? 'mx-4 mt-3 rounded-2xl glass-premium shadow-2xl border-white/20 dark:border-slate-800/50 h-14'
             : 'bg-white/80 backdrop-blur-2xl border-b border-slate-200/40 dark:bg-slate-950/80 dark:border-slate-800/40 h-16'
-        }`}>
+          }`}>
           <div className={`mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 md:px-8 transition-all duration-500 ${isScrolled ? 'h-14' : 'h-16'}`}>
             {/* Left Section */}
             <div className="flex items-center gap-4 flex-1 min-w-0">
@@ -324,16 +322,16 @@ export default function AppLayout() {
               </div>
 
               <div className="h-6 w-px bg-slate-200 dark:bg-slate-800 mx-1 hidden sm:block"></div>
-              
+
               <UserProfileDropdown />
             </div>
           </div>
         </header>
 
-        <MobileSidebar 
-          isOpen={menuOpen} 
-          onClose={() => setMenuOpen(false)} 
-          navItems={filteredNavItems} 
+        <MobileSidebar
+          isOpen={menuOpen}
+          onClose={() => setMenuOpen(false)}
+          navItems={filteredNavItems}
         />
 
         <main className="mx-auto max-w-7xl px-4 pb-24 pt-6 md:px-8 md:pb-8 md:py-8">

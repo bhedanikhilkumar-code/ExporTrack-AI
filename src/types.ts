@@ -272,6 +272,11 @@ export interface ShipmentTracking {
   trackingHistory: LocationUpdate[]; // Keeping existing for legacy support while migrating
   estimatedArrival?: string;
 
+  // Legacy properties used in components
+  location?: string;
+  next_hub?: string;
+  milestones?: Array<{ event: string; timestamp: string; completed: boolean }>;
+
   // New unified tracking fields
   tracking_number?: string;
   carrier?: string;

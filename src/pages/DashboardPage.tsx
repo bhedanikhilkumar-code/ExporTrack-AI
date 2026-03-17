@@ -48,7 +48,7 @@ export default function DashboardPage() {
       recentShipments: recent,
     };
   }, [shipments, notifications]);
-  
+
   const mockTrackingData: ShipmentTracking = useMemo(() => ({
     shipmentId: 'EXP-992',
     currentStatus: 'In Transit',
@@ -73,7 +73,7 @@ export default function DashboardPage() {
         totalShipments: analyticsData.totalShipments,
         onTimeDeliveryRate: analyticsData.onTimeDeliveryRate,
         delayedShipments: analyticsData.delayedShipments,
-        averageDeliveryTime: analyticsData.averageDeliveryTime,
+        averageDeliveryTime: analyticsData.averageDeliveryTimeDays,
         shipments: shipments.map(s => ({
           id: s.id,
           clientName: s.clientName,
@@ -89,7 +89,7 @@ export default function DashboardPage() {
         ['Total Shipments', analyticsData.totalShipments],
         ['On-Time Rate', `${analyticsData.onTimeDeliveryRate}%`],
         ['Delayed Units', analyticsData.delayedShipments],
-        ['Avg Lead Time', `${analyticsData.averageDeliveryTime} days`],
+        ['Avg Lead Time', `${analyticsData.averageDeliveryTimeDays} days`],
         [],
         ['Shipment Details'],
         ['ID', 'Client', 'Status', 'Date']
@@ -214,145 +214,145 @@ export default function DashboardPage() {
 
       {/* Only show full dashboard content when user has shipments or is in demo mode */}
       {(isDemoUser || shipments.length > 0) && (<>
-      {/* Top Stats Row with Staggered Entry */}
-      <section className="dashboard-grid-kpi stagger-in">
-        <KpiCard
-          title="Total Shipments"
-          value={analyticsData.totalShipments} // Changed from metrics.totalShipments to analyticsData.totalShipments
-          subtitle="+12% from last month"
-          accent="navy"
-          icon="shipments"
-          trend={{ value: '12%', isPositive: true }}
-        />
-        <DashboardKpiCard title="On-Time Rate" value={analyticsData.onTimeDeliveryRate} subtitle="Compliance benchmark" accent="teal" icon="check" suffix="%" />
-        <DashboardKpiCard title="Delayed Units" value={analyticsData.delayedShipments} subtitle="Requires attention" accent="rose" icon="warning" />
-        <DashboardKpiCard title="Avg. Lead Time" value={analyticsData.averageDeliveryTime} subtitle="Global average" accent="amber" icon="clock" suffix="d" />
-        <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread notifications" accent="slate" icon="bell" />
-      </section>
+        {/* Top Stats Row with Staggered Entry */}
+        <section className="dashboard-grid-kpi stagger-in">
+          <KpiCard
+            title="Total Shipments"
+            value={analyticsData.totalShipments} // Changed from metrics.totalShipments to analyticsData.totalShipments
+            subtitle="+12% from last month"
+            accent="navy"
+            icon="shipments"
+            trend={{ value: '12%', isPositive: true }}
+          />
+          <DashboardKpiCard title="On-Time Rate" value={analyticsData.onTimeDeliveryRate} subtitle="Compliance benchmark" accent="teal" icon="check" suffix="%" />
+          <DashboardKpiCard title="Delayed Units" value={analyticsData.delayedShipments} subtitle="Requires attention" accent="rose" icon="warning" />
+          <DashboardKpiCard title="Avg. Lead Time" value={analyticsData.averageDeliveryTimeDays} subtitle="Global average" accent="amber" icon="clock" suffix="d" />
+          <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread notifications" accent="slate" icon="bell" />
+        </section>
 
-      {/* ── Analytics Dashboard ── */}
-      <ShipmentAnalytics data={analyticsData} />
+        {/* ── Analytics Dashboard ── */}
+        <ShipmentAnalytics data={analyticsData} />
 
-      <div className="dashboard-grid-section">
-        {/* AI Logistics Assistant */}
-        <AiLogisticsAssistant />
+        <div className="dashboard-grid-section">
+          {/* AI Logistics Assistant */}
+          <AiLogisticsAssistant />
 
-        {/* Recent Activity */}
-        <article className="card-premium lg:col-span-2">
-          <div className="mb-6 flex items-center justify-between">
-            <div>
-              <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Logistics Event Stream</h3>
-              <p className="text-[11px] font-medium text-slate-400 mt-0.5">Real-time system events and notifications</p>
-            </div>
-            <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors group inline-flex items-center gap-1">
-              View All
-              <AppIcon name="chevron-right" className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
-            </Link>
-          </div>
-          <div className="space-y-4">
-            {activityTimeline.slice(0, 5).map((item, idx) => (
-              <div key={item.id} className="relative flex gap-4">
-                {idx !== 4 && (
-                  <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
-                )}
-                <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${item.type === 'Document' ? 'bg-indigo-500' : 'bg-rose-500'
-                  }`}>
-                  <AppIcon name={item.type === 'Document' ? 'upload' : 'bell'} className="h-3.5 w-3.5" />
-                </div>
-                <div className="flex-1 pb-4">
-                  <div className="flex items-center justify-between gap-2">
-                    <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
-                    <time className="text-[10px] font-semibold tracking-wide text-slate-400 tabular-nums">{item.time.split('T')[0]}</time>
-                  </div>
-                  <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{item.detail}</p>
-                </div>
+          {/* Recent Activity */}
+          <article className="card-premium lg:col-span-2">
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Logistics Event Stream</h3>
+                <p className="text-[11px] font-medium text-slate-400 mt-0.5">Real-time system events and notifications</p>
               </div>
-            ))}
+              <Link to="/shipments" className="text-xs font-bold text-teal-600 hover:text-teal-500 transition-colors group inline-flex items-center gap-1">
+                View All
+                <AppIcon name="chevron-right" className="h-3 w-3 transition-transform group-hover:translate-x-0.5" />
+              </Link>
+            </div>
+            <div className="space-y-4">
+              {activityTimeline.slice(0, 5).map((item, idx) => (
+                <div key={item.id} className="relative flex gap-4">
+                  {idx !== 4 && (
+                    <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
+                  )}
+                  <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white text-white shadow-sm dark:border-slate-800 ${item.type === 'Document' ? 'bg-indigo-500' : 'bg-rose-500'
+                    }`}>
+                    <AppIcon name={item.type === 'Document' ? 'upload' : 'bell'} className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="flex-1 pb-4">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-bold text-slate-900 dark:text-white">{item.title}</p>
+                      <time className="text-[10px] font-semibold tracking-wide text-slate-400 tabular-nums">{item.time.split('T')[0]}</time>
+                    </div>
+                    <p className="mt-0.5 text-[11px] leading-relaxed text-slate-500 dark:text-slate-400">{item.detail}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        </div>
+
+        <div className="dashboard-grid-section stagger-in">
+          {/* Real-time Tracking Map */}
+          <div className="col-span-1 lg:col-span-2 space-y-4">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
+                Live Fleet Intelligence
+              </h2>
+              <Link to={`/shipments/${shipments[0]?.id || 'demo'}/tracking`} className="text-xs font-bold text-teal-600 hover:text-teal-500 flex items-center gap-1 transition-all hover:gap-2">
+                Deep View <AppIcon name="arrow-right" className="h-3 w-3" />
+              </Link>
+            </div>
+            <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50">
+              <TrackingMap
+                tracking={mockTrackingData}
+                className="h-[420px] w-full"
+              />
+            </div>
+          </div>
+
+          {/* AI Predictions Spotlight */}
+          <div className="col-span-1 space-y-4">
+            <h2 className="text-lg font-black tracking-tight px-1">Risk Intelligence</h2>
+            <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50 p-6">
+              <div className="space-y-3">
+                {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
+                  <AiDelayPrediction key={s.id} shipmentId={s.id} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <article className="dashboard-grid-table card-premium overflow-hidden">
+          <div className="mb-6 flex items-center justify-between">
+            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Pipeline Monitoring</h3>
+            <button onClick={handleExportReport} disabled={exporting} className="btn-secondary btn-sm disabled:opacity-50">
+              {exporting ? 'Exporting...' : 'Export Global Report'}
+            </button>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Client</th>
+                  <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
+                  <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {recentShipments.map(s => (
+                  <tr key={s.id} className="group table-row-premium hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
+                    <td className="px-5 py-4">
+                      <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">{s.id}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{s.clientName}</span>
+                    </td>
+                    <td className="px-5 py-4">
+                      <StatusBadge value={s.status} />
+                    </td>
+                    <td className="px-5 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2.5">
+                        <Link to={`/shipments/${s.id}/tracking`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 dark:border-teal-900/50 dark:bg-teal-900/20 dark:hover:bg-teal-900/40 transition-all font-bold group" title="Live Tracking">
+                          <span className="relative flex h-3 w-3">
+                            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
+                            <span className="relative inline-flex h-full w-full rounded-full bg-teal-500"></span>
+                          </span>
+                        </Link>
+                        <Link to={`/shipments/${s.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-teal-500/50 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-teal-500/50 transition-all">
+                          <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </article>
-      </div>
-
-      <div className="dashboard-grid-section stagger-in">
-        {/* Real-time Tracking Map */}
-        <div className="col-span-1 lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-lg font-black tracking-tight flex items-center gap-2">
-              <span className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
-              Live Fleet Intelligence
-            </h2>
-            <Link to={`/shipments/${shipments[0]?.id || 'demo'}/tracking`} className="text-xs font-bold text-teal-600 hover:text-teal-500 flex items-center gap-1 transition-all hover:gap-2">
-              Deep View <AppIcon name="arrow-right" className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50">
-            <TrackingMap
-              tracking={mockTrackingData}
-              className="h-[420px] w-full"
-            />
-          </div>
-        </div>
-
-        {/* AI Predictions Spotlight */}
-        <div className="col-span-1 space-y-4">
-          <h2 className="text-lg font-black tracking-tight px-1">Risk Intelligence</h2>
-          <div className="glass-premium rounded-3xl overflow-hidden shadow-2xl border border-white/10 dark:border-slate-800/50 p-6">
-            <div className="space-y-3">
-              {shipments.filter(s => s.status !== 'Delivered').slice(0, 3).map(s => (
-                <AiDelayPrediction key={s.id} shipmentId={s.id} />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <article className="dashboard-grid-table card-premium overflow-hidden">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Pipeline Monitoring</h3>
-          <button onClick={handleExportReport} disabled={exporting} className="btn-secondary btn-sm disabled:opacity-50">
-            {exporting ? 'Exporting...' : 'Export Global Report'}
-          </button>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left">
-            <thead>
-              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">ID</th>
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Client</th>
-                <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
-                <th className="px-4 py-3 text-right text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-              {recentShipments.map(s => (
-                <tr key={s.id} className="group table-row-premium hover:bg-slate-50/80 dark:hover:bg-slate-800/30 transition-colors">
-                  <td className="px-5 py-4">
-                    <span className="text-xs font-bold text-slate-900 dark:text-white tabular-nums">{s.id}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">{s.clientName}</span>
-                  </td>
-                  <td className="px-5 py-4">
-                    <StatusBadge value={s.status} />
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2.5">
-                       <Link to={`/shipments/${s.id}/tracking`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-teal-200 bg-teal-50 text-teal-600 hover:bg-teal-100 hover:text-teal-700 dark:border-teal-900/50 dark:bg-teal-900/20 dark:hover:bg-teal-900/40 transition-all font-bold group" title="Live Tracking">
-                         <span className="relative flex h-3 w-3">
-                           <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-teal-400 opacity-75"></span>
-                           <span className="relative inline-flex h-full w-full rounded-full bg-teal-500"></span>
-                         </span>
-                       </Link>
-                       <Link to={`/shipments/${s.id}`} className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-teal-500/50 hover:text-teal-600 dark:border-slate-700 dark:bg-slate-900 dark:hover:border-teal-500/50 transition-all">
-                         <AppIcon name="chevron-right" className="h-3.5 w-3.5" />
-                       </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </article>
       </>)}
     </main>
   );

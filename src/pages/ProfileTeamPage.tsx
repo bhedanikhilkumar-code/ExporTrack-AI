@@ -204,11 +204,11 @@ export default function ProfileTeamPage() {
               <div className="flex items-center gap-2">
                 <AppIcon
                   name={
-                    tab === 'team' ? 'team' :
+                    (tab === 'team' ? 'team' :
                       tab === 'settings' ? 'settings' :
-                        tab === 'security' ? 'lock' :
+                        tab === 'security' ? 'clock' :
                           tab === 'billing' ? 'credit' :
-                            'plugin'
+                            'activity') as any
                   }
                   className="h-3.5 w-3.5"
                 />
@@ -397,11 +397,11 @@ export default function ProfileTeamPage() {
             <h3 className="text-lg font-black mb-4">Export & Backups</h3>
             <div className="space-y-3">
               <button className="btn-secondary w-full justify-center">
-                <AppIcon name="download" className="h-4 w-4 mr-2" />
+                <AppIcon name="upload" className="h-4 w-4 mr-2" />
                 Export Team Data
               </button>
               <button className="btn-secondary w-full justify-center">
-                <AppIcon name="archive" className="h-4 w-4 mr-2" />
+                <AppIcon name="upload" className="h-4 w-4 mr-2" />
                 Create Backup
               </button>
               <button className="btn-secondary w-full justify-center">
@@ -556,7 +556,7 @@ export default function ProfileTeamPage() {
                 <div className="flex items-center gap-2">
                   <input type="text" value={apiKey} readOnly className="input-field flex-1 font-mono text-xs" />
                   <button onClick={handleCopyApiKey} className="btn-secondary px-3">
-                    <AppIcon name="copy" className="h-4 w-4" />
+                    <AppIcon name="link" className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -658,7 +658,7 @@ export default function ProfileTeamPage() {
             <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">Changing role for: <span className="font-bold">{selectedMember.name}</span></p>
 
             <div className="space-y-2">
-              {(['Admin', 'Manager', 'Operations', 'Broker', 'Auditor'] as const).map((role) => (
+              {(['Admin', 'Manager', 'Operations', 'Viewer', 'Staff'] as Role[]).map((role) => (
                 <button
                   key={role}
                   onClick={() => handleMemberRoleChange(selectedMember.id, role)}
@@ -668,7 +668,7 @@ export default function ProfileTeamPage() {
                     }`}
                 >
                   <p className="font-bold">{role}</p>
-                  <p className="text-xs text-slate-600 dark:text-slate-400">{ROLE_DESCRIPTIONS[role] || 'Team role'}</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400">{ROLE_DESCRIPTIONS[toWorkspaceRole(role)] || 'Team role'}</p>
                 </button>
               ))}
             </div>

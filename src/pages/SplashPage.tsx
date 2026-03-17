@@ -18,12 +18,12 @@ export default function SplashPage() {
   const navigate = useNavigate();
   const {
     state: { shipments, notifications },
-    loginWithGoogle
+    loginWithDemoAccount
   } = useAppContext();
 
   const handleDemo = () => {
     try {
-      loginWithGoogle();
+      loginWithDemoAccount();
       // Redirect after state is updated
       setTimeout(() => {
         navigate('/dashboard', { replace: true });

@@ -10,6 +10,11 @@ export interface ShipmentAnalyticsMetrics {
   inTransitShipments: number;
   awaitingDocsShipments: number;
   customsHoldShipments: number;
+  // Legacy properties for backward compatibility with AnalyticsMetrics
+  averageDeliveryTime?: number;
+  monthlyShipmentTrend?: { month: string; count: number }[];
+  carrierPerformance?: { carrier: string; rating: number; shipments: number }[];
+  deliveryTimeDistribution?: { range: string; count: number }[];
 }
 
 export interface MonthlyTrend {
@@ -97,7 +102,7 @@ export function computeDailyTrend(shipments: Shipment[]): DailyTrend[] {
     const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
     const dateStr = d.toISOString().split('T')[0];
     const count = shipments.filter(s => (s.shipmentDate || '').startsWith(dateStr)).length;
-    
+
     days.push({
       date: d.toLocaleDateString(undefined, { weekday: 'short' }),
       shipments: count
@@ -115,7 +120,7 @@ export function computeDailyTrend(shipments: Shipment[]): DailyTrend[] {
 
 /* ─── Monthly trend (last 6 months, pad missing months) ──────────────── */
 export function computeMonthlyTrend(shipments: Shipment[]): MonthlyTrend[] {
-  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   const now = new Date();
   const months: MonthlyTrend[] = [];
 

@@ -26,18 +26,18 @@ TrackingKpiCard.displayName = 'TrackingKpiCard';
 export default function TrackingPage() {
   const { shipmentId } = useParams<{ shipmentId: string }>();
   const { state: { shipments }, addComment, applyOptimizedRoute, triggerDelayAlert } = useAppContext();
-  
+
   const shipment = shipments.find(s => s.id === shipmentId);
   const { trackingData, loading, error, lastPolled } = useTracking(
-    shipment?.id || '', 
+    shipment?.id || '',
     shipment?.destinationCountry || 'US',
     5000 // Poll every 5 seconds for simulation purposes
   );
-  
+
   // Trigger delay alert when AI detects a delay
   useEffect(() => {
     if (trackingData?.delayAlert?.isDelayed) {
-      triggerDelayAlert(shipmentId!, trackingData.delayAlert.daysDelayed);
+      triggerDelayAlert(shipmentId!, `Shipment delayed by ${trackingData.delayAlert.daysDelayed} days`);
     }
   }, [trackingData?.delayAlert?.isDelayed, shipmentId, triggerDelayAlert]);
 
@@ -61,8 +61,8 @@ export default function TrackingPage() {
 
   const handleApplyRoute = () => {
     if (window.confirm('Are you sure you want to apply the AI Optimized Route? This will update the vessel navigation plans.')) {
-      applyOptimizedRoute(shipment.id);
-      addComment(shipment.id, 'AI Optimized Route applied. New waypoint instructions sent to carrier.', true);
+      applyOptimizedRoute(shipment?.id || '', {});
+      addComment(shipment?.id || '', 'AI Optimized Route applied. New waypoint instructions sent to carrier.', true);
       alert('Optimized route applied successfully.');
     }
   };
@@ -120,14 +120,14 @@ export default function TrackingPage() {
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {lastPolled && (
-             <div className="flex flex-col items-end mr-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Last Sync</span>
-                <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
-                   {lastPolled.toLocaleTimeString()}
-                </span>
-             </div>
+            <div className="flex flex-col items-end mr-4">
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Last Sync</span>
+              <span className="text-xs font-medium text-slate-600 dark:text-slate-300">
+                {lastPolled.toLocaleTimeString()}
+              </span>
+            </div>
           )}
-          <button 
+          <button
             onClick={shareTracking}
             className="btn-secondary flex items-center gap-2"
           >
@@ -141,70 +141,69 @@ export default function TrackingPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Map Section */}
           <div className="card-premium h-[450px] overflow-hidden relative p-0 border-0 shadow-xl group">
-               <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-2 transition-all">
-                  <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-2 pointer-events-auto">
-                    <span className="flex h-2 w-2">
-                       <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-teal-400 opacity-75"></span>
-                       <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-                    </span>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-200">Live GPS Cluster</span>
-                  </div>
- 
-                  {/* AI Route Strategy Badge */}
-                  {trackingData?.optimizedRoute && (
-                    <div className="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl p-3 sm:p-4 rounded-2xl shadow-2xl border border-white/10 w-[calc(100vw-2rem)] sm:max-w-xs pointer-events-auto mt-1 group/ai-panel animate-in fade-in slide-in-from-left-4">
-                       <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2.5">
-                             <div className="relative">
-                                <div className="absolute inset-0 bg-indigo-400/20 blur-md rounded-full animate-pulse" />
-                                <div className="relative flex h-6 w-6 items-center justify-center rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/20">
-                                   <AppIcon name="ai-extract" className="h-3.5 w-3.5" />
-                                </div>
-                             </div>
-                             <span className="text-[10px] font-black uppercase tracking-[0.1em] text-indigo-400">AI Strategy</span>
-                          </div>
-                          <button 
-                            onClick={() => setShowOptimizedRoute(!showOptimizedRoute)}
-                            className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-lg border transition-all ${
-                              showOptimizedRoute ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'border-white/20 text-white/40 hover:text-white hover:border-white/40'
-                            }`}
-                          >
-                            {showOptimizedRoute ? 'Active' : 'Show'}
-                          </button>
-                       </div>
-                       
-                       <div className="grid grid-cols-2 gap-4 text-white mb-4">
-                          <div className="flex flex-col bg-white/5 p-2 rounded-xl">
-                             <span className="text-[8px] uppercase text-slate-500 font-black tracking-widest">Time Saving</span>
-                             <span className="text-sm font-black text-emerald-400 mt-0.5">-{trackingData?.optimizedRoute.savings?.time}</span>
-                          </div>
-                          <div className="flex flex-col bg-white/5 p-2 rounded-xl">
-                             <span className="text-[8px] uppercase text-slate-500 font-black tracking-widest">Efficiency</span>
-                             <span className="text-sm font-black text-indigo-400 mt-0.5">-{trackingData?.optimizedRoute.savings?.distance}</span>
-                          </div>
-                       </div>
- 
-                       <button 
-                         onClick={handleApplyRoute}
-                         className="w-full py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-lg shadow-indigo-500/30 active:scale-[0.98]"
-                       >
-                         Execute Strategy
-                       </button>
+            <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-10 flex flex-col gap-2 transition-all">
+              <div className="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-full shadow-lg border border-slate-200/50 dark:border-slate-800/50 flex items-center gap-2 pointer-events-auto">
+                <span className="flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-teal-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+                </span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-800 dark:text-slate-200">Live GPS Cluster</span>
+              </div>
+
+              {/* AI Route Strategy Badge */}
+              {trackingData?.optimizedRoute && (
+                <div className="bg-slate-900/95 dark:bg-slate-950/95 backdrop-blur-xl p-3 sm:p-4 rounded-2xl shadow-2xl border border-white/10 w-[calc(100vw-2rem)] sm:max-w-xs pointer-events-auto mt-1 group/ai-panel animate-in fade-in slide-in-from-left-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-indigo-400/20 blur-md rounded-full animate-pulse" />
+                        <div className="relative flex h-6 w-6 items-center justify-center rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/20">
+                          <AppIcon name="ai-extract" className="h-3.5 w-3.5" />
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-black uppercase tracking-[0.1em] text-indigo-400">AI Strategy</span>
                     </div>
-                  )}
-               </div>
+                    <button
+                      onClick={() => setShowOptimizedRoute(!showOptimizedRoute)}
+                      className={`text-[9px] font-black uppercase px-2 py-0.5 rounded-lg border transition-all ${showOptimizedRoute ? 'bg-indigo-500 border-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'border-white/20 text-white/40 hover:text-white hover:border-white/40'
+                        }`}
+                    >
+                      {showOptimizedRoute ? 'Active' : 'Show'}
+                    </button>
+                  </div>
 
-               <div className="absolute z-0 inset-0 h-full w-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
-                  {/* Fallback pattern while tiles load */}
-                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-teal-500 dark:border-slate-700"></div>
-               </div>
+                  <div className="grid grid-cols-2 gap-4 text-white mb-4">
+                    <div className="flex flex-col bg-white/5 p-2 rounded-xl">
+                      <span className="text-[8px] uppercase text-slate-500 font-black tracking-widest">Time Saving</span>
+                      <span className="text-sm font-black text-emerald-400 mt-0.5">-{trackingData?.optimizedRoute.savings?.time}</span>
+                    </div>
+                    <div className="flex flex-col bg-white/5 p-2 rounded-xl">
+                      <span className="text-[8px] uppercase text-slate-500 font-black tracking-widest">Efficiency</span>
+                      <span className="text-sm font-black text-indigo-400 mt-0.5">-{trackingData?.optimizedRoute.savings?.distance}</span>
+                    </div>
+                  </div>
 
-               {/* The Map */}
-               <TrackingMap 
-                 tracking={trackingData} 
-                 showOptimizedRoute={showOptimizedRoute}
-                 className="relative z-[5] h-full w-full" 
-               />
+                  <button
+                    onClick={handleApplyRoute}
+                    className="w-full py-2.5 rounded-xl bg-indigo-500 hover:bg-indigo-600 text-white text-[10px] font-black uppercase tracking-[0.15em] transition-all shadow-lg shadow-indigo-500/30 active:scale-[0.98]"
+                  >
+                    Execute Strategy
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="absolute z-0 inset-0 h-full w-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center">
+              {/* Fallback pattern while tiles load */}
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-300 border-t-teal-500 dark:border-slate-700"></div>
+            </div>
+
+            {/* The Map */}
+            <TrackingMap
+              tracking={trackingData}
+              showOptimizedRoute={showOptimizedRoute}
+              className="relative z-[5] h-full w-full"
+            />
           </div>
 
           {/* Live Data Feed Cards */}
@@ -216,95 +215,104 @@ export default function TrackingPage() {
           </section>
 
           <div className="grid gap-4 sm:grid-cols-3">
-             {/* AI ETA Card */}
-             {trackingData.aiEta && (
-               <div className="card-premium border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-white dark:from-purple-900/10 dark:to-slate-900">
-                  <div className="flex items-center justify-between mb-2">
-                     <div className="flex items-center gap-2">
-                       <AppIcon name="ai-extract" className="h-4 w-4 text-purple-600" />
-                       <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">AI Prediction</h3>
-                     </div>
-                     <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${
-                       trackingData.aiEta.confidenceScore >= 90 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 
-                       trackingData.aiEta.confidenceScore >= 75 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' : 
-                       'bg-rose-100 text-rose-700 dark:bg-rose-900/30'
-                     }`}>
-                       {trackingData.aiEta.confidenceScore}% Conf
-                     </span>
+            {/* AI ETA Card */}
+            {trackingData?.aiEta && (
+              <div className="card-premium border-l-4 border-l-purple-500 bg-gradient-to-br from-purple-50/50 to-white dark:from-purple-900/10 dark:to-slate-900">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <AppIcon name="ai-extract" className="h-4 w-4 text-purple-600" />
+                    <h3 className="text-[10px] font-bold uppercase tracking-widest text-purple-600 dark:text-purple-400">AI Prediction</h3>
                   </div>
-                  <p className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                     {new Date(trackingData.aiEta.predictedArrival).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-                  </p>
-                  {trackingData.delayAlert?.isDelayed && (
-                    <p className="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1 mt-1">
-                      <AppIcon name="warning" className="h-3 w-3" />
-                      Delay Detected
-                    </p>
-                  )}
-               </div>
-             )}
-             <div className="card-premium border-l-4 border-l-teal-500">
-                <div className="flex items-center gap-3 mb-2">
-                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-900/20">
-                      <AppIcon name="clock" className="h-4 w-4" />
-                   </div>
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Estimated Arrival</h3>
+                  <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded ${trackingData?.aiEta?.confidenceScore !== undefined && trackingData?.aiEta?.confidenceScore >= 90 ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' :
+                    trackingData?.aiEta?.confidenceScore !== undefined && trackingData?.aiEta?.confidenceScore >= 75 ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30' :
+                      'bg-rose-100 text-rose-700 dark:bg-rose-900/30'
+                    }`}>
+                    {trackingData?.aiEta?.confidenceScore}% Conf
+                  </span>
                 </div>
                 <p className="text-lg font-bold text-slate-900 dark:text-white mt-1">
-                   {trackingData.estimatedArrival ? new Date(trackingData.estimatedArrival).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) : 'Calculating...'}
+                  {trackingData?.aiEta?.predictedArrival ? new Date(trackingData.aiEta.predictedArrival).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : 'Calculating...'}
                 </p>
-             </div>
-             
-             <div className="card-premium border-l-4 border-l-indigo-500">
-                <div className="flex items-center gap-3 mb-2">
-                   <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
-                      <AppIcon name="shield" className="h-4 w-4" />
-                   </div>
-                   <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Current Status</h3>
+                {trackingData?.delayAlert?.isDelayed && (
+                  <p className="text-[10px] font-bold text-rose-500 uppercase flex items-center gap-1 mt-1">
+                    <AppIcon name="warning" className="h-3 w-3" />
+                    Delay Detected
+                  </p>
+                )}
+              </div>
+            )}
+            <div className="card-premium border-l-4 border-l-teal-500">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50 text-teal-600 dark:bg-teal-900/20">
+                  <AppIcon name="clock" className="h-4 w-4" />
                 </div>
-                <div className="mt-1">
-                   <StatusBadge value={trackingData.currentStatus} />
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Estimated Arrival</h3>
+              </div>
+              <p className="text-lg font-bold text-slate-900 dark:text-white mt-1">
+                {trackingData?.estimatedArrival ? new Date(trackingData.estimatedArrival).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' }) : 'Calculating...'}
+              </p>
+            </div>
+
+            <div className="card-premium border-l-4 border-l-indigo-500">
+              <div className="flex items-center gap-3 mb-2">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20">
+                  <AppIcon name="shield" className="h-4 w-4" />
                 </div>
-             </div>
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500">Current Status</h3>
+              </div>
+              <div className="mt-1">
+                <StatusBadge value={trackingData?.currentStatus || 'Unknown'} />
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="space-y-6">
-          <DriverTrackingPanel 
-            driverName={shipment.driverName} 
-            driverPhone={shipment.driverPhone} 
-            vehicleNumber={shipment.vehicleNumber}
-            shipmentId={shipment.id}
+          <DriverTrackingPanel
+            tracking={trackingData || {
+              shipmentId: shipment?.id || '',
+              currentStatus: 'Unknown',
+              currentLocation: '',
+              latitude: 0,
+              longitude: 0,
+              lastUpdatedTime: new Date().toISOString(),
+              trackingHistory: []
+            }}
+            shipment={{
+              driverName: shipment?.driverName,
+              driverPhone: shipment?.driverPhone,
+              vehicleNumber: shipment?.vehicleNumber
+            }}
           />
 
           <div className="card-premium">
-             <div className="flex items-center justify-between mb-4">
-               <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Tracking Events</h3>
-               <AppIcon name="clock" className="h-4 w-4 text-slate-400" />
-             </div>
-             <div className="space-y-5">
-               {(trackingData?.milestones || []).map((milestone: any, idx: number) => (
-                 <div key={idx} className="relative flex gap-4">
-                    {idx !== (trackingData?.milestones || []).length - 1 && (
-                      <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Tracking Events</h3>
+              <AppIcon name="clock" className="h-4 w-4 text-slate-400" />
+            </div>
+            <div className="space-y-5">
+              {(trackingData?.milestones || []).map((milestone: any, idx: number) => (
+                <div key={idx} className="relative flex gap-4">
+                  {idx !== (trackingData?.milestones || []).length - 1 && (
+                    <div className="absolute left-[15px] top-8 h-[calc(100%-24px)] w-px bg-slate-100 dark:bg-slate-800" />
+                  )}
+                  <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-4 border-white dark:border-slate-900 shadow-sm ${milestone.completed ? 'bg-teal-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
+                    {milestone.completed ? (
+                      <AppIcon name="check" className="h-3 w-3" strokeWidth={3} />
+                    ) : (
+                      <div className="h-2 w-2 rounded-full bg-current" />
                     )}
-                    <div className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-4 border-white dark:border-slate-900 shadow-sm ${milestone.completed ? 'bg-teal-500 text-white' : 'bg-slate-100 text-slate-400 dark:bg-slate-800'}`}>
-                      {milestone.completed ? (
-                         <AppIcon name="check" className="h-3 w-3" strokeWidth={3} />
-                      ) : (
-                         <div className="h-2 w-2 rounded-full bg-current" />
-                      )}
+                  </div>
+                  <div>
+                    <p className={`text-xs font-bold ${milestone.completed ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>{milestone.event}</p>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-[10px] font-medium text-slate-400">{milestone.time}</span>
+                      {milestone.location && <span className="text-[10px] text-slate-400">• {milestone.location}</span>}
                     </div>
-                    <div>
-                      <p className={`text-xs font-bold ${milestone.completed ? 'text-slate-900 dark:text-white' : 'text-slate-400'}`}>{milestone.event}</p>
-                      <div className="flex items-center gap-2 mt-0.5">
-                         <span className="text-[10px] font-medium text-slate-400">{milestone.time}</span>
-                         {milestone.location && <span className="text-[10px] text-slate-400">• {milestone.location}</span>}
-                      </div>
-                    </div>
-                 </div>
-               ))}
-             </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </main>

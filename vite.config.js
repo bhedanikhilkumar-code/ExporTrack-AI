@@ -10,7 +10,7 @@ export default defineConfig({
             includeAssets: ['logo.svg', 'favicon.svg'],
             workbox: {
                 globPatterns: ['**/*.{js,css,html,ico,svg,woff2}'],
-                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
+                maximumFileSizeToCacheInBytes: 10 * 1024 * 1024, // 10 MB to accommodate large assets
                 runtimeCaching: [
                     {
                         urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,

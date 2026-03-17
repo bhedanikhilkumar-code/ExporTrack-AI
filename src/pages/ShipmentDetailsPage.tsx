@@ -191,7 +191,7 @@ export default function ShipmentDetailsPage() {
 
   const handleAssignDriver = () => {
     if (driverForm.name && driverForm.phone && driverForm.vehicle) {
-      assignDriver(shipment.id, driverForm);
+      assignDriver(shipment.id, driverForm.name, driverForm.phone, driverForm.vehicle);
       setIsDriverModalOpen(false);
       setDriverForm({ name: '', phone: '', vehicle: '' });
     }
@@ -209,28 +209,25 @@ export default function ShipmentDetailsPage() {
               <div key={stage} className="flex flex-col items-center flex-1 relative group">
                 {/* Connector Line */}
                 {idx < statusStages.length - 1 && (
-                  <div className={`absolute left-1/2 top-4 w-full h-0.5 transition-colors duration-500 ${
-                    idx < currentStageIndex ? 'bg-teal-500' : 'bg-slate-100 dark:bg-slate-800'
-                  }`} />
+                  <div className={`absolute left-1/2 top-4 w-full h-0.5 transition-colors duration-500 ${idx < currentStageIndex ? 'bg-teal-500' : 'bg-slate-100 dark:bg-slate-800'
+                    }`} />
                 )}
-                
+
                 {/* Node */}
-                <div className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ${
-                  isCompleted ? 'bg-teal-500 border-teal-500 text-white' : 
-                  isCurrent ? 'bg-white border-teal-500 text-teal-600 scale-110 shadow-lg dark:bg-slate-900' : 
-                  'bg-white border-slate-200 text-slate-300 dark:bg-slate-900 dark:border-slate-800'
-                }`}>
+                <div className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all duration-500 ${isCompleted ? 'bg-teal-500 border-teal-500 text-white' :
+                    isCurrent ? 'bg-white border-teal-500 text-teal-600 scale-110 shadow-lg dark:bg-slate-900' :
+                      'bg-white border-slate-200 text-slate-300 dark:bg-slate-900 dark:border-slate-800'
+                  }`}>
                   {isCompleted ? (
                     <AppIcon name="check" className="h-4 w-4" strokeWidth={3} />
                   ) : (
                     <span className="text-[10px] font-bold">{idx + 1}</span>
                   )}
                 </div>
-                
+
                 {/* Labels */}
-                <p className={`mt-3 text-[10px] font-bold uppercase tracking-wider text-center ${
-                  isCurrent ? 'text-teal-600' : isCompleted ? 'text-slate-900 dark:text-white' : 'text-slate-400'
-                }`}>
+                <p className={`mt-3 text-[10px] font-bold uppercase tracking-wider text-center ${isCurrent ? 'text-teal-600' : isCompleted ? 'text-slate-900 dark:text-white' : 'text-slate-400'
+                  }`}>
                   {stage}
                 </p>
                 {isCurrent && (
@@ -262,11 +259,11 @@ export default function ShipmentDetailsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <Link to={`/shipments/${shipment.id}/tracking`} className="btn-secondary btn-sm sm:btn-base group border-teal-200 bg-teal-50 text-teal-700 hover:bg-teal-100 dark:border-teal-900/50 dark:bg-teal-900/20 dark:text-teal-400 dark:hover:bg-teal-900/40">
-             <span className="relative flex h-2 w-2 mr-1.5 sm:mr-2">
-               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
-               <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
-             </span>
-             <span className="hidden sm:inline">Live </span>Tracking
+            <span className="relative flex h-2 w-2 mr-1.5 sm:mr-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+            </span>
+            <span className="hidden sm:inline">Live </span>Tracking
           </Link>
           <button
             onClick={() => navigate(`/shipments/${shipment.id}/upload`)}
@@ -323,10 +320,10 @@ export default function ShipmentDetailsPage() {
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Compliance</span>
-             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-900/20 text-teal-600">
-                <AppIcon name="shield" className="h-4 w-4" />
-             </div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Compliance</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-teal-50 dark:bg-teal-900/20 text-teal-600">
+              <AppIcon name="shield" className="h-4 w-4" />
+            </div>
           </div>
           <div className="flex items-end gap-2">
             <span className="text-3xl font-bold text-slate-900 dark:text-white">{completion}%</span>
@@ -339,10 +336,10 @@ export default function ShipmentDetailsPage() {
 
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Network Risk</span>
-             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600">
-                <AppIcon name="warning" className="h-4 w-4" />
-             </div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Network Risk</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-50 dark:bg-rose-900/20 text-rose-600">
+              <AppIcon name="warning" className="h-4 w-4" />
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <span className={`text-3xl font-bold ${getRiskColor(riskScore)}`}>{riskScore}%</span>
@@ -357,10 +354,10 @@ export default function ShipmentDetailsPage() {
 
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Status</span>
-             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600">
-                <AppIcon name="clock" className="h-4 w-4" />
-             </div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Current Status</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/20 text-blue-600">
+              <AppIcon name="clock" className="h-4 w-4" />
+            </div>
           </div>
           <div className="flex flex-col gap-1">
             <StatusBadge value={shipment.status} />
@@ -370,18 +367,18 @@ export default function ShipmentDetailsPage() {
 
         <div className="card-premium">
           <div className="mb-4 flex items-center justify-between">
-             <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Driver & Vehicle</span>
-             <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
-                <AppIcon name="team" className="h-4 w-4" />
-             </div>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Driver & Vehicle</span>
+            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600">
+              <AppIcon name="team" className="h-4 w-4" />
+            </div>
           </div>
           {shipment.driverName ? (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <UserAvatar 
-                  name={shipment.driverName} 
-                  size="md" 
-                  status="online" 
+                <UserAvatar
+                  name={shipment.driverName}
+                  size="md"
+                  status="online"
                 />
                 <div>
                   <p className="text-sm font-bold text-slate-900 dark:text-white">{shipment.driverName}</p>
@@ -390,12 +387,12 @@ export default function ShipmentDetailsPage() {
               </div>
               <div className="flex items-center justify-between pt-2 border-t border-slate-50 dark:border-slate-800">
                 <a href={`tel:${shipment.driverPhone}`} className="text-[10px] font-bold text-teal-600 hover:text-teal-500 transition-colors flex items-center gap-1.5 group">
-                   <div className="h-5 w-5 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <AppIcon name="user" className="h-3 w-3" />
-                   </div>
-                   {shipment.driverPhone}
+                  <div className="h-5 w-5 bg-teal-50 dark:bg-teal-900/20 rounded flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <AppIcon name="user" className="h-3 w-3" />
+                  </div>
+                  {shipment.driverPhone}
                 </a>
-                <button 
+                <button
                   onClick={() => setIsDriverModalOpen(true)}
                   className="text-[9px] font-bold text-indigo-500 hover:text-indigo-600 uppercase tracking-wider transition-colors"
                 >
@@ -404,7 +401,7 @@ export default function ShipmentDetailsPage() {
               </div>
             </div>
           ) : (
-            <button 
+            <button
               onClick={() => setIsDriverModalOpen(true)}
               className="w-full py-4 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:border-indigo-500/30 hover:text-indigo-600 transition-all flex flex-col items-center gap-2"
             >
@@ -423,7 +420,7 @@ export default function ShipmentDetailsPage() {
           <article className="card-premium overflow-hidden border-none bg-slate-900 text-white dark:bg-slate-950/40 relative group">
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
             <div className="absolute -right-10 -top-10 h-40 w-40 bg-teal-500/10 blur-3xl rounded-full" />
-            
+
             <div className="relative flex flex-col md:flex-row gap-8 items-center">
               <div className="flex-1">
                 <div className="flex items-center gap-3 mb-5">
@@ -438,12 +435,12 @@ export default function ShipmentDetailsPage() {
                     <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">Route Engine v4.2</p>
                   </div>
                 </div>
-                
+
                 <h3 className="text-2xl font-black mb-4 tracking-tight">Lane Intelligence Spotlight</h3>
                 <p className="text-sm text-slate-400 leading-relaxed mb-8 max-w-md">
                   Our neural engine has analyzed the performance of the {shipment.destinationCountry} corridor. Diversion to alternate waypoints is currently recommended.
                 </p>
-                
+
                 <div className="flex flex-wrap gap-8">
                   <div className="flex flex-col">
                     <span className="text-[10px] uppercase font-black text-slate-500 tracking-widest mb-1">Lane Stability</span>
@@ -455,7 +452,7 @@ export default function ShipmentDetailsPage() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="w-full md:w-auto shrink-0 animate-in fade-in slide-in-from-right-4 duration-700">
                 <AiDelayPrediction shipmentId={shipment.id} />
               </div>
@@ -467,37 +464,37 @@ export default function ShipmentDetailsPage() {
             <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
               <div className="flex items-center gap-5">
                 <div className="relative">
-                   <div className="absolute inset-0 bg-emerald-400/20 blur-lg rounded-full animate-pulse" />
-                   <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xl border border-emerald-500/20">
-                     <AppIcon name="clock" className="h-7 w-7" strokeWidth={2.5} />
-                   </div>
+                  <div className="absolute inset-0 bg-emerald-400/20 blur-lg rounded-full animate-pulse" />
+                  <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl bg-white dark:bg-slate-900 text-emerald-600 dark:text-emerald-400 shadow-xl border border-emerald-500/20">
+                    <AppIcon name="clock" className="h-7 w-7" strokeWidth={2.5} />
+                  </div>
                 </div>
                 <div>
                   <h3 className="text-xl font-black text-slate-900 dark:text-white leading-tight tracking-tight">AI Predicted Arrival</h3>
                   <div className="flex items-center gap-2 mt-1.5">
-                     <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest border border-emerald-500/10">Dynamic ETA</span>
-                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Logistic-LLM Engine</p>
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-[8px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest border border-emerald-500/10">Dynamic ETA</span>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Logistic-LLM Engine</p>
                   </div>
                 </div>
               </div>
-              
+
               <div className="flex flex-col sm:items-end text-center sm:text-right bg-white/50 dark:bg-black/20 p-4 rounded-2xl border border-white dark:border-white/5 shadow-inner min-w-[200px]">
                 <div className="flex items-baseline gap-2 justify-center sm:justify-end">
                   <span className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">
-                    {shipment.status === 'Delivered' 
-                      ? 'COMPLETED' 
-                      : shipment.estimatedDeliveryTime 
-                        ? new Date(shipment.estimatedDeliveryTime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric'})
+                    {shipment.status === 'Delivered'
+                      ? 'COMPLETED'
+                      : shipment.estimatedDeliveryTime
+                        ? new Date(shipment.estimatedDeliveryTime).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })
                         : 'MAR 22, 2026'}
                   </span>
                   {shipment.status !== 'Delivered' && (
-                     <span className="text-sm font-black text-emerald-500">14:20</span>
+                    <span className="text-sm font-black text-emerald-500">14:20</span>
                   )}
                 </div>
                 <div className="mt-2 flex items-center justify-center sm:justify-end gap-2.5">
                   <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Confidence</span>
                   <div className="flex h-1.5 w-16 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                     <div className="h-full bg-emerald-500 rounded-full" style={{ width: '92%' }} />
+                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '92%' }} />
                   </div>
                   <span className="text-[10px] font-black text-emerald-500">92%</span>
                 </div>
@@ -518,14 +515,14 @@ export default function ShipmentDetailsPage() {
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Intelligent Guidance</p>
                   </div>
                 </div>
-                <Link 
+                <Link
                   to={`/shipments/${shipment.id}/tracking`}
                   className="btn-primary py-1.5 px-4 text-[10px] font-black uppercase tracking-widest bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/20"
                 >
                   Visualize Path
                 </Link>
               </div>
-              
+
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 mb-6 border border-slate-100 dark:border-slate-800">
                 <div className="flex flex-col">
                   <span className="text-[9px] font-black uppercase text-slate-400 mb-1">Opt. Distance</span>
@@ -612,16 +609,14 @@ export default function ShipmentDetailsPage() {
               {checklist.map((item) => {
                 const isVerified = item.status === 'Verified';
                 return (
-                  <div key={item.type} className={`p-3 rounded-xl border flex items-center justify-between group transition-all hover:border-teal-500/30 ${
-                    isVerified 
-                      ? 'bg-emerald-50/20 border-emerald-100 dark:border-emerald-900/20' 
+                  <div key={item.type} className={`p-3 rounded-xl border flex items-center justify-between group transition-all hover:border-teal-500/30 ${isVerified
+                      ? 'bg-emerald-50/20 border-emerald-100 dark:border-emerald-900/20'
                       : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
-                  }`}>
+                    }`}>
                     <div className="flex items-center gap-3">
-                      <div className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${
-                        isVerified ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
-                      }`}>
-                         {isVerified && <AppIcon name="check" className="h-3 w-3" strokeWidth={3} />}
+                      <div className={`flex h-5 w-5 items-center justify-center rounded-full border transition-colors ${isVerified ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200 dark:border-slate-700'
+                        }`}>
+                        {isVerified && <AppIcon name="check" className="h-3 w-3" strokeWidth={3} />}
                       </div>
                       <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300">{item.type}</span>
                     </div>
@@ -634,54 +629,53 @@ export default function ShipmentDetailsPage() {
 
           {/* Collaboration Hub */}
           <article className="card-premium">
-             <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-slate-500">Lane Feed</h3>
-             <form className="mb-8" onSubmit={handleCommentSubmit}>
-                <div className="relative">
-                  <textarea
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    className="w-full h-24 rounded-xl border-slate-200 bg-slate-50 p-4 pb-12 text-xs font-medium placeholder-slate-400 focus:border-teal-500 focus:ring-0 dark:border-slate-800 dark:bg-slate-900/50"
-                    placeholder="Broadcast message to team..."
-                  />
-                  <div className="absolute bottom-2 right-2 left-2 flex items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/40 backdrop-blur-sm p-1 px-2 rounded-lg">
-                     <label className="flex items-center gap-2 cursor-pointer group">
-                        <input 
-                          type="checkbox" 
-                          checked={internal} 
-                          onChange={(e) => setInternal(e.target.checked)} 
-                          className="rounded border-slate-300 text-teal-600 focus:ring-0 dark:border-slate-800 h-3 w-3"
-                        />
-                        <span className="text-[9px] font-bold uppercase text-slate-500 group-hover:text-amber-500 transition-colors">Private Note</span>
-                     </label>
-                     <button type="submit" className="btn-primary py-1 px-3 text-[10px] font-bold rounded-lg h-7">
-                        Broadcast
-                     </button>
-                  </div>
+            <h3 className="mb-6 text-sm font-bold uppercase tracking-wider text-slate-500">Lane Feed</h3>
+            <form className="mb-8" onSubmit={handleCommentSubmit}>
+              <div className="relative">
+                <textarea
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  className="w-full h-24 rounded-xl border-slate-200 bg-slate-50 p-4 pb-12 text-xs font-medium placeholder-slate-400 focus:border-teal-500 focus:ring-0 dark:border-slate-800 dark:bg-slate-900/50"
+                  placeholder="Broadcast message to team..."
+                />
+                <div className="absolute bottom-2 right-2 left-2 flex items-center justify-between gap-4 bg-slate-50/80 dark:bg-slate-900/40 backdrop-blur-sm p-1 px-2 rounded-lg">
+                  <label className="flex items-center gap-2 cursor-pointer group">
+                    <input
+                      type="checkbox"
+                      checked={internal}
+                      onChange={(e) => setInternal(e.target.checked)}
+                      className="rounded border-slate-300 text-teal-600 focus:ring-0 dark:border-slate-800 h-3 w-3"
+                    />
+                    <span className="text-[9px] font-bold uppercase text-slate-500 group-hover:text-amber-500 transition-colors">Private Note</span>
+                  </label>
+                  <button type="submit" className="btn-primary py-1 px-3 text-[10px] font-bold rounded-lg h-7">
+                    Broadcast
+                  </button>
                 </div>
-             </form>
+              </div>
+            </form>
 
-             <div className="space-y-4">
-               {visibleComments.map((comment) => (
-                 <div key={comment.id} className={`p-4 rounded-xl border relative ${
-                   comment.internal 
-                     ? 'bg-amber-50/30 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/20' 
-                     : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
-                 }`}>
-                   <div className="flex items-center justify-between mb-2">
-                     <div className="flex items-center gap-2">
-                       <span className="text-[11px] font-bold text-slate-900 dark:text-white">{comment.author}</span>
-                       {comment.internal && <span className="text-[8px] font-black uppercase text-amber-600">Internal</span>}
-                     </div>
-                     <span className="text-[10px] font-bold text-slate-400">
+            <div className="space-y-4">
+              {visibleComments.map((comment) => (
+                <div key={comment.id} className={`p-4 rounded-xl border relative ${comment.internal
+                    ? 'bg-amber-50/30 border-amber-100 dark:bg-amber-900/10 dark:border-amber-900/20'
+                    : 'bg-white dark:bg-slate-900 border-slate-100 dark:border-slate-800'
+                  }`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[11px] font-bold text-slate-900 dark:text-white">{comment.author}</span>
+                      {comment.internal && <span className="text-[8px] font-black uppercase text-amber-600">Internal</span>}
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-400">
                       {comment.createdAt.split('T')[0]}
-                     </span>
-                   </div>
-                   <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
+                    </span>
+                  </div>
+                  <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400">
                     {comment.message}
-                   </p>
-                 </div>
-               ))}
-             </div>
+                  </p>
+                </div>
+              ))}
+            </div>
           </article>
         </div>
       </div>
@@ -690,17 +684,17 @@ export default function ShipmentDetailsPage() {
         <ShipmentTimeline events={timeline} />
       </div>
 
-      <Modal 
-        isOpen={isDriverModalOpen} 
-        onClose={() => setIsDriverModalOpen(false)} 
+      <Modal
+        isOpen={isDriverModalOpen}
+        onClose={() => setIsDriverModalOpen(false)}
         title="Assign Logistics Driver"
       >
         <div className="space-y-4">
           <div>
             <label className="input-label">Driver Full Name</label>
-            <input 
-              type="text" 
-              className="input-field" 
+            <input
+              type="text"
+              className="input-field"
               placeholder="e.g. John Smith"
               value={driverForm.name}
               onChange={e => setDriverForm({ ...driverForm, name: e.target.value })}
@@ -708,9 +702,9 @@ export default function ShipmentDetailsPage() {
           </div>
           <div>
             <label className="input-label">Phone Number</label>
-            <input 
-              type="text" 
-              className="input-field" 
+            <input
+              type="text"
+              className="input-field"
               placeholder="+1 555-0123"
               value={driverForm.phone}
               onChange={e => setDriverForm({ ...driverForm, phone: e.target.value })}
@@ -718,15 +712,15 @@ export default function ShipmentDetailsPage() {
           </div>
           <div>
             <label className="input-label">Vehicle Registration</label>
-            <input 
-              type="text" 
-              className="input-field" 
+            <input
+              type="text"
+              className="input-field"
               placeholder="e.g. TRK-2024"
               value={driverForm.vehicle}
               onChange={e => setDriverForm({ ...driverForm, vehicle: e.target.value })}
             />
           </div>
-          <button 
+          <button
             onClick={handleAssignDriver}
             className="btn-primary w-full mt-2"
             disabled={!driverForm.name || !driverForm.phone || !driverForm.vehicle}

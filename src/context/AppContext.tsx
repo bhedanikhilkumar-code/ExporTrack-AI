@@ -33,16 +33,21 @@ interface AppContextValue {
   signup: (name: string, email: string, password: string) => void;
   loginWithDemoAccount: () => void;
   loginWithGoogleToken: (token: string) => void;
+  loginWithGoogle: () => void; // Google OAuth login
   logout: () => void;
   switchRole: (role: Role) => void;
   toggleTheme: () => void;
+  setTheme: (theme: 'light' | 'dark' | 'system') => void;
   createShipment: (input: CreateShipmentInput) => Shipment;
   updateShipment: (shipmentId: string, updates: Partial<Shipment>) => void;
+  updateShipmentStatus: (shipmentId: string, status: string) => void;
+  assignDriver: (shipmentId: string, driverName: string, driverPhone: string, vehicleNumber: string) => void;
   deleteShipment: (shipmentId: string) => void;
   addDocument: (shipmentId: string, input: UploadDocumentInput) => void;
   updateDocumentStatus: (shipmentId: string, documentType: DocumentType, status: DocStatus) => void;
   addComment: (shipmentId: string, message: string, internal: boolean) => void;
   markNotificationRead: (notificationId: string) => void;
+  markAllNotificationsRead: () => void;
   // Team management
   createTeam: (teamName: string) => Team;
   addTeamMember: (teamId: string, name: string, email: string, role: Role, permission: TeamPermission) => TeamMemberWithPermissions | null;
@@ -55,6 +60,11 @@ interface AppContextValue {
   removeLegacyTeamMember: (memberId: string) => void;
   updateUserProfile: (updates: { name?: string; region?: string }) => void;
   deleteInvite: (inviteId: string) => void;
+  // Dispatch for state management
+  dispatch: (action: { type: string; payload?: any }) => void;
+  // Tracking features
+  applyOptimizedRoute: (shipmentId: string, route: any) => void;
+  triggerDelayAlert: (shipmentId: string, reason: string) => void;
   // Helpers
   isDemoUser: boolean;
   isRealUser: boolean;
@@ -895,16 +905,46 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       signup,
       loginWithDemoAccount,
       loginWithGoogleToken,
+      loginWithGoogle: () => {
+        // Trigger Google OAuth flow
+        console.log('Google OAuth login triggered');
+        // In a real app, this would trigger the Google OAuth flow
+      },
       logout,
       switchRole,
       toggleTheme,
+      setTheme: (theme: 'light' | 'dark' | 'system') => {
+        setState(prev => ({ ...prev, theme }));
+      },
       createShipment,
       updateShipment,
+      updateShipmentStatus: (shipmentId: string, status: string) => {
+        setState(prev => ({
+          ...prev,
+          shipments: prev.shipments.map(s =>
+            s.id === shipmentId ? { ...s, status: status as any } : s
+          )
+        }));
+      },
+      assignDriver: (shipmentId: string, driverName: string, driverPhone: string, vehicleNumber: string) => {
+        setState(prev => ({
+          ...prev,
+          shipments: prev.shipments.map(s =>
+            s.id === shipmentId ? { ...s, driverName, driverPhone, vehicleNumber } : s
+          )
+        }));
+      },
       deleteShipment,
       addDocument,
       updateDocumentStatus,
       addComment,
       markNotificationRead,
+      markAllNotificationsRead: () => {
+        setState(prev => ({
+          ...prev,
+          notifications: prev.notifications.map(n => ({ ...n, read: true }))
+        }));
+      },
       createTeam,
       addTeamMember,
       removeTeamMember,
@@ -915,6 +955,39 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       removeLegacyTeamMember,
       updateUserProfile,
       deleteInvite,
+      dispatch: (action: { type: string; payload?: any }) => {
+        console.log('Dispatch action:', action);
+        // Handle common actions
+        switch (action.type) {
+          case 'SET_THEME':
+            setState(prev => ({ ...prev, theme: action.payload }));
+            break;
+          default:
+            break;
+        }
+      },
+      applyOptimizedRoute: (shipmentId: string, route: any) => {
+        console.log('Apply optimized route:', shipmentId, route);
+      },
+      triggerDelayAlert: (shipmentId: string, reason: string) => {
+        console.log('Trigger delay alert:', shipmentId, reason);
+        // Add a notification for the delay
+        const newNotification: NotificationItem = {
+          id: `notif-${Date.now()}`,
+          shipmentId,
+          type: 'Approval Delay',
+          severity: 'High',
+          title: 'Shipment Delay Alert',
+          message: reason,
+          createdAt: new Date().toISOString(),
+          dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          read: false
+        };
+        setState(prev => ({
+          ...prev,
+          notifications: [newNotification, ...prev.notifications]
+        }));
+      },
       isDemoUser,
       isRealUser,
       canManageTeam,
