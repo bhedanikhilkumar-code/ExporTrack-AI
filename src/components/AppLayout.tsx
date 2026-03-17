@@ -10,6 +10,7 @@ import { useScrollDirection } from '../hooks/useScrollDirection';
 import MobileBottomNav from './MobileBottomNav';
 import MobileFAB from './MobileFAB';
 import MobileSidebar from './MobileSidebar';
+import AiLogisticsAssistant from './AiLogisticsAssistant';
 
 interface NavItem {
   to: string;
@@ -41,6 +42,7 @@ export default function AppLayout() {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const searchRef = useRef<HTMLDivElement>(null);
@@ -339,6 +341,31 @@ export default function AppLayout() {
             <Outlet />
           </div>
         </main>
+      </div>
+
+      {/* AI Assistant Floating Interface */}
+      <div className={`fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 transition-all duration-300 ${isAiChatOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 pointer-events-none opacity-0 md:pointer-events-auto md:translate-y-0 md:opacity-100'}`}>
+        {isAiChatOpen && (
+          <div className="mb-2 animate-in fade-in zoom-in duration-300 origin-bottom-right">
+            <AiLogisticsAssistant 
+              onClose={() => setIsAiChatOpen(false)} 
+              isFloating 
+            />
+          </div>
+        )}
+        
+        <button
+          onClick={() => setIsAiChatOpen(!isAiChatOpen)}
+          className={`flex h-14 w-14 items-center justify-center rounded-2xl shadow-2xl transition-all duration-300 active:scale-95 border border-white/20 ${
+            isAiChatOpen 
+              ? 'bg-slate-900 text-white rotate-90 dark:bg-slate-800' 
+              : 'bg-teal-500 text-white hover:bg-teal-600 hover:shadow-teal-500/40'
+          }`}
+          aria-label="AI Assistant"
+        >
+          <div className={`absolute inset-0 rounded-2xl animate-pulse bg-teal-400/20 ${isAiChatOpen ? 'hidden' : ''}`} />
+          <AppIcon name={isAiChatOpen ? 'x' : 'ai-extract'} className="h-6 w-6 relative z-10" strokeWidth={2.5} />
+        </button>
       </div>
 
       <MobileBottomNav />

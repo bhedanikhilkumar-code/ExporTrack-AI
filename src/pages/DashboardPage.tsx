@@ -5,7 +5,6 @@ import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
 import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
-import AiLogisticsAssistant from '../components/AiLogisticsAssistant';
 import ShipmentAnalytics from '../components/ShipmentAnalytics';
 import TrackingMap from '../components/TrackingMap';
 import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard, SkeletonLine } from '../components/SkeletonLoader';
@@ -244,11 +243,8 @@ export default function DashboardPage() {
         <ShipmentAnalytics data={analyticsData} />
 
         <div className="dashboard-grid-section">
-          {/* AI Logistics Assistant */}
-          <AiLogisticsAssistant />
-
-          {/* Recent Activity */}
-          <article className="card-premium lg:col-span-2">
+          {/* Recent Activity (Expanded to full width since AI Assistant is now a global FAB) */}
+          <article className="card-premium lg:col-span-3 transition-all duration-500">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500">Logistics Event Stream</h3>

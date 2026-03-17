@@ -9,7 +9,12 @@ interface Message {
   timestamp: string;
 }
 
-export default function AiLogisticsAssistant() {
+interface AiLogisticsAssistantProps {
+  onClose?: () => void;
+  isFloating?: boolean;
+}
+
+export default function AiLogisticsAssistant({ onClose, isFloating = false }: AiLogisticsAssistantProps) {
   const { state: { shipments } } = useAppContext();
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -85,7 +90,7 @@ export default function AiLogisticsAssistant() {
   };
 
     return (
-        <article className="flex flex-col h-[500px] border border-slate-200/60 shadow-xl overflow-hidden p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl dark:border-slate-800/60 relative group transition-all hover:shadow-2xl">
+        <article className={`flex flex-col h-[500px] border border-slate-200/60 shadow-xl overflow-hidden p-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl rounded-2xl dark:border-slate-800/60 relative group transition-all hover:shadow-2xl ${isFloating ? 'w-[380px] max-w-[calc(100vw-32px)]' : ''}`}>
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
             {/* Header */}
@@ -112,12 +117,23 @@ export default function AiLogisticsAssistant() {
                         </div>
                     </div>
                 </div>
-                <div className="flex gap-1.5 opacity-30 group-hover:opacity-60 transition-opacity">
-                    <div className="flex gap-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite]"></span>
-                        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite_100ms]"></span>
-                        <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite_200ms]"></span>
+                <div className="flex items-center gap-2">
+                    <div className="flex gap-1.5 opacity-30 group-hover:opacity-60 transition-opacity">
+                        <div className="flex gap-1">
+                            <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite]"></span>
+                            <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite_100ms]"></span>
+                            <span className="h-1.5 w-1.5 rounded-full bg-teal-500 animate-[bounce_2s_infinite_200ms]"></span>
+                        </div>
                     </div>
+                    {onClose && (
+                        <button 
+                            onClick={onClose}
+                            className="ml-2 p-1.5 rounded-lg hover:bg-white/10 text-white/40 hover:text-white transition-all"
+                            title="Close Assistant"
+                        >
+                            <AppIcon name="x" className="h-4 w-4" />
+                        </button>
+                    )}
                 </div>
             </div>
 

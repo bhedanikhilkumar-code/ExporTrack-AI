@@ -49,7 +49,7 @@ interface AppContextValue {
   markNotificationRead: (notificationId: string) => void;
   markAllNotificationsRead: () => void;
   // Team management
-  createTeam: (teamName: string) => Team;
+  createTeam: (teamName: string) => Team | null;
   addTeamMember: (teamId: string, name: string, email: string, role: Role, permission: TeamPermission) => TeamMemberWithPermissions | null;
   removeTeamMember: (teamId: string, memberId: string) => void;
   updateTeamMemberPermission: (teamId: string, memberId: string, permission: TeamPermission) => void;
@@ -658,14 +658,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   // Team management functions
-  const createTeam = useCallback((teamName: string): Team => {
+  const createTeam = useCallback((teamName: string): Team | null => {
     if (!state.user) {
       throw new Error('Must be logged in to create a team');
     }
 
     if (isDemoUser) {
       console.warn('Demo users cannot create teams');
-      throw new Error('Demo users cannot create teams. Please sign up for a real account.');
+      return null;
     }
 
     const team: Team = {
