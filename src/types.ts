@@ -143,6 +143,7 @@ export interface UserSession {
   role: Role;
   authProvider?: 'email' | 'google' | 'demo';
   profilePicture?: string;
+  region?: string;
 }
 
 export interface AppState {

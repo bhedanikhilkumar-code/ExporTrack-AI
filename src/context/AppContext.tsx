@@ -48,6 +48,8 @@ interface AppContextValue {
   hasPermission: (action: string) => boolean;
   inviteTeamMember: (input: InviteTeamMemberInput) => Promise<void>;
   updateMemberRole: (memberId: string, role: Role) => void;
+  removeTeamMember: (memberId: string) => void;
+  updateUserProfile: (updates: Partial<AppState['user']>) => void;
   deleteInvite: (inviteId: string) => void;
 }
 
@@ -747,6 +749,20 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       invites: prev.invites.filter(i => i.id !== inviteId)
     }));
   };
+
+  const removeTeamMember = (memberId: string) => {
+    setState(prev => ({
+      ...prev,
+      teamMembers: prev.teamMembers.filter(m => m.id !== memberId)
+    }));
+  };
+
+  const updateUserProfile = (updates: any) => {
+    setState(prev => ({
+      ...prev,
+      user: prev.user ? { ...prev.user, ...updates } : prev.user
+    }));
+  };
   
   const value = useMemo<AppContextValue>(
     () => ({
@@ -770,6 +786,11 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       markAllNotificationsRead,
       triggerDelayAlert,
       applyOptimizedRoute,
+      inviteTeamMember,
+      updateMemberRole,
+      removeTeamMember,
+      updateUserProfile,
+      deleteInvite,
       getAnalytics: () => {
         const total = state.shipments.length;
         const verifiedDocs = state.shipments.flatMap(s => s.documents).filter(d => d.status === 'Verified').length;
@@ -814,10 +835,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           'update_tracking': ['Admin', 'Manager', 'Operations', 'Export Operations Manager'],
         };
         return permissions[action]?.includes(role) || false;
-      },
-      inviteTeamMember,
-      updateMemberRole,
-      deleteInvite
+      }
     }),
     [state]
   );

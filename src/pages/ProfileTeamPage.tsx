@@ -23,6 +23,8 @@ export default function ProfileTeamPage() {
     switchRole,
     inviteTeamMember,
     updateMemberRole,
+    removeTeamMember,
+    updateUserProfile,
     deleteInvite
   } = useAppContext();
 
@@ -32,6 +34,11 @@ export default function ProfileTeamPage() {
   const [inviteName, setInviteName] = useState('');
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<Role>('Operations');
+  
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [editName, setEditName] = useState(user?.name || '');
+  const [editRegion, setEditRegion] = useState(user?.region || 'APAC North');
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
 
   useMemo(() => {
     const timer = setTimeout(() => setLoading(false), 800);
@@ -53,22 +60,44 @@ export default function ProfileTeamPage() {
       setInviteName('');
       setInviteEmail('');
       setInviteRole('Operations');
+    } finally {
+      setIsInviting(false);
+    }
+  };
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editName.trim()) return;
+
+    try {
+      setIsUpdatingProfile(true);
+      await new Promise(resolve => setTimeout(resolve, 800)); // Simulate delay
+      updateUserProfile({ name: editName, region: editRegion });
+      setShowEditProfileModal(false);
     } catch (error: any) {
       alert(error.message);
     } finally {
-      setIsInviting(false);
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  const handleRemoveMember = (memberId: string, memberName: string) => {
+    if (confirm(`Are you sure you want to remove ${memberName} from the workspace?`)) {
+      removeTeamMember(memberId);
     }
   };
 
   const memberStats = useMemo(() => teamMembers.map((member) => {
     const assigned = shipments.filter((s) => s.assignedTo === member.name);
     const pending = assigned.reduce((sum, s) => sum + s.documents.filter((d) => d.status === 'Pending').length, 0);
+    // Deterministic status based on member ID
+    const isOnline = (member.id.charCodeAt(member.id.length - 1) % 2) === 0;
     return {
       ...member,
       assignedCount: assigned.length,
       pendingDocs: pending,
       wsRole: toWorkspaceRole(member.role),
-      status: Math.random() > 0.3 ? 'online' : 'offline'
+      status: isOnline ? 'online' : 'offline'
     };
   }), [teamMembers, shipments]);
 
@@ -147,7 +176,19 @@ export default function ProfileTeamPage() {
                  status="online" 
                  className="shadow-xl ring-4 ring-white dark:ring-slate-800"
                />
-               <h2 className="mt-4 text-lg font-black text-slate-900 dark:text-white">{user?.name}</h2>
+                <div className="flex items-center justify-center gap-2 mt-4 group">
+                   <h2 className="text-lg font-black text-slate-900 dark:text-white">{user?.name}</h2>
+                   <button 
+                     onClick={() => {
+                        setEditName(user?.name || '');
+                        setShowEditProfileModal(true);
+                     }}
+                     className="p-1.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-400 opacity-0 group-hover:opacity-100 transition-all hover:text-teal-500 hover:scale-110 active-press"
+                     title="Edit Personnel Data"
+                   >
+                      <AppIcon name="settings" className="h-3.5 w-3.5" />
+                   </button>
+                </div>
                <p className="text-xs font-bold text-slate-500">{user?.email}</p>
                <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 bg-slate-100 dark:bg-slate-800 rounded-full">
                   <div className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -162,7 +203,7 @@ export default function ProfileTeamPage() {
                </div>
                <div className="bg-white dark:bg-slate-900 p-4 text-center">
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Global Region</p>
-                  <p className="text-sm font-black text-slate-900 dark:text-white">APAC North</p>
+                  <p className="text-sm font-black text-slate-900 dark:text-white">{user?.region || 'APAC North'}</p>
                </div>
             </div>
           </article>
@@ -216,10 +257,19 @@ export default function ProfileTeamPage() {
                            status={member.status as any} 
                            size="lg" 
                          />
-                         <div className="min-w-0">
-                            <p className="text-sm font-black text-slate-900 dark:text-white truncate">{member.name}</p>
-                            <p className="text-[10px] font-bold text-slate-400 truncate">{member.email}</p>
-                         </div>
+                          <div className="min-w-0 flex-1">
+                             <p className="text-sm font-black text-slate-900 dark:text-white truncate">{member.name}</p>
+                             <p className="text-[10px] font-bold text-slate-400 truncate">{member.email}</p>
+                          </div>
+                          {user?.role === 'Admin' && (
+                            <button 
+                              onClick={() => handleRemoveMember(member.id, member.name)}
+                              className="p-2 rounded-xl bg-rose-50 dark:bg-rose-500/10 text-rose-500 opacity-0 group-hover/member:opacity-100 transition-all hover:bg-rose-500 hover:text-white active-press"
+                              title="Remove Personnel"
+                            >
+                               <AppIcon name="x" className="h-4 w-4" strokeWidth={3} />
+                            </button>
+                          )}
                       </div>
                       
                       <div className="mt-4 flex flex-wrap gap-2">
@@ -334,6 +384,67 @@ export default function ProfileTeamPage() {
                         <>
                           <AppIcon name="share" className="h-4 w-4 mr-3" />
                           Initialize Invitation
+                        </>
+                      )}
+                    </button>
+                 </div>
+              </form>
+           </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {showEditProfileModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300">
+           <div className="card-premium w-full max-w-md shadow-2xl animate-in zoom-in-95 duration-300 relative border-none">
+              <div className="absolute top-0 inset-x-0 h-1.5 bg-indigo-500 rounded-t-2xl" />
+              <div className="flex items-center justify-between mb-6">
+                 <div>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Edit Profile</h3>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">Identity Management Overlay</p>
+                 </div>
+                 <button onClick={() => setShowEditProfileModal(false)} className="text-slate-400 hover:text-slate-600 transition-colors">
+                    <AppIcon name="x" className="h-5 w-5" />
+                 </button>
+              </div>
+              
+              <form onSubmit={handleUpdateProfile} className="space-y-5">
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block ml-1">Full Name</label>
+                    <input 
+                      type="text" 
+                      required 
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      placeholder="e.g. Bheda Nikhil" 
+                      className="input-field py-4 h-12" 
+                      disabled={isUpdatingProfile}
+                    />
+                 </div>
+                 <div className="space-y-2">
+                    <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 block ml-1">Assigned Region</label>
+                    <input 
+                      type="text" 
+                      value={editRegion}
+                      onChange={(e) => setEditRegion(e.target.value)}
+                      placeholder="e.g. APAC North" 
+                      className="input-field py-4 h-12" 
+                      disabled={isUpdatingProfile}
+                    />
+                 </div>
+                 
+                 <div className="pt-4 flex gap-4">
+                    <button 
+                      type="submit" 
+                      className={`btn-primary flex-1 h-14 justify-center shadow-lg shadow-indigo-500/20 bg-indigo-600 hover:bg-indigo-700 ${isUpdatingProfile ? 'opacity-70' : ''}`}
+                      disabled={isUpdatingProfile}
+                    >
+                      {isUpdatingProfile ? (
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-white" />
+                      ) : (
+                        <>
+                          <AppIcon name="check" className="h-4 w-4 mr-3" />
+                          Save Changes
                         </>
                       )}
                     </button>
