@@ -54,6 +54,7 @@ export default function AuthPage() {
   const [otpSent, setOtpSent] = useState(false);
   const [otpExpiry, setOtpExpiry] = useState<number | null>(null);
   const [countdown, setCountdown] = useState(0);
+  const RESEND_COOLDOWN = 30; // 30 seconds cooldown
 
   // OTP input refs for auto-focus
   const otpInputRefs = useRef<(HTMLInputElement | null)[]>([]);
@@ -424,7 +425,7 @@ export default function AuthPage() {
 
       setOtpSent(true);
       setOtpExpiry(data.expiresIn);
-      setCountdown(60); // 60 seconds cooldown before resend
+      setCountdown(RESEND_COOLDOWN); // 30 seconds cooldown before resend
     } catch (err) {
       console.error('Send OTP error:', err);
       setOtpError('Failed to send OTP. Please try again.');
@@ -791,45 +792,62 @@ export default function AuthPage() {
       <div className="w-full max-w-5xl">
         <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl grid md:grid-cols-[1.2fr_1fr]">
           {/* Left Section - Info Panel */}
-          <section className="hidden bg-gradient-to-br from-slate-900 via-slate-800 to-teal-700 dark:from-slate-950 dark:via-slate-900 dark:to-teal-900 p-8 md:p-12 text-white md:flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(45,212,191,0.15),transparent_60%)]" />
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-6 md:mb-8">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl shadow-lg overflow-hidden bg-white">
-                  <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-full w-full object-cover" />
+          <section className="hidden bg-gradient-to-br from-slate-950 via-slate-900 to-teal-950 p-8 md:p-12 text-white md:flex flex-col justify-center gap-12 relative overflow-hidden">
+            {/* Animated Background Elements */}
+            <div className="absolute top-0 right-0 -mt-20 -mr-20 h-96 w-96 rounded-full bg-teal-500/20 blur-[100px] pointer-events-none mix-blend-screen animate-pulse" style={{ animationDuration: '4s' }} />
+            <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-80 w-80 rounded-full bg-blue-500/10 blur-[100px] pointer-events-none mix-blend-screen animate-pulse" style={{ animationDuration: '6s', animationDelay: '1s' }} />
+
+            <div className="relative z-10 w-full max-w-md mx-auto">
+              {/* Branding */}
+              <div className="flex items-center gap-4 mb-10">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl shadow-[0_0_20px_rgba(45,212,191,0.2)] ring-4 ring-white/10 overflow-hidden bg-white/5 backdrop-blur-xl border border-white/10">
+                  <img src="/logo.svg" alt="ExporTrack-AI Logo" className="h-8 w-8 object-contain" />
                 </div>
-                <h1 className="text-xl md:text-2xl font-extrabold tracking-tight">ExporTrack<span className="text-teal-300">AI</span></h1>
+                <h1 className="text-2xl font-extrabold tracking-tight text-white drop-shadow-sm">
+                  ExporTrack<span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-300 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">AI</span>
+                </h1>
               </div>
-              <p className="text-sm text-slate-100/90 leading-relaxed">
-                Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified in one powerful platform.
-              </p>
+              
+              {/* Headline & Subtext */}
+              <div className="mb-12">
+                <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4 leading-tight tracking-tight">
+                  Streamline Your Logistics with AI
+                </h2>
+                <p className="text-lg text-slate-300 font-light leading-relaxed">
+                  Access the logistics operating layer where shipment documentation, AI extraction, and compliance checks are unified in one powerful platform.
+                </p>
+              </div>
+
+              {/* Feature List */}
+              <ul className="space-y-4">
+                <li className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all duration-300 cursor-default border border-transparent hover:border-white/10 backdrop-blur-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 group-hover:bg-teal-500/20 group-hover:scale-110 transition-all duration-300 ring-1 ring-white/5 group-hover:ring-teal-500/30">
+                    <AppIcon name="check" className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">Real-time tracking of pending & rejected files</span>
+                </li>
+                <li className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all duration-300 cursor-default border border-transparent hover:border-white/10 backdrop-blur-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 group-hover:bg-teal-500/20 group-hover:scale-110 transition-all duration-300 ring-1 ring-white/5 group-hover:ring-teal-500/30">
+                    <AppIcon name="check" className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">AI-powered OCR file validation</span>
+                </li>
+                <li className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-white/5 transition-all duration-300 cursor-default border border-transparent hover:border-white/10 backdrop-blur-sm">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-teal-500/10 text-teal-400 group-hover:bg-teal-500/20 group-hover:scale-110 transition-all duration-300 ring-1 ring-white/5 group-hover:ring-teal-500/30">
+                    <AppIcon name="check" className="h-5 w-5" />
+                  </div>
+                  <span className="text-sm font-medium text-slate-200 group-hover:text-white transition-colors">Secure role-based collaboration workflows</span>
+                </li>
+              </ul>
             </div>
 
-            <ul className="space-y-3 md:space-y-4 mt-6 md:mt-0">
-              <li className="flex items-start gap-3 text-sm">
-                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
-                  <AppIcon name="check" className="h-3 w-3 text-teal-300" />
-                </span>
-                <span>Track pending and rejected files in real time</span>
-              </li>
-              <li className="flex items-start gap-3 text-sm">
-                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
-                  <AppIcon name="check" className="h-3 w-3 text-teal-300" />
-                </span>
-                <span>Run OCR scans and validate extracted fields</span>
-              </li>
-              <li className="flex items-start gap-3 text-sm">
-                <span className="mt-1 flex h-5 w-5 items-center justify-center rounded-full bg-teal-300/20 flex-shrink-0">
-                  <AppIcon name="check" className="h-3 w-3 text-teal-300" />
-                </span>
-                <span>Collaborate securely with role-based workflows</span>
-              </li>
-            </ul>
-
-            <div className="pt-6 md:pt-8 border-t border-white/10 mt-6 md:mt-0">
-              <p className="text-xs text-slate-100/70">
-                Enterprise-grade logistics platform trusted by export operations
-              </p>
+            {/* Footer */}
+            <div className="absolute bottom-8 left-8 right-8 z-10">
+              <div className="pt-6 border-t border-white/10">
+                <p className="text-xs text-slate-400 font-medium tracking-wide uppercase">
+                  Enterprise-grade logistics trusted by global operations
+                </p>
+              </div>
             </div>
           </section>
 

@@ -1,5 +1,5 @@
-// Serverless function for sending OTP via email
-// Uses Nodemailer with SMTP configuration
+// Serverless function for sending OTP via SendGrid
+// SendGrid provides high email deliverability to inbox
 // Deploy to Vercel: https://vercel.com/docs/serverless-functions/introduction
 
 // In-memory OTP storage (for serverless, use Redis or database in production)
@@ -17,6 +17,7 @@ const OTP_EXPIRY_MINUTES = 5;
 const MAX_ATTEMPTS = 3;
 const RATE_LIMIT_HOURS = 1;
 const MAX_OTP_REQUESTS_PER_HOUR = 3;
+const RESEND_COOLDOWN_SECONDS = 30;
 
 // RFC 5322 compliant email regex
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
@@ -61,93 +62,187 @@ function cleanupExpiredOTPs() {
 // Run cleanup every 5 minutes
 setInterval(cleanupExpiredOTPs, 5 * 60 * 1000);
 
-// Email sending function using fetch to email service
-async function sendEmailWithSMTP(to: string, subject: string, body: string): Promise<{ success: boolean; error?: string }> {
-    const smtpHost = process.env.SMTP_HOST;
-    const smtpPort = process.env.SMTP_PORT || '587';
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
-    const smtpFrom = process.env.SMTP_FROM || 'bhedanikhilkumar@gmail.com';
+// Send email using SendGrid API
+async function sendEmailWithSendGrid(to: string, subject: string, htmlContent: string): Promise<{ success: boolean; error?: string }> {
+    const sendgridApiKey = process.env.SENDGRID_API_KEY;
 
-    // If SMTP is not configured, use a mail service API
-    if (!smtpHost || !smtpUser || !smtpPass) {
-        // Use SendGrid or similar API if available
-        const sendgridApiKey = process.env.SENDGRID_API_KEY;
-
-        if (sendgridApiKey) {
-            try {
-                const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${sendgridApiKey}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        personalizations: [{
-                            to: [{ email: to }]
-                        }],
-                        from: { email: smtpFrom },
-                        subject: subject,
-                        content: [{
-                            type: 'text/plain',
-                            value: body
-                        }]
-                    })
-                });
-
-                if (response.ok || response.status === 202) {
-                    return { success: true };
-                } else {
-                    const error = await response.text();
-                    return { success: false, error: `Email service error: ${error}` };
-                }
-            } catch (error: any) {
-                return { success: false, error: error.message };
-            }
-        }
-
-        // If no email service configured, simulate sending (for development)
-        console.log(`[DEV MODE] OTP Email would be sent:`);
-        console.log(`To: ${to}`);
-        console.log(`Subject: ${subject}`);
-        console.log(`Body: ${body}`);
-        return { success: true };
+    if (!sendgridApiKey) {
+        console.error('SendGrid API key not configured');
+        return { success: false, error: 'Email service not configured' };
     }
 
-    // Use nodemailer with SMTP (requires nodemailer package)
-    // For serverless, we'll use a simple approach
     try {
-        // Create SMTP connection URL
-        const smtpUrl = `smtp://${encodeURIComponent(smtpUser)}:${encodeURIComponent(smtpPass)}@${smtpHost}:${smtpPort}`;
-
-        // For serverless environments, use a simpler email sending approach
-        // This is a basic implementation - in production use proper nodemailer setup
-
-        // Use AWS SES or other SMTP-compatible service
-        const nodemailer = await import('nodemailer');
-
-        const transporter = nodemailer.createTransport({
-            host: smtpHost,
-            port: parseInt(smtpPort),
-            secure: smtpPort === '465',
-            auth: {
-                user: smtpUser,
-                pass: smtpPass
-            }
+        const response = await fetch('https://api.sendgrid.com/v3/mail/send', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${sendgridApiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                personalizations: [{
+                    to: [{ email: to }]
+                }],
+                from: {
+                    email: 'noreply@exportrack.ai',
+                    name: 'ExporTrack-AI'
+                },
+                reply_to: { email: 'bhedanikhilkumar@gmail.com', name: 'ExporTrack Support' },
+                subject: subject,
+                content: [
+                    {
+                        type: 'text/plain',
+                        value: htmlContent.replace(/<[^>]*>/g, '') // Strip HTML for plain text
+                    },
+                    {
+                        type: 'text/html',
+                        value: htmlContent
+                    }
+                ]
+            })
         });
 
-        await transporter.sendMail({
-            from: smtpFrom,
-            to: to,
-            subject: subject,
-            text: body
-        });
-
-        return { success: true };
+        if (response.ok || response.status === 202) {
+            console.log(`OTP email sent successfully to ${to}`);
+            return { success: true };
+        } else {
+            const errorText = await response.text();
+            console.error('SendGrid error:', response.status, errorText);
+            return { success: false, error: `Failed to send email: ${response.status}` };
+        }
     } catch (error: any) {
-        console.error('SMTP Error:', error);
+        console.error('SendGrid exception:', error);
         return { success: false, error: error.message };
     }
+}
+
+// Send email using Resend API (alternative to SendGrid)
+async function sendEmailWithResend(to: string, subject: string, htmlContent: string): Promise<{ success: boolean; error?: string }> {
+    const resendApiKey = process.env.RESEND_API_KEY;
+
+    if (!resendApiKey) {
+        console.error('Resend API key not configured');
+        return { success: false, error: 'Email service not configured' };
+    }
+
+    try {
+        const response = await fetch('https://api.resend.com/emails', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${resendApiKey}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                from: 'ExporTrack-AI <onboarding@resend.dev>',
+                reply_to: 'bhedanikhilkumar@gmail.com',
+                to: to,
+                subject: subject,
+                html: htmlContent
+            })
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            console.log(`OTP email sent successfully via Resend to ${to}:`, data.id);
+            return { success: true };
+        } else {
+            const errorText = await response.text();
+            console.error('Resend error:', response.status, errorText);
+            return { success: false, error: `Failed to send email: ${response.status}` };
+        }
+    } catch (error: any) {
+        console.error('Resend exception:', error);
+        return { success: false, error: error.message };
+    }
+}
+
+// Build OTP email HTML template
+function buildOTPEmailHtml(otp: string, email: string): string {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #f8fafc;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 480px; background-color: #ffffff; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #0f172a 0%, #134e4a 100%); padding: 32px 40px; border-radius: 12px 12px 0 0;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">ExporTrack-AI</h1>
+                            <p style="margin: 8px 0 0 0; color: #94a3b8; font-size: 14px;">Email Verification</p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <p style="margin: 0 0 24px 0; color: #334155; font-size: 16px; line-height: 1.6;">
+                                Your verification code is:
+                            </p>
+                            
+                            <!-- OTP Display -->
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td align="center">
+                                        <div style="background: linear-gradient(135deg, #0d9488 0%, #14b8a6 100%); padding: 20px 32px; border-radius: 8px;">
+                                            <span style="color: #ffffff; font-size: 36px; font-weight: 700; letter-spacing: 8px; font-family: monospace;">${otp}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <p style="margin: 24px 0 0 0; color: #64748b; font-size: 14px; text-align: center;">
+                                This code will expire in <strong>5 minutes</strong>
+                            </p>
+                            
+                            <!-- Warning -->
+                            <div style="margin-top: 24px; padding: 16px; background-color: #fef3c7; border-radius: 8px; border-left: 4px solid #f59e0b;">
+                                <p style="margin: 0; color: #92400e; font-size: 13px;">
+                                    <strong>Security Notice:</strong> If you didn't request this code, please ignore this email. Never share your verification code with anyone.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 24px 40px; background-color: #f8fafc; border-radius: 0 0 12px 12px; border-top: 1px solid #e2e8f0;">
+                            <p style="margin: 0; color: #94a3b8; font-size: 12px; text-align: center;">
+                                This email was sent to ${email}<br>
+                                © 2024 ExporTrack-AI. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `.trim();
+}
+
+// Build plain text OTP email
+function buildOTPEmailText(otp: string, email: string): string {
+    return `
+Your Verification Code - ExporTrack-AI
+======================================
+
+Your OTP is: ${otp}
+
+This code will expire in 5 minutes.
+
+Security Notice: If you didn't request this code, please ignore this email. 
+Never share your verification code with anyone.
+
+---
+This email was sent to ${email}
+© 2024 ExporTrack-AI. All rights reserved.
+    `.trim();
 }
 
 export default async function handler(req: any, res: any) {
@@ -190,9 +285,8 @@ export default async function handler(req: any, res: any) {
         const rateLimitMs = RATE_LIMIT_HOURS * 60 * 60 * 1000;
 
         if (timeSinceLastSent < rateLimitMs) {
-            // Check if too many requests
-            const otpRequestCount = parseInt(req.headers['x-otp-request-count'] || '0');
-            if (otpRequestCount >= MAX_OTP_REQUESTS_PER_HOUR) {
+            const requestCount = existingOTP.attempts + 1;
+            if (requestCount > MAX_OTP_REQUESTS_PER_HOUR) {
                 return res.status(429).json({
                     success: false,
                     error: 'Too many OTP requests. Please try again later.',
@@ -203,11 +297,23 @@ export default async function handler(req: any, res: any) {
 
         // Check if previous OTP is still valid (not expired)
         if (existingOTP.expiresAt > now) {
-            // Don't allow new OTP while previous is still valid
+            const timeLeft = Math.ceil((existingOTP.expiresAt - now) / 1000);
             return res.status(400).json({
                 success: false,
                 error: 'OTP already sent. Please check your email or wait for the current OTP to expire.',
-                expiresIn: Math.ceil((existingOTP.expiresAt - now) / 1000 / 60)
+                expiresIn: Math.ceil(timeLeft / 60),
+                canResendIn: timeLeft < RESEND_COOLDOWN_SECONDS ? 0 : RESEND_COOLDOWN_SECONDS - timeLeft
+            });
+        }
+
+        // Check cooldown for resend
+        const timeSinceLastOTP = now - existingOTP.lastSentAt;
+        if (timeSinceLastOTP < RESEND_COOLDOWN_SECONDS * 1000) {
+            const waitTime = Math.ceil((RESEND_COOLDOWN_SECONDS * 1000 - timeSinceLastOTP) / 1000);
+            return res.status(400).json({
+                success: false,
+                error: `Please wait ${waitTime} seconds before requesting a new OTP`,
+                cooldownRemaining: waitTime
             });
         }
     }
@@ -225,20 +331,25 @@ export default async function handler(req: any, res: any) {
         lastSentAt: now
     });
 
-    // Send OTP via email
+    // Build email content
     const emailSubject = 'Your Verification Code';
-    const emailBody = `Your OTP is: ${otp} (valid for ${OTP_EXPIRY_MINUTES} minutes)
+    const htmlContent = buildOTPEmailHtml(otp, emailLower);
+    const textContent = buildOTPEmailText(otp, emailLower);
 
-This code was requested for your ExporTrack-AI account.
-If you didn't request this, please ignore this email.
+    // Try SendGrid first, then Resend as fallback
+    let emailResult = await sendEmailWithSendGrid(emailLower, emailSubject, htmlContent);
 
-Note: This OTP will expire in ${OTP_EXPIRY_MINUTES} minutes for security purposes.`;
+    // If SendGrid fails, try Resend
+    if (!emailResult.success && process.env.RESEND_API_KEY) {
+        console.log('SendGrid failed, trying Resend...');
+        emailResult = await sendEmailWithResend(emailLower, emailSubject, htmlContent);
+    }
 
-    const emailResult = await sendEmailWithSMTP(
-        emailLower,
-        emailSubject,
-        emailBody
-    );
+    // If no email service configured, simulate success for development
+    if (!process.env.SENDGRID_API_KEY && !process.env.RESEND_API_KEY) {
+        console.log(`[DEV MODE] OTP would be sent to ${emailLower}: ${otp}`);
+        emailResult = { success: true };
+    }
 
     if (!emailResult.success) {
         // Remove OTP if email failed to send
@@ -256,7 +367,8 @@ Note: This OTP will expire in ${OTP_EXPIRY_MINUTES} minutes for security purpose
         success: true,
         message: 'OTP sent successfully',
         email: emailLower,
-        expiresIn: OTP_EXPIRY_MINUTES * 60
+        expiresIn: OTP_EXPIRY_MINUTES * 60,
+        resendCooldown: RESEND_COOLDOWN_SECONDS
     });
 }
 

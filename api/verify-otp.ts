@@ -3,8 +3,10 @@
 
 // Configuration
 const MAX_ATTEMPTS = 3;
+const OTP_EXPIRY_MINUTES = 5;
+const RESEND_COOLDOWN_SECONDS = 30;
 
-// In-memory OTP storage (same as send-otp.ts)
+// In-memory OTP storage
 const otpStore = new Map<string, {
     otp: string;
     expiresAt: number;
@@ -73,7 +75,7 @@ export default async function handler(req: any, res: any) {
     if (!otp) {
         return res.status(400).json({
             success: false,
-            error: 'OTP is required'
+            error: 'Please enter the verification code'
         });
     }
 
@@ -90,7 +92,7 @@ export default async function handler(req: any, res: any) {
     if (!/^\d{6}$/.test(otp)) {
         return res.status(400).json({
             success: false,
-            error: 'Invalid OTP'
+            error: 'Invalid verification code format'
         });
     }
 
@@ -104,7 +106,8 @@ export default async function handler(req: any, res: any) {
     if (!storedOTP) {
         return res.status(400).json({
             success: false,
-            error: 'OTP expired, request a new one'
+            error: 'OTP expired, request a new one',
+            canResend: true
         });
     }
 
@@ -116,7 +119,8 @@ export default async function handler(req: any, res: any) {
         return res.status(400).json({
             success: false,
             error: 'OTP expired, request a new one',
-            canResend: true
+            canResend: true,
+            resendCooldown: 0
         });
     }
 
