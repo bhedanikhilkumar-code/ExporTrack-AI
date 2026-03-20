@@ -91,17 +91,12 @@ ExporTrack-AI is built on a modern, high-performance stack optimized for speed, 
 
 ---
 
-## 🔮 Future Improvements
-
-- [ ] Backend integration (Node.js/PostgreSQL)
-- [ ] Real email notifications
-- [ ] Carrier API integrations (FedEx, DHL, UPS)
-- [ ] PDF export functionality
-- [ ] Multi-language support
-- [ ] Mobile native apps (React Native)
-- [ ] Webhook support for automation
+## Backend API
+Live URL: https://exportrack-backend.onrender.com/
 
 ---
+
+## 🔮 Future Improvements
 
 ---
 
