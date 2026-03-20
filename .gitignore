@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.npm-cache/
+# Environment variables (sensitive data)
+.env
+.env.local
+.env.*.local
+.env.production.local
+.env.development.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn

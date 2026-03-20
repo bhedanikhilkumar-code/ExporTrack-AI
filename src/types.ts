@@ -1,0 +1,324 @@
+import { CommercialInvoice } from './types/invoice';
+import { PackingList } from './types/packingList';
+import { CertificateOfOrigin } from './types/certificateOfOrigin';
+import { ShippingBill } from './types/shippingBill';
+import { TrackingInfo } from './types/tracking';
+
+export const REQUIRED_DOCUMENT_TYPES = [
+  'Invoice',
+  'Packing List',
+  'Bill of Lading',
+  'Shipping Bill',
+  'Certificate of Origin',
+  'Insurance Papers',
+  'Customs Files'
+] as const;
+
+export type RequiredDocumentType = (typeof REQUIRED_DOCUMENT_TYPES)[number];
+export type DocumentType = RequiredDocumentType | 'Delivery Order' | 'Inspection Report' | 'Other';
+export type DocStatus = 'Pending' | 'Verified' | 'Missing' | 'Rejected';
+export type ShipmentStatus =
+  | 'Shipment Created'
+  | 'Driver Assigned'
+  | 'Picked Up'
+  | 'In Transit'
+  | 'Reached Hub'
+  | 'Out For Delivery'
+  | 'Delivered'
+  | 'Under Verification'
+  | 'Customs Hold'
+  | 'Awaiting Documents'
+  | 'Under Review'
+  | 'Delayed';
+
+export type Role = 'Owner' | 'Admin' | 'Manager' | 'Operations' | 'Viewer' | 'Export Operations Manager' | 'Staff' | 'Client';
+
+export interface AnalyticsMetrics {
+  totalShipments: number;
+  onTimeDeliveryRate: number;
+  delayedShipments: number;
+  averageDeliveryTime: number; // in days
+  monthlyShipmentTrend: { month: string; count: number }[];
+  carrierPerformance: { carrier: string; rating: number; shipments: number }[];
+  deliveryTimeDistribution: { range: string; count: number }[];
+}
+
+export interface ShipmentDocument {
+  id: string;
+  userId?: string;
+  type: DocumentType;
+  fileName: string;
+  fileFormat: 'PDF' | 'JPG' | 'PNG';
+  status: DocStatus;
+  uploadedAt: string;
+  uploadedBy: string;
+}
+
+export interface OCRExtraction {
+  id: string;
+  documentType: string;
+  invoiceNumber: string;
+  date: string;
+  buyerName: string;
+  shipmentValue: string;
+  destination: string;
+  confidence: number;
+}
+
+export interface ShipmentComment {
+  id: string;
+  author: string;
+  role: Role;
+  message: string;
+  createdAt: string;
+  internal: boolean;
+}
+
+export interface ShipmentTimelineEvent {
+  id: string;
+  status: string;
+  timestamp: string;
+  note?: string;
+}
+
+export interface Shipment {
+  id: string;
+  userId?: string;
+  clientName: string;
+  destinationCountry: string;
+  shipmentDate: string;
+  containerNumber: string;
+  status: ShipmentStatus;
+  isDelayed: boolean;
+  deadline: string;
+  priority: 'High' | 'Medium' | 'Low';
+  assignedTo: string;
+  documents: ShipmentDocument[];
+  aiScan: OCRExtraction[];
+  comments: ShipmentComment[];
+  trackingId?: string;
+  driverName?: string;
+  driverPhone?: string;
+  vehicleNumber?: string;
+  estimatedDeliveryTime?: string;
+  // NEW: Status Automation fields
+  bookingDate?: string;
+  departureDate?: string;
+  deliveryDate?: string;
+  customsDocumentUploaded?: boolean;
+  timeline?: ShipmentTimelineEvent[];
+}
+
+export interface NotificationItem {
+  id: string;
+  userId?: string;
+  shipmentId: string;
+  type: 'Missing Docs' | 'Approval Delay' | 'Deadline';
+  severity: 'High' | 'Medium' | 'Low';
+  title: string;
+  message: string;
+  createdAt: string;
+  dueDate: string;
+  read: boolean;
+}
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  region: string;
+  activeCases: number;
+  lastActive: string;
+}
+
+export interface TeamInvite {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  workspaceId: string;
+  token: string;
+  status: 'Pending' | 'Accepted' | 'Expired';
+  createdAt: string;
+}
+
+export interface InviteTeamMemberInput {
+  name: string;
+  email: string;
+  role: Role;
+  workspaceId?: string;
+}
+
+export interface Client {
+  id: string;
+  name: string;
+  email: string;
+  companyName: string;
+  activeShipments: number;
+  lastLogin: string;
+}
+
+export interface UserSession {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  authProvider?: 'email' | 'google' | 'demo';
+  profilePicture?: string;
+  region?: string;
+  userMode: 'demo' | 'real';
+}
+
+export type TeamPermission = 'view_only' | 'edit' | 'admin';
+
+export interface TeamMemberWithPermissions {
+  id: string;
+  userId: string;
+  name: string;
+  email: string;
+  role: Role;
+  permission: TeamPermission;
+  joinedAt: string;
+}
+
+export interface Team {
+  id: string;
+  ownerId: string;
+  name: string;
+  createdAt: string;
+  members: TeamMemberWithPermissions[];
+}
+
+export interface AppState {
+  isAuthenticated: boolean;
+  user: UserSession | null;
+  shipments: Shipment[];
+  notifications: NotificationItem[];
+  teamMembers: TeamMember[];
+  clients: Client[];
+  theme: 'light' | 'dark' | 'system';
+  invites: TeamInvite[];
+  userTeams: Team[];
+  invoices: CommercialInvoice[];
+  packingLists: PackingList[];
+  coos: CertificateOfOrigin[];
+  shippingBills: ShippingBill[];
+  trackings: TrackingInfo[];
+}
+
+export interface CreateShipmentInput {
+  shipmentId: string;
+  clientName: string;
+  destinationCountry: string;
+  shipmentDate: string;
+  containerNumber: string;
+  status: ShipmentStatus;
+  assignedTo: string;
+}
+
+export interface UploadDocumentInput {
+  type: DocumentType;
+  fileName: string;
+  fileFormat: 'PDF' | 'JPG' | 'PNG';
+  uploadedBy: string;
+}
+
+
+
+export interface TrackingEvent {
+  timestamp: string;
+  location: string;
+  status: string;
+  description: string;
+}
+
+export interface LocationUpdate {
+  timestamp: string;
+  locationName: string;
+  lat: number;
+  lng: number;
+  status: string;
+  notes?: string;
+}
+
+export interface DriverTelemetry {
+  driverId: string;
+  shipmentId: string;
+  latitude: number;
+  longitude: number;
+  speed: number;
+  heading: number; // direction in degrees
+  timestamp: string;
+}
+
+export interface AIEtaPrediction {
+  predictedArrival: string;
+  confidenceScore: number;
+  factors?: string[];
+}
+
+export interface DelayEvaluation {
+  isDelayed: boolean;
+  daysDelayed: number;
+}
+
+export type NotificationEventType =
+  | 'shipment_created'
+  | 'shipment_dispatched'
+  | 'shipment_delayed'
+  | 'shipment_delivered';
+
+export interface DetailedAIEta extends AIEtaPrediction {
+  factors: string[];
+}
+
+export interface OptimizedRoute {
+  id: string;
+  coordinates: { lat: number; lng: number }[];
+  distance: string;
+  estimatedTime: string;
+  stops: number;
+  savings?: {
+    time: string;
+    distance: string;
+  };
+  recommendationReason: string;
+}
+
+export interface ShipmentTracking {
+  shipmentId: string;
+  currentStatus: string;
+  currentLocation: string;
+  latitude: number;
+  longitude: number;
+  lastUpdatedTime: string;
+  trackingHistory: LocationUpdate[]; // Keeping existing for legacy support while migrating
+  estimatedArrival?: string;
+
+  // Legacy properties used in components
+  location?: string;
+  next_hub?: string;
+  milestones?: Array<{ event: string; timestamp: string; completed: boolean }>;
+
+  // New unified tracking fields
+  tracking_number?: string;
+  carrier?: string;
+  status?: string; // Unified status
+  current_location?: string;
+  estimated_delivery?: string;
+  tracking_events?: TrackingEvent[];
+
+  // Step 2 & 3 Additions
+  aiEta?: AIEtaPrediction;
+  delayAlert?: DelayEvaluation;
+
+  // Step 4: AI Route Optimization
+  optimizedRoute?: OptimizedRoute;
+
+  // Step 5: Real-Time Driver Tracking
+  driverTele?: DriverTelemetry;
+  driverAvatar?: string;
+  driverVehicle?: string;
+}
+
