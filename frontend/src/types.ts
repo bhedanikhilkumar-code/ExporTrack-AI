@@ -1,9 +1,3 @@
-import { CommercialInvoice } from './types/invoice';
-import { PackingList } from './types/packingList';
-import { CertificateOfOrigin } from './types/certificateOfOrigin';
-import { ShippingBill } from './types/shippingBill';
-import { TrackingInfo } from './types/tracking';
-
 export const REQUIRED_DOCUMENT_TYPES = [
   'Invoice',
   'Packing List',
@@ -31,7 +25,7 @@ export type ShipmentStatus =
   | 'Under Review'
   | 'Delayed';
 
-export type Role = 'Owner' | 'Admin' | 'Manager' | 'Operations' | 'Viewer' | 'Export Operations Manager' | 'Staff' | 'Client';
+export type Role = 'Admin' | 'Manager' | 'Operations' | 'Viewer' | 'Export Operations Manager' | 'Staff' | 'Client';
 
 export interface AnalyticsMetrics {
   totalShipments: number;
@@ -89,7 +83,7 @@ export interface Shipment {
   shipmentDate: string;
   containerNumber: string;
   status: ShipmentStatus;
-  isDelayed: boolean;
+  delayed: boolean;
   deadline: string;
   priority: 'High' | 'Medium' | 'Low';
   assignedTo: string;
@@ -200,11 +194,6 @@ export interface AppState {
   theme: 'light' | 'dark' | 'system';
   invites: TeamInvite[];
   userTeams: Team[];
-  invoices: CommercialInvoice[];
-  packingLists: PackingList[];
-  coos: CertificateOfOrigin[];
-  shippingBills: ShippingBill[];
-  trackings: TrackingInfo[];
 }
 
 export interface CreateShipmentInput {

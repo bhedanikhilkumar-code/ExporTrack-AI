@@ -101,11 +101,7 @@ export default function AuthPage() {
   }, [email, mode]);
 
   // Check if CAPTCHA is configured (Turnstile or reCAPTCHA)
-  // For now, show CAPTCHA for better security - can be disabled by removing this line
-  const captchaEnabled = useMemo(() => {
-    return true; // Always enable for testing
-    // In production, use: return isTurnstileConfigured() || isRecaptchaConfigured();
-  }, []);
+  const captchaEnabled = useMemo(() => isTurnstileConfigured() || isRecaptchaConfigured(), []);
 
   // Countdown timer for OTP resend
   useEffect(() => {
@@ -410,33 +406,29 @@ export default function AuthPage() {
     setOtpError('');
 
     try {
-      const response = await fetch('/api/auth-otp', {
+      const response = await fetch('/api/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'send', email, type: mode === 'login' ? 'login' : 'verification' })
+        body: JSON.stringify({ email })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
         if (data.retryAfter) {
-          setOtpError(`Please wait ${data.retryAfter} seconds before requesting another code`);
+          setOtpError(`Please wait ${data.retryAfter} minutes before requesting another OTP`);
         } else {
-          setOtpError(data.error || 'Failed to send verification code. Please try again.');
+          setOtpError(data.error || 'Failed to send OTP. Please try again.');
         }
         return;
       }
 
       setOtpSent(true);
-      setCountdown(RESEND_COOLDOWN);
-
-      // In development mode, show the OTP for testing
-      if (data.devMode && data.devOTP) {
-        console.log(`[DEV] OTP for ${email}: ${data.devOTP}`);
-      }
+      setOtpExpiry(data.expiresIn);
+      setCountdown(RESEND_COOLDOWN); // 30 seconds cooldown before resend
     } catch (err) {
       console.error('Send OTP error:', err);
-      setOtpError('Failed to send verification code. Please try again.');
+      setOtpError('Failed to send OTP. Please try again.');
     } finally {
       setIsSendingOtp(false);
     }
@@ -453,10 +445,10 @@ export default function AuthPage() {
     setOtpError('');
 
     try {
-      const response = await fetch('/api/auth-otp', {
+      const response = await fetch('/api/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'verify', email, otp })
+        body: JSON.stringify({ email, otp })
       });
 
       const data = await response.json();
@@ -465,14 +457,14 @@ export default function AuthPage() {
         setOtpAttempts(prev => prev + 1);
 
         if (data.locked) {
-          setOtpError(data.error || 'Too many failed attempts. Please request a new code.');
+          setOtpError(data.error || 'Too many failed attempts. Please request a new OTP.');
           return;
         }
 
         if (data.attemptsRemaining) {
           setOtpError(`${data.error}. ${data.attemptsRemaining} attempt(s) remaining.`);
         } else {
-          setOtpError(data.error || 'Invalid verification code');
+          setOtpError(data.error || 'Invalid OTP');
         }
         return;
       }
@@ -481,7 +473,7 @@ export default function AuthPage() {
       setAuthStep('credentials');
     } catch (err) {
       console.error('Verify OTP error:', err);
-      setOtpError('Failed to verify code. Please try again.');
+      setOtpError('Failed to verify OTP. Please try again.');
     } finally {
       setIsVerifyingOtp(false);
     }
@@ -815,7 +807,7 @@ export default function AuthPage() {
                   ExporTrack<span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-300 drop-shadow-[0_0_8px_rgba(45,212,191,0.5)]">AI</span>
                 </h1>
               </div>
-
+              
               {/* Headline & Subtext */}
               <div className="mb-12">
                 <h2 className="text-3xl lg:text-4xl font-extrabold text-white mb-4 leading-tight tracking-tight">
@@ -1238,7 +1230,7 @@ export default function AuthPage() {
                       <div className="flex flex-col items-center">
                         <div
                           id="turnstile-container"
-                          className={`transition-all duration-300 ${captchaSuccess ? 'border-2 border-emerald-500 rounded-lg' : ''}`}
+                          className={`g-recaptcha transition-all duration-300 ${captchaSuccess ? 'border-2 border-emerald-500 rounded-lg' : ''}`}
                           data-sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || '0x4AAAAAAA_TestSiteKey'}
                         />
                         {/* Hidden input to store token */}

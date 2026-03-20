@@ -1,123 +1,255 @@
-# ExporTrack-AI
+# 🚢 ExporTrack AI
 
-The Intelligent Export Logistics Ecosystem
-Next-generation document management and shipment tracking powered by AI.
+**Export Logistics Document Management System**
 
-<p align="center">
-  <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-3.x-38BDF8?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Vite-5.x-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite" />
-  <br>
-  <img src="https://img.shields.io/badge/MySQL-Managed-4479A1?style=for-the-badge&logo=mysql&logoColor=white" alt="MySQL" />
-  <img src="https://img.shields.io/badge/Vercel-Deployed-000000?style=for-the-badge&logo=vercel&logoColor=white" alt="Vercel" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="License" />
-</p>
+A modern, enterprise-grade SaaS platform for managing export shipments, tracking documents, and streamlining logistics operations with AI-powered insights.
+
+![React](https://img.shields.io/badge/React-18-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8)
+![Vite](https://img.shields.io/badge/Vite-5-646cff)
 
 ---
 
-## 🌟 Vision
+## 📋 Overview
 
-ExporTrack-AI is not just a document management system; it's a mission-critical platform for the modern global trade era. By unifying fragmented logistics workflows into a single, intelligent interface, we empower freight forwarders and export operations teams to move faster, reduce errors, and gain unprecedented visibility into their global supply chains.
+ExporTrack AI is a comprehensive export logistics document management system designed for shipping companies, freight forwarders, and export operations teams. It provides real-time shipment tracking, automated document verification, team collaboration, and analytics dashboard — all in one platform.
 
-**Try the Demo instantly!** Just click on "Demo Mode" on the login page to explore the full dashboard without creating an account.
-
----
-
-## ✨ Enterprise-Grade Features
-
-### 🛡️ Smart Logic & Security
-- **Dynamic Auth Engine**: Seamless transition between Google OAuth, email verification, and a zero-friction "Demo Mode."
-- **Role-Based Workspaces**: Granular permissions for Admins, Managers, and Operations, ensuring data integrity and security.
-- **Intelligent Data Isolation**: Complete separation of development, demo, and production environments.
-
-### 📦 Precision Logistics Control
-- **Automated Lifecycle Sync**: Shipments evolve through `Draft` → `Booked` → `In Transit` → `Delivered` automatically based on real-time document triggers.
-- **Advanced Container Tracking**: Manage complex multi-container shipments with detailed driver assignments and milestones.
-- **Interactive Routing**: Geographic maps powered by Leaflet to visualize shipment paths across global ports.
-
-### 🤖 The "AI" Advantage
-- **Intelligent OCR**: Coming soon! Our engine is designed for automated data extraction from Invoices and Packing Lists.
-- **Predictive Risk Engine**: Historical data analysis (Delay Prediction) to identify high-risk routes before they impact your SLAs.
-- **Compliance Copilot**: Real-time validation checks against export checklists to prevent customs rejections.
-
-### 📊 Tactical Intelligence
-- **Live KPI Ecosystem**: Real-time heartbeat of your operations—tracking on-time delivery rates, document completion, and volume trends.
-- **Rich Analytics Suite**: High-fidelity charts (Recharts) providing deep insights into monthly throughput and bottleneck detection.
+**Problem Solved:** Export logistics teams often struggle with fragmented document workflows, manual status updates, and lack of visibility into shipment progress. ExporTrack AI centralizes all export operations with intelligent automation.
 
 ---
 
-## 🏗 System Architecture
+## ✨ Key Features
 
-```text
-User --> React Frontend (Vite)
-React Frontend --> Vercel API (Node.js)
-Vercel API --> MySQL Database
-React Frontend --> Google/Email Auth
-```
+### 🔐 Authentication & User Management
+- **Google OAuth** integration for seamless sign-in
+- **Email authentication** with form-based registration
+- **Demo Mode** vs **Real User Mode** — try the app instantly without account creation
 
-### Core Components
-- **Shipment Engine**: Automated lifecycle management.
-- **Document Manager**: Smart upload and verification.
-- **Analytics Dashboard**: Real-time KPI visualization.
+### 📦 Shipment Management
+- **Create, edit, and track** export shipments
+- **Automated status flow**: Draft → Booked → In Transit → Customs Clearance → Delivered
+- **Smart automation** — status updates automatically based on documents and dates
+- **Container & driver assignment** with real-time tracking
+
+### 📄 Document Management
+- **Multi-format upload**: PDF, JPG, PNG support
+- **Mobile camera capture** for on-the-go uploads
+- **Required document checklist**: Invoice, Packing List, Bill of Lading, Shipping Bill, Certificate of Origin, Insurance Papers, Customs Files
+- **Document verification** with status: Pending, Verified, Missing, Rejected
+
+### 🤖 AI-Powered Features
+- **OCR Document Extraction** — automatically extract invoice numbers, dates, buyer names, shipment values
+- **Delay Prediction** — AI estimates potential delays based on historical data
+- **Compliance Copilot** — AI assistant for export regulations
+
+### 👥 Team Collaboration
+- **Role-Based Access Control (RBAC)**
+  - **Admin**: Full access, user management, analytics
+  - **Manager**: Create/edit shipments, invite users, view analytics
+  - **Operations**: Create shipments, update tracking, manage documents
+  - **Viewer**: Read-only access
+- **Team workspace** with member management
+- **Internal notes** for private team communication
+
+### 📊 Analytics Dashboard
+- **Live KPI Cards**: Total shipments, on-time rate, delayed units, lead time
+- **Interactive Charts**:
+  - Status Distribution (Pie Chart)
+  - Monthly Shipments (Bar Chart)
+  - Document Trends (Line Chart)
+  - Active vs Completed (Donut Chart)
+- **Real-time updates** when data changes
+
+### 🔔 Notification System
+- Missing document alerts
+- Approval delay warnings
+- Deadline reminders
+- Shipment status updates
 
 ---
 
 ## 🛠 Tech Stack
 
-ExporTrack-AI is built on a modern, high-performance stack optimized for speed, scalability, and developer experience.
+| Category | Technology |
+|----------|------------|
+| **Frontend** | React 18, React Router v6 |
+| **Language** | TypeScript |
+| **Styling** | Tailwind CSS |
+| **Build Tool** | Vite |
+| **State Management** | React Context + useReducer |
+| **Data Persistence** | localStorage |
+| **Charts** | Recharts |
+| **Maps** | Leaflet + React Leaflet |
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Core** | `React 18`, `TypeScript`, `React Router v6` |
-| **Design** | `Tailwind CSS`, `Framer Motion` (Micro-animations), `Lucide-react` |
-| **Data & State** | `Context API`, `useReducer`, `SQL (MySQL)`, `Resend` (Emails) |
-| **Visualization** | `Recharts`, `React-Leaflet`, `Lucide Icons` |
-| **Infrastructure** | `Vite`, `Vercel Serverless`, `Node.js` |
+---
+
+## 🏗 System Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                    ExporTrack AI                        │
+├─────────────────────────────────────────────────────────┤
+│  Authentication Layer                                   │
+│  ├── Google OAuth                                       │
+│  └── Email/Password                                     │
+├─────────────────────────────────────────────────────────┤
+│  Core Features                                          │
+│  ├── Shipment Management (CRUD)                         │
+│  ├── Document Upload & Verification                     │
+│  ├── Status Automation Engine                           │
+│  ├── RBAC Permission System                             │
+│  └── Notification Service                               │
+├─────────────────────────────────────────────────────────┤
+│  UI Layer                                               │
+│  ├── Dashboard (KPIs + Charts)                          │
+│  ├── Shipment Details                                   │
+│  ├── Team Management                                    │
+│  └── Analytics                                          │
+├─────────────────────────────────────────────────────────┤
+│  Data Layer                                             │
+│  └── localStorage (mock backend)                        │
+└─────────────────────────────────────────────────────────┘
+```
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- **Node.js** (v18.0 or higher)
-- **MySQL Instance** (Local via XAMPP or Cloud)
 
-### One-Command Setup
+- Node.js 18+
+- npm or yarn
+
+### Installation
+
 ```bash
+# Clone the repository
+git clone https://github.com/your-username/ExporTrack-AI.git
+
+# Navigate to project directory
+cd ExporTrack-AI
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+### Build for Production
+
+```bash
+npm run build
+```
+
+---
+
+## ⚙️ Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+# Google OAuth (optional - for production)
+VITE_GOOGLE_CLIENT_ID=your-google-client-id
+
+# App Configuration
+VITE_APP_NAME=ExporTrack AI
+VITE_APP_VERSION=1.0.0
+```
+
+> **Note:** The app works fully without Google OAuth. Demo mode provides instant access without authentication.
+
+---
+
+## 📖 Usage Guide
+
+### 1. Login / Demo Mode
+- Click **"Continue with Google"** or use email/password
+- Select **Demo Mode** to explore without account
+
+### 2. Create a Shipment
+- Go to **Dashboard** → Click **"Add Shipment"**
+- Fill in shipment details (ID, client, destination, date)
+- Status automatically starts as **Draft**
+
+### 3. Upload Documents
+- Navigate to shipment details
+- Upload required documents (Invoice, Bill of Lading, etc.)
+- Documents trigger status automation
+
+### 4. Track Progress
+- View **Progress Bar** on shipment details
+- Status auto-updates: Draft → Booked → In Transit → Customs → Delivered
+
+### 5. Manage Team
+- Go to **Profile & Team**
+- Invite members with roles (Admin/Manager/Operations/Viewer)
+- Admins can change roles and remove members
+
+### 6. View Analytics
+- Dashboard shows live charts and KPIs
+- Charts update in real-time as data changes
+
+---
+
+## 🖼 Screenshots
+
+| Dashboard | Shipment Details | Team Management |
+|-----------|-----------------|----------------|
+| ![Dashboard](https://placehold.co/600x400/1e293b/ffffff?text=Dashboard) | ![Shipment](https://placehold.co/600x400/1e293b/ffffff?text=Shipment+Details) | ![Team](https://placehold.co/600x400/1e293b/ffffff?text=Team+Management) |
+
+---
+
+## 💼 Use Cases
+
+- **Freight Forwarders** — Track multiple shipments across carriers
+- **Export Departments** — Manage compliance documents
+- **Logistics Teams** — Coordinate with drivers and warehouses
+- **Supply Chain Managers** — Monitor delivery performance
+
+---
+
+## ⚠️ Limitations
+
+- **No real backend** — Data stored in browser localStorage only
 - **No email delivery** — Notifications are in-app only
 - **Demo data resets** — Clearing browser storage removes all data
 - **No real shipping integration** — Mock carrier APIs
 
 ---
 
-## Backend API
-Live URL: https://exportrack-backend.onrender.com/
-
----
-
 ## 🔮 Future Improvements
+
+- [ ] Backend integration (Node.js/PostgreSQL)
+- [ ] Real email notifications
+- [ ] Carrier API integrations (FedEx, DHL, UPS)
+- [ ] PDF export functionality
+- [ ] Multi-language support
+- [ ] Mobile native apps (React Native)
+- [ ] Webhook support for automation
 
 ---
 
 ## 👨‍💻 Author
 
-**Bheda Nikhilkumar**
-- Full-Stack Developer & AI Specialist
-- Building SaaS products for the Logistics Industry 🚀
+**Your Name**
+- Full-Stack Developer
+- React & TypeScript Specialist
+- Building SaaS products 🚀
 
 ---
 
-**Note:** Ensure you run `schema.sql` on your MySQL server to initialize the required tables before starting the application for real data persistence.
+## 📄 License
+
+MIT License — feel free to use this project for learning and portfolio purposes.
 
 ---
 
-<p align="center">
-  **⭐ Star this repo if you found it helpful!**
-</p>
+<div align="center">
 
-<p align="center">
-  Built with ❤️ by the ExporTrack-AI Team.
-</p>
+**⭐ Star this repo if you found it helpful!**
 
+Built with ❤️ using React + TypeScript + Tailwind
 
+</div>

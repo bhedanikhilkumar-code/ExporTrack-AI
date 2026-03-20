@@ -189,7 +189,7 @@ export function getProgressPercentage(status: ShipmentStatus | AutomationStatus)
  * Check if shipment is delayed
  */
 export function isShipmentDelayed(shipment: Shipment): boolean {
-    if (shipment.isDelayed) return true;
+    if (shipment.delayed) return true;
 
     const deadline = shipment.deadline ? new Date(shipment.deadline) : null;
     const now = new Date();

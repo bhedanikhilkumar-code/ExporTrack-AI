@@ -22,11 +22,6 @@ import {
 import { decodeJWT } from '../utils/googleAuth';
 import { hasPermission as checkPermission, Permission } from '../utils/permissions';
 import { computeAnalytics, ShipmentAnalyticsMetrics } from '../services/analyticsService';
-import { CommercialInvoice } from '../types/invoice';
-import { PackingList } from '../types/packingList';
-import { CertificateOfOrigin } from '../types/certificateOfOrigin';
-import { ShippingBill } from '../types/shippingBill';
-import { TrackingInfo } from '../types/tracking';
 
 // Storage keys
 const STORAGE_KEY = 'exportrack-ai-state-v1';
@@ -79,19 +74,6 @@ interface AppContextValue {
   canCreateShipment: boolean;
   hasPermission: (permission: Permission) => boolean;
   getAnalytics: () => ShipmentAnalyticsMetrics;
-  // Document Management
-  saveInvoice: (invoice: CommercialInvoice) => void;
-  deleteInvoice: (id: string) => void;
-  savePackingList: (packingList: PackingList) => void;
-  deletePackingList: (id: string) => void;
-  saveCOO: (coo: CertificateOfOrigin) => void;
-  deleteCOO: (id: string) => void;
-  saveShippingBill: (shippingBill: ShippingBill) => void;
-  deleteShippingBill: (id: string) => void;
-  saveTracking: (tracking: TrackingInfo) => void;
-  deleteTracking: (id: string) => void;
-  getNextDocumentNumber: (type: 'INV' | 'PL' | 'COO' | 'SB') => string;
-  performApiCall: (url: string, method: string, body?: any) => Promise<any>;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -391,7 +373,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     console.warn('Demo account loaded for testing');
   }, []);
 
-  const loginWithGoogleToken = useCallback(async (token: string) => {
+  const loginWithGoogleToken = useCallback((token: string) => {
     try {
       const payload = decodeJWT(token);
 
@@ -399,27 +381,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         throw new Error('Invalid token or missing email');
       }
 
-      // Sync with MySQL backend
-      const response = await fetch('/api/auth-google', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token })
-      });
-
-      const dbResponse = await response.json();
-      if (!response.ok) throw new Error(dbResponse.error || 'Backend sync failed');
-
-      const dbUser = dbResponse.user;
       const emptyState = createEmptyState();
-      const newUserId = dbUser.id;
+      const userName = payload.name || payload.given_name || 'Google User';
+      const userEmail = payload.email;
+      const profilePicture = payload.picture;
+      const newUserId = payload.sub || `google-${userEmail}`;
 
       const newUser: UserSession = {
         id: newUserId,
-        name: dbUser.name,
-        email: dbUser.email,
-        role: dbUser.role as Role,
+        name: userName,
+        email: userEmail,
+        role: 'Staff',
         authProvider: 'google',
-        profilePicture: payload.picture,
+        profilePicture: profilePicture,
         userMode: 'real'
       };
 
@@ -435,11 +409,24 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       if (typeof globalThis.window !== 'undefined') {
         sessionStorage.setItem('google_auth_token', token);
         sessionStorage.setItem('google_token_expiry', new Date(payload.exp * 1000).toISOString());
-        sessionStorage.setItem('google_user_email', dbUser.email);
+        sessionStorage.setItem('google_user_email', userEmail);
+
+        console.log('User authenticated with Google:', {
+          name: userName,
+          email: userEmail,
+          hasProfilePicture: !!profilePicture
+        });
       }
     } catch (error) {
       console.error('Failed to login with Google token:', error);
-      throw error;
+
+      if (typeof globalThis.window !== 'undefined') {
+        sessionStorage.removeItem('google_auth_token');
+        sessionStorage.removeItem('google_token_expiry');
+        sessionStorage.removeItem('google_user_email');
+      }
+
+      throw new Error('Google authentication failed. Please try again.');
     }
   }, []);
 
@@ -483,7 +470,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       shipmentDate: input.shipmentDate,
       containerNumber: input.containerNumber,
       status: 'Shipment Created', // Initial legacy status
-      isDelayed: false,
+      delayed: false,
       deadline: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10),
       priority: 'Medium',
       assignedTo: input.assignedTo,
@@ -1001,20 +988,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     return computeAnalytics(state.shipments);
   }, [state.shipments]);
 
-  const performApiCall = useCallback(async (url: string, method: string, body?: any) => {
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: body ? JSON.stringify(body) : undefined
-      });
-      return await res.json();
-    } catch (e) {
-      console.error('API call failed:', e);
-      return { error: 'Network error' };
-    }
-  }, []);
-
   const value = useMemo<AppContextValue>(
     () => ({
       state,
@@ -1092,7 +1065,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
             break;
         }
       },
-      performApiCall,
       applyOptimizedRoute: (shipmentId: string, route: any) => {
         console.log('Apply optimized route:', shipmentId, route);
       },
@@ -1114,89 +1086,6 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           ...prev,
           notifications: [newNotification, ...prev.notifications]
         }));
-      },
-
-      // Document Management
-      getNextDocumentNumber: (type: 'INV' | 'PL' | 'COO' | 'SB') => {
-        const date = new Date();
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const fiscalYear = month >= 3 ? `${year}-${(year + 1).toString().slice(-2)}` : `${year - 1}-${year.toString().slice(-2)}`;
-        const prefix = `${type}/${fiscalYear}/`;
-
-        let list: any[] = [];
-        if (type === 'INV') list = state.invoices;
-        else if (type === 'PL') list = state.packingLists;
-        else if (type === 'COO') list = state.coos;
-        else if (type === 'SB') list = state.shippingBills;
-
-        const count = list.length + 1;
-        return `${prefix}${count.toString().padStart(3, '0')}`;
-      },
-      saveInvoice: async (invoice: CommercialInvoice) => {
-        setState(prev => ({
-          ...prev,
-          invoices: prev.invoices.find(i => i.id === invoice.id)
-            ? prev.invoices.map(i => i.id === invoice.id ? invoice : i)
-            : [...prev.invoices, { ...invoice, createdAt: invoice.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() }]
-        }));
-        if (isRealUser) await performApiCall('/api/documents/invoices', 'POST', invoice);
-      },
-      deleteInvoice: async (id: string) => {
-        setState(prev => ({ ...prev, invoices: prev.invoices.filter(i => i.id !== id) }));
-        if (isRealUser) await performApiCall(`/api/documents/invoices?deleteId=${id}`, 'DELETE');
-      },
-      savePackingList: async (pl: PackingList) => {
-        setState(prev => ({
-          ...prev,
-          packingLists: prev.packingLists.find(p => p.id === pl.id)
-            ? prev.packingLists.map(p => p.id === pl.id ? pl : p)
-            : [...prev.packingLists, { ...pl, createdAt: pl.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() }]
-        }));
-        if (isRealUser) await performApiCall('/api/documents/packing-lists', 'POST', pl);
-      },
-      deletePackingList: async (id: string) => {
-        setState(prev => ({ ...prev, packingLists: prev.packingLists.filter(p => p.id !== id) }));
-        if (isRealUser) await performApiCall(`/api/documents/packing-lists?deleteId=${id}`, 'DELETE');
-      },
-      saveCOO: async (coo: CertificateOfOrigin) => {
-        setState(prev => ({
-          ...prev,
-          coos: prev.coos.find(c => c.id === coo.id)
-            ? prev.coos.map(c => c.id === coo.id ? coo : c)
-            : [...prev.coos, { ...coo, createdAt: coo.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() }]
-        }));
-        if (isRealUser) await performApiCall('/api/documents/coos', 'POST', coo);
-      },
-      deleteCOO: async (id: string) => {
-        setState(prev => ({ ...prev, coos: prev.coos.filter(c => c.id !== id) }));
-        if (isRealUser) await performApiCall(`/api/documents/coos?deleteId=${id}`, 'DELETE');
-      },
-      saveShippingBill: async (sb: ShippingBill) => {
-        setState(prev => ({
-          ...prev,
-          shippingBills: prev.shippingBills.find(s => s.id === sb.id)
-            ? prev.shippingBills.map(s => s.id === sb.id ? sb : s)
-            : [...prev.shippingBills, { ...sb, createdAt: sb.createdAt || new Date().toISOString(), updatedAt: new Date().toISOString() }]
-        }));
-        if (isRealUser) await performApiCall('/api/documents/shipping-bills', 'POST', sb);
-      },
-      deleteShippingBill: async (id: string) => {
-        setState(prev => ({ ...prev, shippingBills: prev.shippingBills.filter(s => s.id !== id) }));
-        if (isRealUser) await performApiCall(`/api/documents/shipping-bills?deleteId=${id}`, 'DELETE');
-      },
-      saveTracking: async (tracking: TrackingInfo) => {
-        setState(prev => ({
-          ...prev,
-          trackings: prev.trackings.find(t => t.id === tracking.id)
-            ? prev.trackings.map(t => t.id === tracking.id ? tracking : t)
-            : [...prev.trackings, { ...tracking, lastUpdated: new Date().toISOString() }]
-        }));
-        if (isRealUser) await performApiCall('/api/documents/trackings', 'POST', tracking);
-      },
-      deleteTracking: async (id: string) => {
-        setState(prev => ({ ...prev, trackings: prev.trackings.filter(t => t.id !== id) }));
-        if (isRealUser) await performApiCall(`/api/documents/trackings?deleteId=${id}`, 'DELETE');
       },
       isDemoUser,
       isRealUser,
@@ -1237,13 +1126,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       deleteInvite,
       acceptInvite,
       checkUserPermission,
-      getAnalytics,
-      performApiCall,
-      state.invoices,
-      state.packingLists,
-      state.coos,
-      state.shippingBills,
-      state.trackings,
+      getAnalytics
     ]
   );
 

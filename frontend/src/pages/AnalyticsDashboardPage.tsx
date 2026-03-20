@@ -216,7 +216,7 @@ export default function AnalyticsDashboardPage() {
                 <polyline
                   points={monthlyTrend.map((m, i) => {
                     const x = (i / (monthlyTrend.length - 1)) * 560 + 20;
-                    const y = 180 - (m.isDelayed / maxMonthly) * 160;
+                    const y = 180 - (m.delayed / maxMonthly) * 160;
                     return `${x},${y}`;
                   }).join(' ')}
                   fill="none"

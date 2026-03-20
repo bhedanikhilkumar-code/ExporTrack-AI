@@ -22,14 +22,14 @@ export interface MonthlyTrend {
   fullMonth: string;   // e.g. "2026-01"
   shipments: number;
   delivered: number;
-  isDelayed: number;
+  delayed: number;
 }
 
 export interface CarrierPerformance {
   carrier: string;
   shipments: number;
   onTime: number;
-  isDelayed: number;
+  delayed: number;
   avgDays: number;
 }
 
@@ -56,12 +56,12 @@ function getCarrier(containerNumber: string): string {
 export function computeAnalytics(shipments: Shipment[]): ShipmentAnalyticsMetrics {
   const total = shipments.length;
   const delivered = shipments.filter(s => s.status === 'Delivered').length;
-  const delayed = shipments.filter(s => s.isDelayed).length;
+  const delayed = shipments.filter(s => s.delayed).length;
   const inTransit = shipments.filter(s => s.status === 'In Transit').length;
   const awaitingDocs = shipments.filter(s => s.status === 'Awaiting Documents').length;
   const customsHold = shipments.filter(s => s.status === 'Customs Hold').length;
 
-  const deliveredNonDelayed = shipments.filter(s => s.status === 'Delivered' && !s.isDelayed).length;
+  const deliveredNonDelayed = shipments.filter(s => s.status === 'Delivered' && !s.delayed).length;
   const onTimeRate = delivered > 0 ? Math.round((deliveredNonDelayed / delivered) * 100) : 100;
 
   // Calculate average delivery time using date diff between shipmentDate and deadline
@@ -133,7 +133,7 @@ export function computeMonthlyTrend(shipments: Shipment[]): MonthlyTrend[] {
       fullMonth: key,
       shipments: monthShipments.length,
       delivered: monthShipments.filter(s => s.status === 'Delivered').length,
-      isDelayed: monthShipments.filter(s => s.isDelayed).length,
+      delayed: monthShipments.filter(s => s.delayed).length,
     });
   }
 
@@ -144,7 +144,7 @@ export function computeMonthlyTrend(shipments: Shipment[]): MonthlyTrend[] {
     months.forEach((m, i) => {
       m.shipments = mockCounts[i];
       m.delivered = Math.round(mockCounts[i] * 0.7);
-      m.isDelayed = Math.round(mockCounts[i] * 0.15);
+      m.delayed = Math.round(mockCounts[i] * 0.15);
     });
   }
 
@@ -153,14 +153,14 @@ export function computeMonthlyTrend(shipments: Shipment[]): MonthlyTrend[] {
 
 /* ─── Carrier performance ────────────────────────────────────────────── */
 export function computeCarrierPerformance(shipments: Shipment[]): CarrierPerformance[] {
-  const map: Record<string, { shipments: number; onTime: number; isDelayed: number; totalDays: number }> = {};
+  const map: Record<string, { shipments: number; onTime: number; delayed: number; totalDays: number }> = {};
 
   shipments.forEach(s => {
     const carrier = getCarrier(s.containerNumber);
-    if (!map[carrier]) map[carrier] = { shipments: 0, onTime: 0, isDelayed: 0, totalDays: 0 };
+    if (!map[carrier]) map[carrier] = { shipments: 0, onTime: 0, delayed: 0, totalDays: 0 };
     map[carrier].shipments++;
-    if (!s.isDelayed) map[carrier].onTime++;
-    if (s.isDelayed) map[carrier].isDelayed++;
+    if (!s.delayed) map[carrier].onTime++;
+    if (s.delayed) map[carrier].delayed++;
 
     const start = new Date(s.shipmentDate).getTime();
     const end = new Date(s.deadline).getTime();
@@ -168,11 +168,11 @@ export function computeCarrierPerformance(shipments: Shipment[]): CarrierPerform
   });
 
   // Ensure we have at least 4 carriers for visual interest
-  const defaults: Record<string, { shipments: number; onTime: number; isDelayed: number; totalDays: number }> = {
-    'MSC': { shipments: 12, onTime: 10, isDelayed: 2, totalDays: 96 },
-    'Maersk': { shipments: 9, onTime: 8, isDelayed: 1, totalDays: 63 },
-    'Hapag-Lloyd': { shipments: 7, onTime: 6, isDelayed: 1, totalDays: 56 },
-    'CMA CGM': { shipments: 5, onTime: 4, isDelayed: 1, totalDays: 45 },
+  const defaults: Record<string, { shipments: number; onTime: number; delayed: number; totalDays: number }> = {
+    'MSC': { shipments: 12, onTime: 10, delayed: 2, totalDays: 96 },
+    'Maersk': { shipments: 9, onTime: 8, delayed: 1, totalDays: 63 },
+    'Hapag-Lloyd': { shipments: 7, onTime: 6, delayed: 1, totalDays: 56 },
+    'CMA CGM': { shipments: 5, onTime: 4, delayed: 1, totalDays: 45 },
   };
 
   Object.entries(defaults).forEach(([name, data]) => {
@@ -184,7 +184,7 @@ export function computeCarrierPerformance(shipments: Shipment[]): CarrierPerform
       carrier,
       shipments: data.shipments,
       onTime: data.onTime,
-      isDelayed: data.isDelayed,
+      delayed: data.delayed,
       avgDays: data.shipments > 0 ? Math.round(data.totalDays / data.shipments) : 0,
     }))
     .sort((a, b) => b.shipments - a.shipments);

@@ -1,7 +1,5 @@
 import { FormEvent, useMemo, useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { exportShipmentPDF, exportDocumentChecklistPDF } from '../services/pdfExportService';
-import { logAuditEvent } from '../services/auditLogService';
 import PageHeader from '../components/PageHeader';
 import StatusBadge from '../components/StatusBadge';
 import AppIcon from '../components/AppIcon';
@@ -146,7 +144,7 @@ export default function ShipmentDetailsPage() {
 
     const missingDocs = checklist.filter((item) => item.status === 'Missing').map((item) => item.type);
     const rejectedDocs = shipment.documents.filter((doc) => doc.status === 'Rejected').map((doc) => doc.type);
-    const delayed = shipment.isDelayed;
+    const delayed = shipment.delayed;
 
     missingDocs.forEach((doc) => factors.push(`Missing ${doc}`));
     rejectedDocs.forEach((doc) => factors.push(`Rejected ${doc}`));
@@ -163,7 +161,7 @@ export default function ShipmentDetailsPage() {
 
     score += missingCount * 15;
     score += rejectedCount * 20;
-    if (shipment.isDelayed) score += 10;
+    if (shipment.delayed) score += 10;
 
     return Math.min(100, score);
   }, [shipment, checklist]);
@@ -243,7 +241,7 @@ export default function ShipmentDetailsPage() {
       </section>
 
       {/* ── Risk Alerts ── */}
-      <ShipmentRiskAlert shipmentId={shipment.id} isDelayed={shipment.isDelayed} />
+      <ShipmentRiskAlert shipmentId={shipment.id} isDelayed={shipment.delayed} />
 
       {/* ── Page Header ── */}
       <header className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -277,31 +275,24 @@ export default function ShipmentDetailsPage() {
           </button>
           <button
             onClick={() => {
-              exportShipmentPDF(shipment);
-              if (user) {
-                logAuditEvent({
-                  userId: user.id,
-                  userName: user.name,
-                  userRole: user.role,
-                  action: 'DOCUMENT_UPLOADED',
-                  entityType: 'shipment',
-                  entityId: shipment.id,
-                  entityName: shipment.id,
-                  description: `Exported PDF report for shipment ${shipment.id}`,
-                });
-              }
+              const csvContent = [
+                'Document Type,File Name,Status,Uploaded By,Uploaded At'
+              ];
+              shipment.documents.forEach(doc => {
+                csvContent.push(`"${doc.type}","${doc.fileName}","${doc.status}","${doc.uploadedBy}","${doc.uploadedAt}"`);
+              });
+              const header = `Shipment: ${shipment.id}\nClient: ${shipment.clientName}\nDestination: ${shipment.destinationCountry}\nContainer: ${shipment.containerNumber}\nStatus: ${shipment.status}\n\n`;
+              const element = document.createElement('a');
+              element.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(header + csvContent.join('\n')));
+              element.setAttribute('download', `shipment-report-${shipment.id}-${new Date().toISOString().split('T')[0]}.csv`);
+              element.style.display = 'none';
+              document.body.appendChild(element);
+              element.click();
+              document.body.removeChild(element);
             }}
             className="btn-primary btn-sm sm:btn-base"
           >
-            <AppIcon name="download" className="mr-1 sm:mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Export </span>PDF
-          </button>
-          <button
-            onClick={() => exportDocumentChecklistPDF(shipment)}
-            className="btn-secondary btn-sm sm:btn-base"
-          >
-            <AppIcon name="file-text" className="mr-1 sm:mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Checklist </span>PDF
+            <span className="hidden sm:inline">Export </span>Report
           </button>
           <button
             onClick={() => {

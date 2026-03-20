@@ -121,7 +121,7 @@ export function getDeliveryPerformance(shipments: Shipment[]): { onTime: number;
     shipments.forEach(shipment => {
         const status = normalizeStatus(shipment.status);
         if (status === 'Delivered') {
-            if (shipment.isDelayed) {
+            if (shipment.delayed) {
                 delayed++;
             } else {
                 onTime++;

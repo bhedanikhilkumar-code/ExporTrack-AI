@@ -64,13 +64,8 @@ const navItems: NavItem[] = [
   { to: '/analytics', label: 'Analytics', icon: 'bar-chart' },
   { to: '/shipments', label: 'Shipments', icon: 'shipments' },
   { to: '/shipments/create', label: 'Create Shipment', icon: 'create' },
-  { to: '/live-tracking', label: 'Live Tracking', icon: 'navigation' },
   { to: '/documents/upload', label: 'Upload Docs', icon: 'upload' },
   { to: '/document-ocr', label: 'Document OCR', icon: 'ai-extract' },
-  { to: '/invoices/new', label: 'Commercial Invoice', icon: 'file-text' },
-  { to: '/packing-lists/new', label: 'Packing List', icon: 'package' },
-  { to: '/coo/new', label: 'Certificate of Origin', icon: 'shield' },
-  { to: '/shipping-bills/new', label: 'Shipping Bill', icon: 'file' },
   { to: '/ai-extraction', label: 'AI Extraction', icon: 'ai-extract' },
   { to: '/ai-validator', label: 'AI Validator', icon: 'verification' },
   { to: '/ai-compliance', label: 'AI Compliance', icon: 'shield' },
@@ -78,11 +73,6 @@ const navItems: NavItem[] = [
   { to: '/notifications', label: 'Notifications', icon: 'notifications', badge: true },
   { to: '/team-workspace', label: 'Team Workspace', icon: 'users' },
   { to: '/team', label: 'Team', icon: 'team' },
-  // New Features
-  { to: '/hs-codes', label: 'HS Code Lookup', icon: 'search' },
-  { to: '/letter-of-credit', label: 'Letter of Credit', icon: 'file-text' },
-  { to: '/freight-calculator', label: 'Freight Calculator', icon: 'calculator' },
-  { to: '/audit-log', label: 'Audit Log', icon: 'shield' },
 ] as const;
 
 export default function AppLayout() {

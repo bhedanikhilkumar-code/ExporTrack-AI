@@ -213,8 +213,8 @@ export default function DashboardCharts({ shipments, isDemo = false }: Dashboard
             monthlyData: getMonthlyShipments(shipments),
             activeVsCompleted: getActiveVsCompleted(shipments),
             deliveryPerformance: {
-                onTime: shipments.filter(s => normalizeStatus(s.status) === 'Delivered' && !s.isDelayed).length,
-                delayed: shipments.filter(s => normalizeStatus(s.status) === 'Delivered' && s.isDelayed).length
+                onTime: shipments.filter(s => normalizeStatus(s.status) === 'Delivered' && !s.delayed).length,
+                delayed: shipments.filter(s => normalizeStatus(s.status) === 'Delivered' && s.delayed).length
             }
         };
     }, [shipments, isDemo]);

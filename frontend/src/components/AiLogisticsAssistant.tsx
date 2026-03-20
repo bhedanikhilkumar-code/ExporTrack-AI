@@ -70,8 +70,8 @@ export default function AiLogisticsAssistant({ onClose, isFloating = false }: Ai
     }
     
     if (query.includes('risk') || query.includes('delay')) {
-      const highRisk = shipments.filter(s => s.isDelayed).length;
-      return `Currently, ${highRisk} shipments are showing high delay risks. We should focus on ${shipments.find(s => s.isDelayed)?.id || 'the active queue'} due to congestion reports.`;
+      const highRisk = shipments.filter(s => s.delayed).length;
+      return `Currently, ${highRisk} shipments are showing high delay risks. We should focus on ${shipments.find(s => s.delayed)?.id || 'the active queue'} due to congestion reports.`;
     }
 
     if (query.includes('shipment') || query.includes('status')) {

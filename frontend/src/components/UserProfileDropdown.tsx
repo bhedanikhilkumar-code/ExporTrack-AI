@@ -3,7 +3,6 @@ import { useAppContext } from '../context/AppContext';
 import { useNavigate } from 'react-router-dom';
 import AppIcon from './AppIcon';
 import UserAvatar from './UserAvatar';
-import LanguageSwitcher from './LanguageSwitcher';
 
 export default function UserProfileDropdown() {
     const { state: { user, theme }, logout, setTheme } = useAppContext();
@@ -41,48 +40,48 @@ export default function UserProfileDropdown() {
                 aria-expanded={isOpen}
             >
                 {/* Profile Picture */}
-                <UserAvatar
-                    name={user.name}
-                    src={user.profilePicture}
-                    size="sm"
-                    status="online"
+                <UserAvatar 
+                    name={user.name} 
+                    src={user.profilePicture} 
+                    size="sm" 
+                    status="online" 
                     className="transition-transform group-hover:scale-105"
                 />
 
                 {/* User Name */}
                 <div className="hidden sm:flex flex-col items-start px-1 mr-1">
-                    <span className="text-xs font-bold text-slate-700 dark:text-slate-200 max-w-[120px] truncate leading-tight">
-                        {user.name}
-                    </span>
-                    <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 leading-tight">
-                        {user.authProvider === 'demo' ? 'Demo' : 'Admin'}
-                    </span>
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-200 max-w-[120px] truncate leading-tight">
+                      {user.name}
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 leading-tight">
+                      {user.authProvider === 'demo' ? 'Demo' : 'Admin'}
+                  </span>
                 </div>
 
                 {/* Chevron */}
                 <div className="hidden sm:flex items-center justify-center h-5 w-5 rounded bg-slate-100 dark:bg-slate-800 group-hover:bg-slate-200 dark:group-hover:bg-slate-700 transition-colors">
-                    <AppIcon
-                        name={isOpen ? 'chevronUp' : 'chevronDown'}
-                        className="h-3 w-3 text-slate-500 dark:text-slate-400"
-                        strokeWidth={3}
-                    />
+                  <AppIcon
+                      name={isOpen ? 'chevronUp' : 'chevronDown'}
+                      className="h-3 w-3 text-slate-500 dark:text-slate-400"
+                      strokeWidth={3}
+                  />
                 </div>
             </button>
 
             {/* Dropdown Menu - Premium YouTube Style */}
             {isOpen && (
-                <div
+                <div 
                     className="fixed inset-x-4 top-20 sm:absolute sm:inset-auto sm:right-0 sm:top-full mt-3 w-auto sm:w-72 rounded-2xl border border-slate-200/50 bg-white/95 backdrop-blur-xl dark:border-slate-800/50 dark:bg-slate-900/95 shadow-dropdown z-[100] overflow-hidden animate-profile-menu p-1.5"
                     onClick={(e) => e.stopPropagation()}
                 >
                     {/* Header Section */}
                     <div className="flex items-start gap-4 p-4 border-b border-slate-100 dark:border-slate-800/40 mb-1">
                         {/* Avatar */}
-                        <UserAvatar
-                            name={user.name}
-                            src={user.profilePicture}
-                            size="lg"
-                            status="online"
+                        <UserAvatar 
+                            name={user.name} 
+                            src={user.profilePicture} 
+                            size="lg" 
+                            status="online" 
                             className="transition-transform duration-300 group-hover/avatar:scale-105"
                         />
 
@@ -93,7 +92,7 @@ export default function UserProfileDropdown() {
                             <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 truncate mb-2">
                                 @{user.email.split('@')[0]}
                             </span>
-                            <button
+                            <button 
                                 onClick={() => {
                                     navigate('/team');
                                     setIsOpen(false);
@@ -124,17 +123,6 @@ export default function UserProfileDropdown() {
 
                         <div className="h-px bg-slate-100 dark:bg-slate-800/40 mx-4 my-2" />
 
-                        {/* Language Switcher */}
-                        <div className="px-3 py-3">
-                            <p className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-3 px-2 flex items-center gap-2">
-                                <AppIcon name="globe2" className="h-3 w-3" />
-                                Language
-                            </p>
-                            <LanguageSwitcher compact />
-                        </div>
-
-                        <div className="h-px bg-slate-100 dark:bg-slate-800/40 mx-4 my-2" />
-
                         {/* Appearance Switcher */}
                         <div className="px-3 py-3">
                             <p className="text-[9px] font-black uppercase tracking-[0.15em] text-slate-400 dark:text-slate-500 mb-3 px-2 flex items-center gap-2">
@@ -150,10 +138,11 @@ export default function UserProfileDropdown() {
                                     <button
                                         key={opt.id}
                                         onClick={() => setTheme(opt.id as any)}
-                                        className={`flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-lg transition-all duration-200 ${theme === opt.id
-                                                ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-[0_4px_12px_rgba(0,0,0,0.08)] scale-100'
+                                        className={`flex flex-col items-center justify-center gap-1.5 py-2.5 rounded-lg transition-all duration-200 ${
+                                            theme === opt.id 
+                                                ? 'bg-white dark:bg-slate-700 text-teal-600 dark:text-teal-400 shadow-[0_4px_12px_rgba(0,0,0,0.08)] scale-100' 
                                                 : 'text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300'
-                                            }`}
+                                        }`}
                                     >
                                         <AppIcon name={opt.icon as any} className="h-3.5 w-3.5" />
                                         <span className="text-[9px] font-black uppercase tracking-tighter">{opt.label}</span>

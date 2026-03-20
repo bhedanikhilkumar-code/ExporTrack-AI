@@ -42,7 +42,7 @@ export default function AiComplianceCopilotPage() {
       }
 
       // Additional logic for delays
-      if (shipment.isDelayed) {
+      if (shipment.delayed) {
         if (status !== 'Risk') status = 'Warning';
         issues.push('Shipment is currently delayed.');
         recommendations.push('Contact logistics provider for status update.');

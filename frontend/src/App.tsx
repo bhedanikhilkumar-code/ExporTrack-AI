@@ -24,17 +24,7 @@ import PublicTrackingPage from './pages/PublicTrackingPage';
 import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage';
 import DocumentOcrPage from './pages/DocumentOcrPage';
 import TeamWorkspacePage from './pages/TeamWorkspacePage';
-import AcceptInvitePage from './pages/AcceptInvitePage';
 import RippleEffect from './components/RippleEffect';
-import AuditLogPage from './pages/AuditLogPage';
-import HsCodeLookupPage from './pages/HsCodeLookupPage';
-import LetterOfCreditPage from './pages/LetterOfCreditPage';
-import FreightCalculatorPage from './pages/FreightCalculatorPage';
-import InvoiceGenerator from './pages/InvoiceGenerator';
-import PackingListGenerator from './pages/PackingListGenerator';
-import CertificateOfOriginGenerator from './pages/CertificateOfOriginGenerator';
-import ShipmentTrackingPage from './pages/ShipmentTrackingPage';
-import ShippingBillForm from './pages/ShippingBillForm';
 
 // Client Portal Components
 import ClientLayout from './components/ClientLayout';
@@ -88,7 +78,6 @@ export default function App() {
         <Route path="/" element={<SplashPage />} />
         <Route path="/splash" element={<Navigate to="/" replace />} />
         <Route path="/track/:trackingNumber" element={<PublicTrackingPage />} />
-        <Route path="/accept-invite" element={<AcceptInvitePage />} />
 
         {/* Auth Route - Handled within AuthPage for authenticated state */}
         <Route path="/auth" element={<AuthPage />} />
@@ -127,17 +116,6 @@ export default function App() {
           <Route path="/document-ocr" element={<DocumentOcrPage />} />
           <Route path="/team-workspace" element={<TeamWorkspacePage />} />
           <Route path="/search" element={<Navigate to="/shipments" replace />} />
-          <Route path="/audit-log" element={<AuditLogPage />} />
-          <Route path="/hs-codes" element={<HsCodeLookupPage />} />
-          <Route path="/letter-of-credit" element={<LetterOfCreditPage />} />
-          <Route path="/freight-calculator" element={<FreightCalculatorPage />} />
-
-          {/* Document Generators */}
-          <Route path="/invoices/new" element={<InvoiceGenerator />} />
-          <Route path="/packing-lists/new" element={<PackingListGenerator />} />
-          <Route path="/coo/new" element={<CertificateOfOriginGenerator />} />
-          <Route path="/shipping-bills/new" element={<ShippingBillForm />} />
-          <Route path="/live-tracking" element={<ShipmentTrackingPage />} />
         </Route>
 
         {/* 404 Not Found */}

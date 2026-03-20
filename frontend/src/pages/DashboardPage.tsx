@@ -8,10 +8,8 @@ import { useAppContext } from '../context/AppContext';
 import AiDelayPrediction from '../components/AiDelayPrediction';
 import ShipmentAnalytics from '../components/ShipmentAnalytics';
 import TrackingMap from '../components/TrackingMap';
-import TrackingWidget from '../components/TrackingWidget';
 import { SkeletonKpiCard, SkeletonChart, SkeletonTable, SkeletonCard, SkeletonLine } from '../components/SkeletonLoader';
 import { ShipmentTracking } from '../types';
-import { TrackingInfo } from '../types/tracking';
 
 /* ─── Sub-Components ─────────────────────────────────────────────────── */
 interface DashboardKpiCardProps {
@@ -39,11 +37,9 @@ export default function DashboardPage() {
 
   const [loading, setLoading] = useState(true);
   const [exporting, setExporting] = useState(false);
-  const [trackings, setTrackings] = useState<TrackingInfo[]>([]);
 
   // Simulate initial load for UX polish
   useEffect(() => {
-    try { setTrackings(JSON.parse(localStorage.getItem('exportrack-trackings') || '[]')); } catch { }
     const timer = setTimeout(() => setLoading(false), 800);
     return () => clearTimeout(timer);
   }, []);
@@ -242,35 +238,6 @@ export default function DashboardPage() {
           <DashboardKpiCard title="Delayed Units" value={analyticsData.delayedShipments} subtitle="Requires attention" accent="rose" icon="warning" />
           <DashboardKpiCard title="Avg. Lead Time" value={analyticsData.averageDeliveryTimeDays} subtitle="Global average" accent="amber" icon="clock" suffix="d" />
           <DashboardKpiCard title="Active Alerts" value={unreadAlerts} subtitle="Unread notifications" accent="slate" icon="bell" />
-        </section>
-
-        {/* ── Quick Actions & Active Trackings ── */}
-        <section className="dashboard-grid-section stagger-in mb-6">
-          <div className="lg:col-span-2">
-            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500 mb-4 px-1">Quick Generators</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <Link to="/invoices/new" className="card-premium p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3"><AppIcon name="file-text" className="h-5 w-5" /></div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Commercial Invoice</p>
-              </Link>
-              <Link to="/packing-lists/new" className="card-premium p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                <div className="h-10 w-10 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-3"><AppIcon name="package" className="h-5 w-5" /></div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Packing List</p>
-              </Link>
-              <Link to="/shipping-bills/new" className="card-premium p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                <div className="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-3"><AppIcon name="file" className="h-5 w-5" /></div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Shipping Bill</p>
-              </Link>
-              <Link to="/coo/new" className="card-premium p-4 flex flex-col items-center justify-center text-center hover:bg-slate-50 dark:hover:bg-slate-800/80 transition-all hover:scale-[1.02] active:scale-[0.98]">
-                <div className="h-10 w-10 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3"><AppIcon name="shield" className="h-5 w-5" /></div>
-                <p className="text-xs font-bold text-slate-900 dark:text-white">Cert. of Origin</p>
-              </Link>
-            </div>
-          </div>
-          <div className="lg:col-span-1">
-            <h3 className="section-title text-sm font-bold uppercase tracking-wider text-slate-500 mb-4 px-1">Live Tracking</h3>
-            <TrackingWidget trackings={trackings} maxItems={4} />
-          </div>
         </section>
 
         {/* ── Live Dashboard Charts ── */}

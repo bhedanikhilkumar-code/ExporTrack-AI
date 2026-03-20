@@ -11,7 +11,6 @@ interface RoleBadgeProps {
  * Role Badge Component
  * Displays user role with appropriate color coding
  * 
- * Owner → purple
  * Admin → red/rose
  * Manager → blue
  * Operations → teal
@@ -19,7 +18,7 @@ interface RoleBadgeProps {
  */
 export default function RoleBadge({ role, size = 'md', showIcon = false }: RoleBadgeProps) {
     // Normalize role to WorkspaceRole
-    const normalizedRole = (['Owner', 'Admin', 'Manager', 'Operations', 'Viewer'].includes(role)
+    const normalizedRole = (['Admin', 'Manager', 'Operations', 'Viewer'].includes(role)
         ? role
         : role === 'Staff'
             ? 'Operations'
@@ -40,7 +39,6 @@ export default function RoleBadge({ role, size = 'md', showIcon = false }: RoleB
     };
 
     const roleIcons: Record<WorkspaceRole, string> = {
-        Owner: 'crown',
         Admin: 'shield',
         Manager: 'briefcase',
         Operations: 'package',

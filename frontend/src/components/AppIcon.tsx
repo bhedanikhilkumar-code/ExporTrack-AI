@@ -1,4 +1,5 @@
-export type AppIconName =
+interface AppIconProps {
+  name:
   | 'dashboard'
   | 'shipments'
   | 'create'
@@ -43,35 +44,13 @@ export type AppIconName =
   | 'truck'
   | 'users'
   | 'star'
-  | 'activity'
-  | 'trash-2'
-  | 'alert-triangle'
-  | 'hash'
-  | 'file-text'
-  | 'package'
-  | 'pen-tool'
-  | 'calculator'
-  | 'globe2'
-  | 'layers'
-  | 'download'
-  | 'eye'
-  | 'edit'
-  | 'copy'
-  | 'refresh'
-  | 'navigation'
-  | 'map-pin'
-  | 'refresh-cw'
-  | 'briefcase'
-  | 'crown';
-
-interface AppIconProps {
-  name: AppIconName;
+  | 'activity';
   className?: string;
   strokeWidth?: number;
   'aria-hidden'?: boolean;
 }
 
-const iconMap: Record<AppIconName, string> = {
+const iconMap: Record<AppIconProps['name'], string> = {
   dashboard: 'M3 13.5h8.5V3H3v10.5Zm0 7.5h8.5v-5H3v5Zm11.5 0H23V10.5h-8.5V21Zm0-18v4.5H23V3h-8.5Z',
   shipments: 'M2.5 8.5 12 3l9.5 5.5v7L12 21l-9.5-5.5v-7Zm9.5 3.5 9.5-5.5M12 12 2.5 6.5M12 21v-9',
   create: 'M12 4v16M4 12h16M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9Z',
@@ -117,25 +96,6 @@ const iconMap: Record<AppIconName, string> = {
   users: 'M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm14 10v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75',
   star: 'M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z',
   activity: 'M22 12h-4l-3 9L9 3l-3 9H2',
-  'trash-2': 'M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6',
-  'alert-triangle': 'M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0ZM12 9v4M12 17h.01',
-  hash: 'M4 9h16M4 15h16M10 3 8 21M16 3l-2 18',
-  'file-text': 'M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6ZM14 2v6h6M16 13H8M16 17H8M10 9H8',
-  package: 'M16.5 9.4 7.55 4.24M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 2 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16ZM3.27 6.96 12 12.01l8.73-5.05M12 22.08V12',
-  'pen-tool': 'M12 19l7-7 3 3-7 7-3-3ZM18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5ZM2 2l7.586 7.586M11 13a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
-  calculator: 'M4 2h16a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2ZM8 6h2M14 6h2M8 10h2M14 10h2M8 14h2M14 14h2M8 18h2M14 18h2',
-  globe2: 'M12 2a10 10 0 1 0 0 20A10 10 0 0 0 12 2ZM2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10Z',
-  layers: 'M12 2 2 7l10 5 10-5-10-5ZM2 17l10 5 10-5M2 12l10 5 10-5',
-  download: 'M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3',
-  eye: 'M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8ZM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z',
-  edit: 'M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z',
-  copy: 'M20 9h-9a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9a2 2 0 0 0-2-2ZM5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1',
-  refresh: 'M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15',
-  navigation: 'M3 11l19-9-9 19-2-8-8-2z',
-  'map-pin': 'M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0ZM12 13a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z',
-  'refresh-cw': 'M23 4v6h-6M1 20v-6h6M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15',
-  briefcase: 'M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2ZM16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2',
-  crown: 'M2 20h20M5 17l-3-7 5 4 5-7 5 7 5-4-3 7H5Z',
 };
 
 export default function AppIcon({ name, className, strokeWidth, 'aria-hidden': ariaHidden }: AppIconProps) {

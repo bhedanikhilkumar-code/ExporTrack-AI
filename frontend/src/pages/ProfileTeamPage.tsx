@@ -6,7 +6,6 @@ import RoleBadge from '../components/RoleBadge';
 import ShowForPermission from '../components/ShowForPermission';
 import { useAppContext } from '../context/AppContext';
 import { Role } from '../types';
-import { sendInvite, validateEmail } from '../services/inviteService';
 import { toWorkspaceRole, ROLE_COLORS, ROLE_DESCRIPTIONS, hasPermission } from '../utils/permissions';
 import { useHasPermission } from '../hooks/useHasPermission';
 
@@ -35,7 +34,6 @@ interface MemberStat {
 
 export default function ProfileTeamPage() {
   const {
-    state,
     state: { user, teamMembers, shipments, invites },
     switchRole,
     inviteTeamMember,
@@ -84,62 +82,22 @@ export default function ProfileTeamPage() {
 
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inviteName.trim() || !inviteEmail.trim()) {
-      alert('Please enter both name and email address');
-      return;
-    }
-
-    // Validate email format
-    const emailValidation = validateEmail(inviteEmail);
-    if (!emailValidation.isValid) {
-      alert(emailValidation.error || 'Invalid email address');
-      return;
-    }
+    if (!inviteName.trim() || !inviteEmail.trim()) return;
 
     try {
       setIsInviting(true);
-
-      // Use the new API-based invite service
-      const result = await sendInvite({
+      const success = await inviteTeamMember({
         name: inviteName,
         email: inviteEmail,
-        role: inviteRole,
-        workspaceId: 'default',
-        workspaceName: 'ExporTrack-AI',
-        inviterId: user?.id,
-        inviterName: user?.name || 'Team Admin',
-        inviterEmail: user?.email,
+        role: inviteRole
       });
-
-      if (result.success) {
-        // Also update local state for immediate UI feedback
-        await inviteTeamMember({
-          name: inviteName,
-          email: inviteEmail,
-          role: inviteRole,
-        });
+      if (success) {
         setShowInviteModal(false);
         setInviteName('');
         setInviteEmail('');
         setInviteRole('Operations');
-        alert('✅ Invitation sent successfully!\n\nAn email has been sent to ' + inviteEmail + ' with instructions to join the team.');
+        alert('✅ Team member invited successfully!');
       } else {
-        alert('❌ ' + (result.error || 'Failed to send invitation'));
-      }
-    } catch (err) {
-      // Fallback to local invite if API fails
-      try {
-        await inviteTeamMember({
-          name: inviteName,
-          email: inviteEmail,
-          role: inviteRole,
-        });
-        setShowInviteModal(false);
-        setInviteName('');
-        setInviteEmail('');
-        setInviteRole('Operations');
-        alert('✅ Invitation sent successfully!\n\n(Note: Email delivery may be delayed.))');
-      } catch (fallbackErr) {
         alert('❌ Failed to invite. Demo users cannot invite team members. Please sign up for a real account.');
       }
     } finally {
