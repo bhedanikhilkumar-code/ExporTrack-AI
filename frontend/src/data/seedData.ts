@@ -564,7 +564,12 @@ export const getDemoSeedState = (): AppState => ({
       lastLogin: '2026-03-14T09:00:00.000Z'
     }
   ],
-  invites: []
+  invites: [],
+  trackings: [],
+  invoices: [],
+  packingLists: [],
+  shippingBills: [],
+  coos: []
 });
 
 /**
@@ -580,7 +585,12 @@ export const createEmptyState = (): AppState => ({
   shipments: [],
   notifications: [],
   clients: [],
-  invites: []
+  invites: [],
+  trackings: [],
+  invoices: [],
+  packingLists: [],
+  shippingBills: [],
+  coos: []
 });
 
 /**

@@ -40,6 +40,7 @@ export default function ProfileTeamPage() {
     updateMemberRole,
     removeLegacyTeamMember,
     updateUserProfile,
+    updateWorkspaceSettings,
     deleteInvite,
     deleteShipment,
     isDemoUser
@@ -219,6 +220,14 @@ export default function ProfileTeamPage() {
       </main>
     );
   }
+
+  const handleSaveCustomization = () => {
+    updateWorkspaceSettings({
+      name: workspaceName,
+      tagline: workspaceTagline
+    });
+    alert('✅ Settings saved!');
+  };
 
   return (
     <main className="page-stack animate-in fade-in duration-500">
@@ -512,7 +521,7 @@ export default function ProfileTeamPage() {
                   <option>UTC +08:00 (Singapore)</option>
                 </select>
               </div>
-              <button onClick={() => alert('✅ Settings saved!')} className="btn-primary w-full mt-6">
+              <button onClick={handleSaveCustomization} className="btn-primary w-full mt-6">
                 Save Customization
               </button>
             </div>

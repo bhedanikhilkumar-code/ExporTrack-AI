@@ -24,6 +24,15 @@ import PublicTrackingPage from './pages/PublicTrackingPage';
 import AnalyticsDashboardPage from './pages/AnalyticsDashboardPage';
 import DocumentOcrPage from './pages/DocumentOcrPage';
 import TeamWorkspacePage from './pages/TeamWorkspacePage';
+import BuyersPage from './pages/BuyersPage';
+import BuyerDetail from './pages/BuyerDetail';
+import SuppliersPage from './pages/SuppliersPage';
+
+import InvoiceGenerator from './pages/InvoiceGenerator';
+import PackingListGenerator from './pages/PackingListGenerator';
+import ShippingBillForm from './pages/ShippingBillForm';
+import CertificateOfOriginGenerator from './pages/CertificateOfOriginGenerator';
+
 import RippleEffect from './components/RippleEffect';
 
 // Client Portal Components
@@ -115,6 +124,16 @@ export default function App() {
           <Route path="/analytics" element={<AnalyticsDashboardPage />} />
           <Route path="/document-ocr" element={<DocumentOcrPage />} />
           <Route path="/team-workspace" element={<TeamWorkspacePage />} />
+          
+          <Route path="/buyers" element={<BuyersPage />} />
+          <Route path="/buyers/:id" element={<BuyerDetail />} />
+          <Route path="/suppliers" element={<SuppliersPage />} />
+
+          <Route path="/invoice-generator" element={<InvoiceGenerator />} />
+          <Route path="/packing-list-generator" element={<PackingListGenerator />} />
+          <Route path="/shipping-bill" element={<ShippingBillForm />} />
+          <Route path="/certificate-of-origin" element={<CertificateOfOriginGenerator />} />
+
           <Route path="/search" element={<Navigate to="/shipments" replace />} />
         </Route>
 

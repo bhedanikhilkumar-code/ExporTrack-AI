@@ -22,15 +22,27 @@ import {
 import { decodeJWT } from '../utils/googleAuth';
 import { hasPermission as checkPermission, Permission } from '../utils/permissions';
 import { computeAnalytics, ShipmentAnalyticsMetrics } from '../services/analyticsService';
+import { shipmentApi } from '../services/api/shipmentApi';
+import { teamApi } from '../services/api/teamApi';
+import { notificationApi } from '../services/api/notificationApi';
+import { trackingApi } from '../services/api/trackingApi';
+import { documentApi } from '../services/api/documentApi';
 
 // Storage keys
 const STORAGE_KEY = 'exportrack-ai-state-v1';
 const DEMO_STORAGE_KEY = 'exportrack-ai-demo-state';
 const USER_DATA_PREFIX = 'exportrack-ai-user-';
 
+import { TrackingInfo } from '../types/tracking';
+
+import { CommercialInvoice } from '../types/invoice';
+import { PackingList } from '../types/packingList';
+import { ShippingBill } from '../types/shippingBill';
+import { CertificateOfOrigin } from '../types/certificateOfOrigin';
+
 interface AppContextValue {
   state: AppState;
-  login: (email: string, password: string) => void;
+  login: (email: string, password?: string, forceMode?: 'real' | 'demo') => void;
   signup: (name: string, email: string, password: string) => void;
   loginWithDemoAccount: () => void;
   loginWithGoogleToken: (token: string) => void;
@@ -60,13 +72,26 @@ interface AppContextValue {
   updateMemberRole: (memberId: string, role: Role) => void;
   removeLegacyTeamMember: (memberId: string) => void;
   updateUserProfile: (updates: { name?: string; region?: string }) => void;
+  updateWorkspaceSettings: (settings: { name: string; tagline: string; timezone?: string; language?: string }) => void;
   deleteInvite: (inviteId: string) => void;
   acceptInvite: (inviteId: string) => void;
   // Dispatch for state management
   dispatch: (action: { type: string; payload?: any }) => void;
   // Tracking features
+  saveTracking: (tracking: TrackingInfo) => void;
+  deleteTracking: (trackingId: string) => void;
   applyOptimizedRoute: (shipmentId: string, route: any) => void;
   triggerDelayAlert: (shipmentId: string, reason: string) => void;
+  // Document Generators
+  saveInvoice: (invoice: CommercialInvoice) => void;
+  deleteInvoice: (id: string) => void;
+  savePackingList: (pl: PackingList) => void;
+  deletePackingList: (id: string) => void;
+  saveShippingBill: (sb: ShippingBill) => void;
+  deleteShippingBill: (id: string) => void;
+  saveCOO: (coo: CertificateOfOrigin) => void;
+  deleteCOO: (id: string) => void;
+  getNextDocumentNumber: (prefix: string) => string;
   // Helpers
   isDemoUser: boolean;
   isRealUser: boolean;
@@ -110,7 +135,9 @@ const loadState = (userMode?: 'demo' | 'real', userId?: string): AppState => {
       const raw = localStorage.getItem(DEMO_STORAGE_KEY);
       if (raw) {
         const demoState = JSON.parse(raw) as AppState;
+        // Ensure state fields are present
         return {
+          ...createEmptyState(),
           ...demoState,
           isAuthenticated: true
         };
@@ -251,6 +278,58 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }
   }, [state.isAuthenticated, state.user?.authProvider]);
 
+  // Load shipments and teams from backend if real user
+  useEffect(() => {
+    const loadData = async () => {
+      if (state.isAuthenticated && userMode === 'real') {
+        try {
+          // Load Shipments
+          const shipments = await shipmentApi.getAll();
+          setState(prev => ({
+            ...prev,
+            shipments: shipments.length > 0 ? shipments : prev.shipments
+          }));
+
+          // Load Notifications, Tracking and Documents
+          if (userId) {
+            const [notifications, trackings, invoices, packingLists, shippingBills, coos] = await Promise.all([
+              notificationApi.getNotifications(userId),
+              trackingApi.getAll(),
+              documentApi.getInvoices(),
+              documentApi.getPackingLists(),
+              documentApi.getShippingBills(),
+              documentApi.getCOOs()
+            ]);
+
+            setState(prev => ({
+              ...prev,
+              notifications: notifications.length > 0 ? notifications : prev.notifications,
+              trackings: trackings.length > 0 ? trackings : prev.trackings,
+              invoices: invoices.length > 0 ? invoices : prev.invoices,
+              packingLists: packingLists.length > 0 ? packingLists : prev.packingLists,
+              shippingBills: shippingBills.length > 0 ? shippingBills : prev.shippingBills,
+              coos: coos.length > 0 ? coos : prev.coos
+            }));
+          }
+
+          // Load Team if exists
+          if (state.user?.teamId) {
+            const team = await teamApi.getTeam(state.user.teamId);
+            const members = await teamApi.getMembers(state.user.teamId);
+            setState(prev => ({
+              ...prev,
+              team,
+              teamMembers: members
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to load backend data:', error);
+        }
+      }
+    };
+    loadData();
+  }, [state.isAuthenticated, userMode, state.user?.teamId]);
+
   // Helper properties
   const isDemoUser = state.user?.userMode === 'demo' || state.user?.authProvider === 'demo';
   const isRealUser = state.user?.userMode === 'real' || state.user?.authProvider === 'email' || state.user?.authProvider === 'google';
@@ -268,32 +347,22 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
   }, []);
 
-  const login = useCallback((email: string, password: string) => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      throw new Error('Invalid email format');
-    }
-
-    if (!password || password.length < 6) {
-      throw new Error('Password must be at least 6 characters');
-    }
-
-    // For real users, start with empty state
-    const emptyState = createEmptyState();
-    const nameFromEmail = email.split('@')[0].replace(/[._]/g, ' ');
-    const displayName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
-    const newUserId = `email-${email}`;
-
+  const login = useCallback((email: string, password?: string, forceMode?: 'real' | 'demo') => {
+    // For demo purposes, we'll just set a mock user
+    const mode = forceMode || (email.includes('demo') ? 'demo' : 'real');
     const newUser: UserSession = {
-      id: newUserId,
-      name: displayName,
-      email,
+      id: mode === 'real' ? `email-${email.toLowerCase()}` : 'user-123',
+      name: email.split('@')[0],
+      email: email.toLowerCase(),
       role: 'Staff',
-      authProvider: 'email',
-      userMode: 'real'
+      authProvider: mode === 'demo' ? 'demo' : 'email',
+      userMode: mode,
     };
 
-    setUserMode('real');
+    const emptyState = mode === 'demo' ? createSeedState() : createEmptyState();
+    const newUserId = newUser.id;
+
+    setUserMode(mode);
     setUserId(newUserId);
 
     setState({
@@ -511,6 +580,18 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           shipment.timeline = [timelineWithId];
         }
       }
+
+      // Persist to backend
+      shipmentApi.create({
+        ...input,
+        id: shipment.id,
+        userId: userId || undefined
+      }).then(() => {
+        // Persist initial timeline event
+        if (shipment.timeline && shipment.timeline.length > 0) {
+          shipmentApi.addTimelineEvent(shipment.id, shipment.timeline[0]);
+        }
+      }).catch(err => console.error('Failed to persist shipment to backend:', err));
     }
 
     setState(prev => ({
@@ -535,6 +616,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const updateShipment = useCallback((shipmentId: string, updates: Partial<Shipment>) => {
     const userMode = state.user?.userMode;
 
+    if (checkIsRealUser(userMode)) {
+      shipmentApi.addDocument(shipmentId, newDocument).then(() => {
+        // Also add a timeline event for document upload
+        const timelineEvent: ShipmentTimelineEvent = {
+          id: createId('TLE'),
+          status: 'Document Uploaded',
+          timestamp: new Date().toISOString(),
+          note: `${newDocument.type} uploaded by ${newDocument.uploadedBy}`
+        };
+        shipmentApi.addTimelineEvent(shipmentId, timelineEvent);
+      }).catch(err => console.error('Failed to persist document to backend:', err));
+    }
+
     setState(prev => {
       const shipments = prev.shipments.map(shipment => {
         if (shipment.id !== shipmentId) return shipment;
@@ -558,20 +652,28 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           }
         }
 
+        // Persist update to backend
+        shipmentApi.update(shipmentId, updates).catch(err => console.error('Failed to update shipment in backend:', err));
+
         return updatedShipment;
       });
 
       return { ...prev, shipments };
     });
-  }, [state.user]);
+  }, [state.user, userMode]);
 
   const deleteShipment = useCallback((shipmentId: string) => {
+    // Persist delete to backend
+    if (userMode === 'real') {
+      shipmentApi.delete(shipmentId).catch(err => console.error('Failed to delete shipment in backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       shipments: prev.shipments.filter(shipment => shipment.id !== shipmentId),
       notifications: prev.notifications.filter(n => n.shipmentId !== shipmentId)
     }));
-  }, []);
+  }, [userMode]);
 
   const addDocument = useCallback((shipmentId: string, input: UploadDocumentInput) => {
     const newDocument: ShipmentDocument = {
@@ -618,7 +720,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         ]
       };
     });
-  }, [userId]);
+  }, [userId, userMode]);
 
   const updateDocumentStatus = useCallback((shipmentId: string, documentType: DocumentType, status: DocStatus) => {
     setState(prev => {
@@ -635,8 +737,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
             ...nextDocuments[documentIndex],
             status
           };
+
+          // Persist update to backend
+          if (checkIsRealUser(userMode)) {
+            shipmentApi.updateDocumentStatus(shipmentId, nextDocuments[documentIndex].id, status)
+              .catch(err => console.error('Failed to update document status in backend:', err));
+          }
         } else {
-          nextDocuments.unshift({
+          const newDoc: ShipmentDocument = {
             id: createId('DOC'),
             type: documentType,
             fileName: 'Not uploaded',
@@ -644,7 +752,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
             status,
             uploadedAt: new Date().toISOString(),
             uploadedBy: 'System'
-          });
+          };
+          nextDocuments.unshift(newDoc);
+
+          // Persist new placeholder doc if needed (optional, but good for sync)
+          if (checkIsRealUser(userMode)) {
+            shipmentApi.addDocument(shipmentId, newDoc)
+              .catch(err => console.error('Failed to add placeholder document in backend:', err));
+          }
         }
 
         return {
@@ -673,9 +788,22 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         notifications
       };
     });
-  }, []);
+  }, [userMode]);
 
   const addComment = useCallback((shipmentId: string, message: string, internal: boolean) => {
+    const newComment = {
+      id: createId('COM'),
+      author: state.user?.name ?? 'Unknown',
+      role: state.user?.role ?? 'Staff',
+      message,
+      createdAt: new Date().toISOString(),
+      internal
+    };
+
+    if (checkIsRealUser(userMode)) {
+      shipmentApi.addComment(shipmentId, newComment).catch(err => console.error('Failed to persist comment to backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       shipments: prev.shipments.map(shipment =>
@@ -683,30 +811,24 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           ? shipment
           : {
             ...shipment,
-            comments: [
-              {
-                id: createId('COM'),
-                author: prev.user?.name ?? 'Unknown',
-                role: prev.user?.role ?? 'Staff',
-                message,
-                createdAt: new Date().toISOString(),
-                internal
-              },
-              ...shipment.comments
-            ]
+            comments: [newComment, ...shipment.comments]
           }
       )
     }));
-  }, []);
+  }, [state.user, userMode]);
 
   const markNotificationRead = useCallback((notificationId: string) => {
+    if (userMode === 'real') {
+      notificationApi.markAsRead(notificationId).catch(err => console.error('Failed to mark notification as read in backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       notifications: prev.notifications.map(notification =>
         notification.id === notificationId ? { ...notification, read: true } : notification
       )
     }));
-  }, []);
+  }, [userMode]);
 
   // Team management functions
   const createTeam = useCallback((teamName: string): Team | null => {
@@ -737,13 +859,22 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       ]
     };
 
+    // Persist to backend if real user
+    if (userMode === 'real') {
+      teamApi.createTeam({
+        id: team.id,
+        name: teamName,
+        ownerId: state.user.id
+      }).catch(err => console.error('Failed to persist team to backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       userTeams: [...prev.userTeams, team]
     }));
 
     return team;
-  }, [state.user, isDemoUser]);
+  }, [state.user, isDemoUser, userMode]);
 
   const addTeamMember = useCallback((
     teamId: string,
@@ -778,6 +909,17 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       joinedAt: new Date().toISOString()
     };
 
+    // Persist to backend if real user
+    if (userMode === 'real') {
+      teamApi.addMember(teamId, {
+        userId: newMember.userId,
+        role,
+        name,
+        email,
+        permission
+      }).catch(err => console.error('Failed to add member to backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       userTeams: prev.userTeams.map(t =>
@@ -788,7 +930,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     }));
 
     return newMember;
-  }, [state.user, state.userTeams, isDemoUser]);
+  }, [state.user, state.userTeams, isDemoUser, userMode]);
 
   const removeTeamMember = useCallback((teamId: string, memberId: string) => {
     if (!state.user || isDemoUser) {
@@ -881,12 +1023,24 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       createdAt: new Date().toISOString()
     };
 
+    if (userMode === 'real') {
+      fetch('/api/invite-member', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: invite.email,
+          role: invite.role,
+          workspaceId: invite.workspaceId
+        })
+      }).catch(err => console.error('Failed to send invite to backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       invites: [...prev.invites, invite]
     }));
     return true;
-  }, [state.user, isDemoUser]);
+  }, [state.user, isDemoUser, userMode]);
 
   const updateMemberRole = useCallback((memberId: string, role: Role) => {
     if (!state.user || isDemoUser) {
@@ -917,11 +1071,19 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
   const updateUserProfile = useCallback((updates: { name?: string; region?: string }) => {
     if (!state.user) return;
 
+    if (userMode === 'real') {
+      fetch(`/api/users/${state.user.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updates)
+      }).catch(err => console.error('Failed to update profile in backend:', err));
+    }
+
     setState(prev => ({
       ...prev,
       user: prev.user ? { ...prev.user, ...updates } : prev.user
     }));
-  }, [state.user]);
+  }, [state.user, userMode]);
 
   const deleteInvite = useCallback((inviteId: string) => {
     if (!state.user || isDemoUser) {
@@ -945,6 +1107,14 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
     if (!invite) {
       console.warn('Invite not found');
       return;
+    }
+
+    if (userMode === 'real') {
+      fetch('/api/confirm-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: invite.token })
+      }).catch(err => console.error('Failed to confirm invite in backend:', err));
     }
 
     // Add the user to the team's members
@@ -971,7 +1141,7 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         i.id === inviteId ? { ...i, status: 'Accepted' as const } : i
       )
     }));
-  }, [state.user, state.invites, isDemoUser]);
+  }, [state.user, state.invites, isDemoUser, userMode]);
 
   // Permission checker - use a different name to avoid conflict with imported function
   const checkUserPermission = useCallback((permission: Permission): boolean => {
@@ -993,7 +1163,22 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       state,
       login,
       signup,
-      loginWithDemoAccount,
+      loginWithDemoAccount: () => {
+        const demoState = createSeedState();
+        setState({
+          ...demoState,
+          isAuthenticated: true,
+          user: {
+            id: 'demo-user',
+            name: 'Demo User',
+            email: 'demo@exportrack.ai',
+            role: 'Staff',
+            userMode: 'demo'
+          }
+        });
+        setUserMode('demo');
+        setUserId('demo-user');
+      },
       loginWithGoogleToken,
       loginWithGoogle: () => {
         // Trigger Google OAuth flow
@@ -1017,10 +1202,16 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
         }));
       },
       assignDriver: (shipmentId: string, driverName: string, driverPhone: string, vehicleNumber: string) => {
+        const updates = { driverName, driverPhone, vehicleNumber };
+
+        if (userMode === 'real') {
+          shipmentApi.update(shipmentId, updates).catch(err => console.error('Failed to persist driver assignment to backend:', err));
+        }
+
         setState(prev => ({
           ...prev,
           shipments: prev.shipments.map(s =>
-            s.id === shipmentId ? { ...s, driverName, driverPhone, vehicleNumber } : s
+            s.id === shipmentId ? { ...s, ...updates } : s
           )
         }));
       },
@@ -1030,6 +1221,15 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       addComment,
       markNotificationRead,
       markAllNotificationsRead: () => {
+        if (userMode === 'real' && userId) {
+          // For each notification that is not read, mark it as read in backend
+          state.notifications.forEach(n => {
+            if (!n.read) {
+              notificationApi.markAsRead(n.id).catch(err => console.error('Failed to mark notification read:', err));
+            }
+          });
+        }
+
         setState(prev => ({
           ...prev,
           notifications: prev.notifications.map(n => ({ ...n, read: true }))
@@ -1044,6 +1244,15 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
       updateMemberRole,
       removeLegacyTeamMember,
       updateUserProfile,
+      updateWorkspaceSettings: (settings: { name: string; tagline: string; timezone?: string; language?: string }) => {
+        if (userMode === 'real') {
+          fetch('/api/workspace/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+          }).catch(err => console.error('Failed to update workspace settings:', err));
+        }
+      },
       deleteInvite,
       acceptInvite,
       dispatch: (action: { type: string; payload?: any }) => {
@@ -1064,6 +1273,31 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           default:
             break;
         }
+      },
+      saveTracking: (tracking: TrackingInfo) => {
+        if (userMode === 'real') {
+          trackingApi.save(tracking).catch(err => console.error('Failed to save tracking in backend:', err));
+        }
+
+        setState(prev => {
+          const existingIdx = prev.trackings.findIndex(t => t.id === tracking.id || t.trackingNumber === tracking.trackingNumber);
+          if (existingIdx >= 0) {
+            const trackings = [...prev.trackings];
+            trackings[existingIdx] = tracking;
+            return { ...prev, trackings };
+          }
+          return { ...prev, trackings: [tracking, ...prev.trackings] };
+        });
+      },
+      deleteTracking: (trackingId: string) => {
+        if (userMode === 'real') {
+          trackingApi.delete(trackingId).catch(err => console.error('Failed to delete tracking in backend:', err));
+        }
+
+        setState(prev => ({
+          ...prev,
+          trackings: prev.trackings.filter(t => t.id !== trackingId)
+        }));
       },
       applyOptimizedRoute: (shipmentId: string, route: any) => {
         console.log('Apply optimized route:', shipmentId, route);
@@ -1086,6 +1320,87 @@ export const AppProvider = ({ children }: PropsWithChildren) => {
           ...prev,
           notifications: [newNotification, ...prev.notifications]
         }));
+      },
+
+      // Document Generator Implementations
+      saveInvoice: (invoice: CommercialInvoice) => {
+        if (userMode === 'real') {
+          documentApi.saveInvoice(invoice).catch(err => console.error('Failed to save invoice:', err));
+        }
+        setState(prev => ({
+          ...prev,
+          invoices: prev.invoices.some(i => i.id === invoice.id)
+            ? prev.invoices.map(i => i.id === invoice.id ? invoice : i)
+            : [invoice, ...prev.invoices]
+        }));
+      },
+      deleteInvoice: (id: string) => {
+        if (userMode === 'real') {
+          documentApi.deleteInvoice(id).catch(err => console.error('Failed to delete invoice:', err));
+        }
+        setState(prev => ({ ...prev, invoices: prev.invoices.filter(i => i.id !== id) }));
+      },
+
+      savePackingList: (pl: PackingList) => {
+        if (userMode === 'real') {
+          documentApi.savePackingList(pl).catch(err => console.error('Failed to save packing list:', err));
+        }
+        setState(prev => ({
+          ...prev,
+          packingLists: prev.packingLists.some(p => p.id === pl.id)
+            ? prev.packingLists.map(p => p.id === pl.id ? pl : p)
+            : [pl, ...prev.packingLists]
+        }));
+      },
+      deletePackingList: (id: string) => {
+        if (userMode === 'real') {
+          documentApi.deletePackingList(id).catch(err => console.error('Failed to delete packing list:', err));
+        }
+        setState(prev => ({ ...prev, packingLists: prev.packingLists.filter(p => p.id !== id) }));
+      },
+
+      saveShippingBill: (sb: ShippingBill) => {
+        if (userMode === 'real') {
+          documentApi.saveShippingBill(sb).catch(err => console.error('Failed to save shipping bill:', err));
+        }
+        setState(prev => ({
+          ...prev,
+          shippingBills: prev.shippingBills.some(s => s.id === sb.id)
+            ? prev.shippingBills.map(s => s.id === sb.id ? sb : s)
+            : [sb, ...prev.shippingBills]
+        }));
+      },
+      deleteShippingBill: (id: string) => {
+        if (userMode === 'real') {
+          documentApi.deleteShippingBill(id).catch(err => console.error('Failed to delete shipping bill:', err));
+        }
+        setState(prev => ({ ...prev, shippingBills: prev.shippingBills.filter(s => s.id !== id) }));
+      },
+
+      saveCOO: (coo: CertificateOfOrigin) => {
+        if (userMode === 'real') {
+          documentApi.saveCOO(coo).catch(err => console.error('Failed to save COO:', err));
+        }
+        setState(prev => ({
+          ...prev,
+          coos: prev.coos.some(c => c.id === coo.id)
+            ? prev.coos.map(c => c.id === coo.id ? coo : c)
+            : [coo, ...prev.coos]
+        }));
+      },
+      deleteCOO: (id: string) => {
+        if (userMode === 'real') {
+          documentApi.deleteCOO(id).catch(err => console.error('Failed to delete COO:', err));
+        }
+        setState(prev => ({ ...prev, coos: prev.coos.filter(c => c.id !== id) }));
+      },
+
+      getNextDocumentNumber: (prefix: string) => {
+        const date = new Date();
+        const year = date.getFullYear().toString().slice(-2);
+        const month = (date.getMonth() + 1).toString().padStart(2, '0');
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        return `${prefix}/${year}${month}/${random}`;
       },
       isDemoUser,
       isRealUser,

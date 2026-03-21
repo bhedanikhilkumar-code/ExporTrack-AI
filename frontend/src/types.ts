@@ -184,6 +184,13 @@ export interface Team {
   members: TeamMemberWithPermissions[];
 }
 
+import { TrackingInfo } from './types/tracking';
+
+import { CommercialInvoice } from './types/invoice';
+import { PackingList } from './types/packingList';
+import { ShippingBill } from './types/shippingBill';
+import { CertificateOfOrigin } from './types/certificateOfOrigin';
+
 export interface AppState {
   isAuthenticated: boolean;
   user: UserSession | null;
@@ -194,6 +201,11 @@ export interface AppState {
   theme: 'light' | 'dark' | 'system';
   invites: TeamInvite[];
   userTeams: Team[];
+  trackings: TrackingInfo[];
+  invoices: CommercialInvoice[];
+  packingLists: PackingList[];
+  shippingBills: ShippingBill[];
+  coos: CertificateOfOrigin[];
 }
 
 export interface CreateShipmentInput {

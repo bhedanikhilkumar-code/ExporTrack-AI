@@ -19,6 +19,124 @@ CREATE TABLE IF NOT EXISTS users (
   updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
+-- 18. Workspace Settings Table
+CREATE TABLE IF NOT EXISTS workspace_settings (
+  id VARCHAR(50) PRIMARY KEY,
+  name VARCHAR(100) NOT NULL,
+  tagline VARCHAR(200),
+  logo VARCHAR(255),
+  timezone VARCHAR(50),
+  language VARCHAR(20),
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 15. Packing Lists Table
+CREATE TABLE IF NOT EXISTS packing_lists (
+  id VARCHAR(50) PRIMARY KEY,
+  plNumber VARCHAR(50) NOT NULL,
+  plDate DATE NOT NULL,
+  status VARCHAR(20) DEFAULT 'Draft',
+  linkedInvoiceId VARCHAR(50),
+  exporterDetails JSON,
+  buyerDetails JSON,
+  shipmentDetails JSON,
+  packages JSON,
+  totalPackages INT,
+  totalNetWeight DECIMAL(15, 2),
+  totalGrossWeight DECIMAL(15, 2),
+  totalVolume DECIMAL(15, 4),
+  linkedDocuments JSON,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 16. Shipping Bills Table
+CREATE TABLE IF NOT EXISTS shipping_bills (
+  id VARCHAR(50) PRIMARY KEY,
+  sbNumber VARCHAR(50) NOT NULL,
+  sbDate DATE NOT NULL,
+  status VARCHAR(20) DEFAULT 'Draft',
+  customsStation VARCHAR(100),
+  portCode VARCHAR(20),
+  exporterDetails JSON,
+  consigneeDetails JSON,
+  exportScheme VARCHAR(50),
+  shipmentDetails JSON,
+  items JSON,
+  totalFOBValueINR DECIMAL(15, 2),
+  totalFOBValueForeign DECIMAL(15, 2),
+  currency VARCHAR(10),
+  exchangeRate DECIMAL(15, 4),
+  drawbackDetails JSON,
+  linkedDocuments JSON,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 17. Certificate of Origins Table
+CREATE TABLE IF NOT EXISTS certificate_of_origins (
+  id VARCHAR(50) PRIMARY KEY,
+  cooNumber VARCHAR(50) NOT NULL,
+  cooDate DATE NOT NULL,
+  status VARCHAR(20) DEFAULT 'Draft',
+  cooType VARCHAR(50),
+  exporterDetails JSON,
+  consigneeDetails JSON,
+  transportDetails JSON,
+  items JSON,
+  declarationText TEXT,
+  issuingAuthority VARCHAR(100),
+  linkedDocuments JSON,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 14. Payments Table
+CREATE TABLE IF NOT EXISTS payments (
+  id VARCHAR(50) PRIMARY KEY,
+  referenceNo VARCHAR(100) NOT NULL,
+  buyerId VARCHAR(50) NOT NULL,
+  invoiceId VARCHAR(50),
+  amount DECIMAL(15, 2) NOT NULL,
+  currency VARCHAR(10) NOT NULL,
+  date VARCHAR(20) NOT NULL,
+  method VARCHAR(50),
+  status VARCHAR(20),
+  notes TEXT,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 13. Notifications Table
+CREATE TABLE IF NOT EXISTS notifications (
+  id VARCHAR(50) PRIMARY KEY,
+  userId VARCHAR(100),
+  shipmentId VARCHAR(50),
+  type VARCHAR(50) NOT NULL,
+  severity ENUM('High', 'Medium', 'Low') NOT NULL,
+  title VARCHAR(255) NOT NULL,
+  message TEXT NOT NULL,
+  dueDate DATE,
+  isRead TINYINT(1) DEFAULT 0,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (shipmentId) REFERENCES shipments(id) ON DELETE CASCADE
+);
+
+-- 12. Shipment Documents Table
+CREATE TABLE IF NOT EXISTS shipment_documents (
+  id VARCHAR(50) PRIMARY KEY,
+  shipmentId VARCHAR(50) NOT NULL,
+  userId VARCHAR(100),
+  type VARCHAR(50) NOT NULL,
+  fileName VARCHAR(255) NOT NULL,
+  fileFormat ENUM('PDF', 'JPG', 'PNG') NOT NULL,
+  status ENUM('Pending', 'Verified', 'Missing', 'Rejected') DEFAULT 'Pending',
+  uploadedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  uploadedBy VARCHAR(100),
+  FOREIGN KEY (shipmentId) REFERENCES shipments(id) ON DELETE CASCADE
+);
+
 -- 2. Teams Table
 CREATE TABLE IF NOT EXISTS teams (
   id VARCHAR(50) PRIMARY KEY,
@@ -135,4 +253,40 @@ CREATE TABLE IF NOT EXISTS otps (
   verified TINYINT(1) DEFAULT 0,
   lastSentAt BIGINT NOT NULL,
   createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 10. Buyers Table
+CREATE TABLE IF NOT EXISTS buyers (
+  id VARCHAR(50) PRIMARY KEY,
+  companyName VARCHAR(100) NOT NULL,
+  contactPerson VARCHAR(100),
+  email VARCHAR(100),
+  phone VARCHAR(20),
+  address TEXT,
+  city VARCHAR(100),
+  country VARCHAR(100),
+  currency VARCHAR(10) DEFAULT 'USD',
+  paymentTerms TEXT,
+  tags JSON,
+  totalOrders INT DEFAULT 0,
+  totalValue DECIMAL(15, 2) DEFAULT 0,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- 11. Suppliers Table
+CREATE TABLE IF NOT EXISTS suppliers (
+  id VARCHAR(50) PRIMARY KEY,
+  companyName VARCHAR(100) NOT NULL,
+  contactPerson VARCHAR(100),
+  email VARCHAR(100),
+  phone VARCHAR(20),
+  address TEXT,
+  city VARCHAR(100),
+  country VARCHAR(100),
+  category VARCHAR(50),
+  rating DECIMAL(3, 2) DEFAULT 0,
+  tags JSON,
+  createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
