@@ -1,19 +1,29 @@
 # ExporTrack AI
 
-Export document and shipment workflow platform for logistics teams.
+<p align="left">
+  <a href="https://github.com/bhedanikhilkumar-code/ExporTrack-AI"><img src="https://img.shields.io/badge/Repo-GitHub-111827?style=for-the-badge&logo=github&logoColor=white" alt="Repo" /></a>
+  <a href="https://expor-track-ai.vercel.app"><img src="https://img.shields.io/badge/Live%20Demo-Vercel-0A66C2?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
+  <a href="https://exportrack-backend.onrender.com/"><img src="https://img.shields.io/badge/Backend%20API-Render-3B82F6?style=for-the-badge&logo=render&logoColor=white" alt="Backend API" /></a>
+</p>
 
-## Overview
-ExporTrack AI is a full-stack web application built for export operations, freight forwarding, and shipment documentation workflows. It brings shipment tracking, document verification, collaboration, analytics, and compliance-oriented workflows into one interface.
+Full-stack logistics workflow platform for shipment tracking, document verification, and operational visibility.
 
-The project is designed to reduce fragmented logistics processes by giving teams a central place to manage shipments, upload supporting documents, track status changes, and monitor operational performance.
+## What This Project Solves
+Export operations often involve fragmented shipment tracking, scattered document handling, and limited dashboard visibility.
 
-## Highlights
-- Shipment lifecycle management from draft to delivery
-- Document upload and verification workflows for export paperwork
-- Team-oriented workspace with role-based access
-- Dashboard analytics for shipment and document visibility
-- OCR and AI-oriented workflow concepts for smarter operations
-- Map and location-aware UI components for logistics context
+ExporTrack AI brings these workflows into one system so teams can manage shipment records, track status changes, organize supporting documents, and monitor operational activity from a single interface.
+
+## Key Capabilities
+- Manage shipment workflows from draft to delivery
+- Upload and verify export-related documents
+- Centralize operational visibility through dashboard views
+- Support team-oriented workflows with role-based access concepts
+- Surface analytics and status trends for logistics activity
+- Add location-aware context through map-oriented UI components
+
+## Demo
+- **Live app:** https://expor-track-ai.vercel.app
+- **Backend API:** https://exportrack-backend.onrender.com/
 
 ## Tech Stack
 ### Frontend
@@ -42,26 +52,26 @@ ExporTrack-AI/
 └── vercel.json
 ```
 
-## Core Features
+## Feature Areas
 ### Shipment Operations
 - Create and manage export shipments
 - Track shipment stages and operational progress
-- Assign logistics-related details as records move through the workflow
+- Organize shipment details through structured workflow states
 
 ### Document Workflows
 - Upload supporting export documents
 - Track verification states such as pending, verified, missing, or rejected
-- Organize paperwork around shipment records
+- Keep paperwork tied to shipment records
 
-### Team Collaboration
-- Role-based access for different user types
-- Shared operational visibility across teams
-- Internal workflow support for logistics coordination
+### Dashboards & Visibility
+- View KPI-style summary cards
+- Explore charts for shipment trends and document activity
+- Monitor operational performance in one place
 
-### Analytics
-- KPI-style overview cards
-- Visual charts for shipment activity and trends
-- Centralized dashboard for operational monitoring
+### Team Workflow Support
+- Role-based access concepts for different user types
+- Shared visibility for operational coordination
+- A structure suited to logistics-focused collaboration
 
 ## Getting Started
 ### Prerequisites
@@ -91,19 +101,15 @@ npm run dev
 ```
 
 ## Environment Notes
-This project contains separate frontend and backend applications. Configure environment variables according to the services you want to enable, including database connectivity and any authentication-related settings.
+This project contains separate frontend and backend applications. Configure environment variables according to the services you want to enable, especially database connectivity and any authentication-related settings.
 
-## Deployment
-- Frontend-oriented deployment configuration is present via `vercel.json`
-- Backend can be deployed separately on a Node-compatible host
-
-## Why This Project Matters
-ExporTrack AI focuses on a real business workflow instead of a generic demo use case. It showcases full-stack application structure, domain-specific UX, operational dashboards, and document-centric process design.
+## Why This Project Stands Out
+ExporTrack AI focuses on a real business workflow instead of a generic CRUD demo. It shows domain-oriented product thinking, full-stack structure, operational dashboard design, and document-centric process handling.
 
 ## Roadmap Ideas
 - Stronger backend validation and API documentation
-- Real OCR/compliance integrations
-- Notification delivery workflows
+- Real OCR / compliance integrations
+- Notification workflows
 - Multi-tenant organization support
 - Audit logging and reporting improvements
 
