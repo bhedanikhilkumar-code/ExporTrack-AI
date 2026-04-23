@@ -1,260 +1,111 @@
-# 🚢 ExporTrack AI
+# ExporTrack AI
 
-**Export Logistics Document Management System**
+Export document and shipment workflow platform for logistics teams.
 
-A modern, enterprise-grade SaaS platform for managing export shipments, tracking documents, and streamlining logistics operations with AI-powered insights.
+## Overview
+ExporTrack AI is a full-stack web application built for export operations, freight forwarding, and shipment documentation workflows. It brings shipment tracking, document verification, collaboration, analytics, and compliance-oriented workflows into one interface.
 
-![React](https://img.shields.io/badge/React-18-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
-![Tailwind](https://img.shields.io/badge/Tailwind-3-38bdf8)
-![Vite](https://img.shields.io/badge/Vite-5-646cff)
+The project is designed to reduce fragmented logistics processes by giving teams a central place to manage shipments, upload supporting documents, track status changes, and monitor operational performance.
 
----
+## Highlights
+- Shipment lifecycle management from draft to delivery
+- Document upload and verification workflows for export paperwork
+- Team-oriented workspace with role-based access
+- Dashboard analytics for shipment and document visibility
+- OCR and AI-oriented workflow concepts for smarter operations
+- Map and location-aware UI components for logistics context
 
-## 📋 Overview
+## Tech Stack
+### Frontend
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- React Router
+- Recharts
+- Leaflet / React Leaflet
 
-ExporTrack AI is a comprehensive export logistics document management system designed for shipping companies, freight forwarders, and export operations teams. It provides real-time shipment tracking, automated document verification, team collaboration, and analytics dashboard — all in one platform.
+### Backend
+- Node.js
+- Express
+- MySQL
+- dotenv
+- cors
 
-**Problem Solved:** Export logistics teams often struggle with fragmented document workflows, manual status updates, and lack of visibility into shipment progress. ExporTrack AI centralizes all export operations with intelligent automation.
-
----
-
-## Backend API
-Live URL: https://exportrack-backend.onrender.com/
-
----
-
-## ✨ Key Features
-
-### 🔐 Authentication & User Management
-- **Google OAuth** integration for seamless sign-in
-- **Email authentication** with form-based registration
-- **Demo Mode** vs **Real User Mode** — try the app instantly without account creation
-
-### 📦 Shipment Management
-- **Create, edit, and track** export shipments
-- **Automated status flow**: Draft → Booked → In Transit → Customs Clearance → Delivered
-- **Smart automation** — status updates automatically based on documents and dates
-- **Container & driver assignment** with real-time tracking
-
-### 📄 Document Management
-- **Multi-format upload**: PDF, JPG, PNG support
-- **Mobile camera capture** for on-the-go uploads
-- **Required document checklist**: Invoice, Packing List, Bill of Lading, Shipping Bill, Certificate of Origin, Insurance Papers, Customs Files
-- **Document verification** with status: Pending, Verified, Missing, Rejected
-
-### 🤖 AI-Powered Features
-- **OCR Document Extraction** — automatically extract invoice numbers, dates, buyer names, shipment values
-- **Delay Prediction** — AI estimates potential delays based on historical data
-- **Compliance Copilot** — AI assistant for export regulations
-
-### 👥 Team Collaboration
-- **Role-Based Access Control (RBAC)**
-  - **Admin**: Full access, user management, analytics
-  - **Manager**: Create/edit shipments, invite users, view analytics
-  - **Operations**: Create shipments, update tracking, manage documents
-  - **Viewer**: Read-only access
-- **Team workspace** with member management
-- **Internal notes** for private team communication
-
-### 📊 Analytics Dashboard
-- **Live KPI Cards**: Total shipments, on-time rate, delayed units, lead time
-- **Interactive Charts**:
-  - Status Distribution (Pie Chart)
-  - Monthly Shipments (Bar Chart)
-  - Document Trends (Line Chart)
-  - Active vs Completed (Donut Chart)
-- **Real-time updates** when data changes
-
-### 🔔 Notification System
-- Missing document alerts
-- Approval delay warnings
-- Deadline reminders
-- Shipment status updates
-
----
-
-## 🛠 Tech Stack
-
-| Category | Technology |
-|----------|------------|
-| **Frontend** | React 18, React Router v6 |
-| **Language** | TypeScript |
-| **Styling** | Tailwind CSS |
-| **Build Tool** | Vite |
-| **State Management** | React Context + useReducer |
-| **Data Persistence** | localStorage |
-| **Charts** | Recharts |
-| **Maps** | Leaflet + React Leaflet |
-
----
-
-## 🏗 System Architecture
-
-```
-┌─────────────────────────────────────────────────────────┐
-│                    ExporTrack AI                        │
-├─────────────────────────────────────────────────────────┤
-│  Authentication Layer                                   │
-│  ├── Google OAuth                                       │
-│  └── Email/Password                                     │
-├─────────────────────────────────────────────────────────┤
-│  Core Features                                          │
-│  ├── Shipment Management (CRUD)                         │
-│  ├── Document Upload & Verification                     │
-│  ├── Status Automation Engine                           │
-│  ├── RBAC Permission System                             │
-│  └── Notification Service                               │
-├─────────────────────────────────────────────────────────┤
-│  UI Layer                                               │
-│  ├── Dashboard (KPIs + Charts)                          │
-│  ├── Shipment Details                                   │
-│  ├── Team Management                                    │
-│  └── Analytics                                          │
-├─────────────────────────────────────────────────────────┤
-│  Data Layer                                             │
-│  └── localStorage (mock backend)                        │
-└─────────────────────────────────────────────────────────┘
+## Repository Structure
+```text
+ExporTrack-AI/
+├── frontend/   # React + TypeScript client
+├── backend/    # Express API and database connectivity
+├── Dockerfile
+├── schema.sql
+└── vercel.json
 ```
 
----
+## Core Features
+### Shipment Operations
+- Create and manage export shipments
+- Track shipment stages and operational progress
+- Assign logistics-related details as records move through the workflow
 
-## 🚀 Getting Started
+### Document Workflows
+- Upload supporting export documents
+- Track verification states such as pending, verified, missing, or rejected
+- Organize paperwork around shipment records
 
+### Team Collaboration
+- Role-based access for different user types
+- Shared operational visibility across teams
+- Internal workflow support for logistics coordination
+
+### Analytics
+- KPI-style overview cards
+- Visual charts for shipment activity and trends
+- Centralized dashboard for operational monitoring
+
+## Getting Started
 ### Prerequisites
-
 - Node.js 18+
-- npm or yarn
+- npm
+- MySQL database
 
-### Installation
-
+### 1) Clone the repository
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/ExporTrack-AI.git
-
-# Navigate to project directory
+git clone https://github.com/bhedanikhilkumar-code/ExporTrack-AI.git
 cd ExporTrack-AI
+```
 
-# Install dependencies
+### 2) Run the backend
+```bash
+cd backend
 npm install
+npm start
+```
 
-# Start development server
+### 3) Run the frontend
+Open a second terminal:
+```bash
+cd frontend
+npm install
 npm run dev
 ```
 
-### Build for Production
+## Environment Notes
+This project contains separate frontend and backend applications. Configure environment variables according to the services you want to enable, including database connectivity and any authentication-related settings.
 
-```bash
-npm run build
-```
+## Deployment
+- Frontend-oriented deployment configuration is present via `vercel.json`
+- Backend can be deployed separately on a Node-compatible host
 
----
+## Why This Project Matters
+ExporTrack AI focuses on a real business workflow instead of a generic demo use case. It showcases full-stack application structure, domain-specific UX, operational dashboards, and document-centric process design.
 
-## ⚙️ Environment Variables
+## Roadmap Ideas
+- Stronger backend validation and API documentation
+- Real OCR/compliance integrations
+- Notification delivery workflows
+- Multi-tenant organization support
+- Audit logging and reporting improvements
 
-Create a `.env` file in the root directory:
-
-```env
-# Google OAuth (optional - for production)
-VITE_GOOGLE_CLIENT_ID=your-google-client-id
-
-# App Configuration
-VITE_APP_NAME=ExporTrack AI
-VITE_APP_VERSION=1.0.0
-```
-
-> **Note:** The app works fully without Google OAuth. Demo mode provides instant access without authentication.
-
----
-
-## 📖 Usage Guide
-
-### 1. Login / Demo Mode
-- Click **"Continue with Google"** or use email/password
-- Select **Demo Mode** to explore without account
-
-### 2. Create a Shipment
-- Go to **Dashboard** → Click **"Add Shipment"**
-- Fill in shipment details (ID, client, destination, date)
-- Status automatically starts as **Draft**
-
-### 3. Upload Documents
-- Navigate to shipment details
-- Upload required documents (Invoice, Bill of Lading, etc.)
-- Documents trigger status automation
-
-### 4. Track Progress
-- View **Progress Bar** on shipment details
-- Status auto-updates: Draft → Booked → In Transit → Customs → Delivered
-
-### 5. Manage Team
-- Go to **Profile & Team**
-- Invite members with roles (Admin/Manager/Operations/Viewer)
-- Admins can change roles and remove members
-
-### 6. View Analytics
-- Dashboard shows live charts and KPIs
-- Charts update in real-time as data changes
-
----
-
-## 🖼 Screenshots
-
-| Dashboard | Shipment Details | Team Management |
-|-----------|-----------------|----------------|
-| ![Dashboard](https://placehold.co/600x400/1e293b/ffffff?text=Dashboard) | ![Shipment](https://placehold.co/600x400/1e293b/ffffff?text=Shipment+Details) | ![Team](https://placehold.co/600x400/1e293b/ffffff?text=Team+Management) |
-
----
-
-## 💼 Use Cases
-
-- **Freight Forwarders** — Track multiple shipments across carriers
-- **Export Departments** — Manage compliance documents
-- **Logistics Teams** — Coordinate with drivers and warehouses
-- **Supply Chain Managers** — Monitor delivery performance
-
----
-
-## ⚠️ Limitations
-
-- **No real backend** — Data stored in browser localStorage only
-- **No email delivery** — Notifications are in-app only
-- **Demo data resets** — Clearing browser storage removes all data
-- **No real shipping integration** — Mock carrier APIs
-
----
-
-## 🔮 Future Improvements
-
-- [ ] Backend integration (Node.js/PostgreSQL)
-- [ ] Real email notifications
-- [ ] Carrier API integrations (FedEx, DHL, UPS)
-- [ ] PDF export functionality
-- [ ] Multi-language support
-- [ ] Mobile native apps (React Native)
-- [ ] Webhook support for automation
-
----
-
-## 👨‍💻 Author
-
-**Your Name**
-- Full-Stack Developer
-- React & TypeScript Specialist
-- Building SaaS products 🚀
-
----
-
-## 📄 License
-
-MIT License — feel free to use this project for learning and portfolio purposes.
-
----
-
-<div align="center">
-
-**⭐ Star this repo if you found it helpful!**
-
-Built with ❤️ using React + TypeScript + Tailwind
-
-</div>
+## License
+This repository currently does not expose a dedicated license file. Add one if you want to make reuse terms explicit.
