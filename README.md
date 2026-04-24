@@ -2,7 +2,6 @@
 
 <p align="left">
   <a href="https://github.com/bhedanikhilkumar-code/ExporTrack-AI"><img src="https://img.shields.io/badge/Repo-GitHub-111827?style=for-the-badge&logo=github&logoColor=white" alt="Repo" /></a>
-  <a href="https://expor-track-ai.vercel.app"><img src="https://img.shields.io/badge/Live%20Demo-Vercel-0A66C2?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" /></a>
   <a href="https://exportrack-backend.onrender.com/"><img src="https://img.shields.io/badge/Backend%20API-Render-3B82F6?style=for-the-badge&logo=render&logoColor=white" alt="Backend API" /></a>
 </p>
 
@@ -22,8 +21,8 @@ ExporTrack AI brings these workflows into one system so teams can manage shipmen
 - Add location-aware context through map-oriented UI components
 
 ## Demo
-- **Live app:** https://expor-track-ai.vercel.app
 - **Backend API:** https://exportrack-backend.onrender.com/
+- **Frontend demo:** currently not linked publicly in this README while deployment is being refreshed.
 
 ## Tech Stack
 ### Frontend
