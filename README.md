@@ -20,28 +20,46 @@
 
 ## Executive Overview
 
-Full-stack export logistics workflow platform with shipment tracking, document verification, and operational dashboards.
+ExporTrack AI is a full-stack export logistics workspace for managing shipment operations, document verification, buyer/supplier coordination, public tracking, and analytics from one dashboard.
 
-This README is written as a **portfolio-grade project document**: it explains the product idea, technical approach, architecture, workflows, setup process, engineering standards, and future roadmap so a reviewer can understand both the codebase and the thinking behind it.
+The project is positioned as a **portfolio-grade operations platform**: it shows product thinking, a realistic multi-role workflow, a polished React/TypeScript interface, backend API structure, and documentation that helps a recruiter or reviewer understand the system quickly.
+
+## Recruiter Quick Scan
+
+| What to notice | Why it matters |
+| --- | --- |
+| **Real business workflow** | Shipment creation, document upload, verification checklists, tracking, notifications, and client portal flows. |
+| **Full-stack scope** | React/Vite frontend, Express/MySQL backend APIs, typed UI components, and structured data workflows. |
+| **Product polish** | Dashboard KPIs, charts, shipment timeline, tracking map, PWA-style UX, and mobile-aware navigation. |
+| **AI/product angle** | AI document extraction, validation, compliance copilot, delay prediction, and OCR-oriented screens. |
+| **Recruiter signal** | Demonstrates the ability to turn an operational problem into a usable product, not just a small tutorial app. |
+
+## Demo Preview
+
+| Landing / product entry | Operations dashboard |
+| --- | --- |
+| <img src="docs/assets/screenshots/exportrack-hero.png" alt="ExporTrack AI landing page preview" /> | <img src="docs/assets/screenshots/exportrack-dashboard.png" alt="ExporTrack AI dashboard preview" /> |
+
+> Screenshots are captured from the local running frontend demo so visitors can understand the product experience before cloning the repository.
 
 ## Product Positioning
 
 | Question | Answer |
 | --- | --- |
-| **Who is it for?** | Users, reviewers, recruiters, and developers who want to understand the project quickly. |
-| **What problem does it solve?** | It turns a practical idea into a structured software project with clear workflows and maintainable implementation direction. |
-| **Why it matters?** | The project demonstrates product thinking, stack selection, feature planning, and clean documentation discipline. |
-| **Current focus** | Professional polish, understandable architecture, and portfolio-ready presentation. |
+| **Who is it for?** | Export businesses, operations teams, logistics coordinators, buyers, and reviewers evaluating a realistic workflow product. |
+| **What problem does it solve?** | Export operations often scatter shipment data, verification status, documents, tracking, and team communication across multiple tools. ExporTrack AI brings those flows into one command center. |
+| **Why it matters?** | It demonstrates practical full-stack engineering: workflow modeling, dashboards, document handling, authentication-style flows, API boundaries, analytics, and UI polish. |
+| **Current focus** | Stronger demo presentation, production deployment readiness, API hardening, and more automated verification around shipment/document workflows. |
 
 ## Repository Snapshot
 
 | Area | Details |
 | --- | --- |
 | Visibility | Public portfolio repository |
-| Primary stack | `TypeScript` |
-| Repository topics | `dashboard`, `express`, `logistics`, `react`, `supply-chain`, `typescript` |
-| Useful commands | Documented in setup section |
-| Key dependencies | No dependency manifest detected |
+| Primary stack | `React`, `TypeScript`, `Vite`, `Tailwind CSS`, `Express`, `MySQL` |
+| Product areas | Shipments, documents, verification, analytics, tracking, buyers, suppliers, client portal, AI-assist screens |
+| Useful commands | Frontend: `npm run dev`, `npm run build`; Backend: `npm start` |
+| Key dependencies | `react`, `react-router-dom`, `recharts`, `leaflet`, `jspdf`, `express`, `mysql2` |
 
 ## Topics
 
@@ -51,10 +69,12 @@ This README is written as a **portfolio-grade project document**: it explains th
 
 | Capability | Description |
 | --- | --- |
-| **Operational workflow** | Models real shipment, tracking, document, and coordination processes. |
-| **Dashboard visibility** | Gives teams a single place to understand status, bottlenecks, and next actions. |
-| **Document-aware** | Designed for workflows where records, verification, and handoffs matter. |
-| **Business-ready structure** | Architecture supports maintainability, role-based expansion, and reporting. |
+| **Shipment command center** | Create and inspect shipments, track progress, review statuses, and surface operational alerts. |
+| **Document workflow** | Upload, organize, verify, and generate export documents such as invoices, packing lists, shipping bills, and certificates of origin. |
+| **Analytics and visibility** | Dashboard KPIs, charts, report export, shipment analytics, and delay/risk-oriented components. |
+| **Tracking experience** | Internal and public tracking pages, timeline views, map-based tracking components, and client-facing shipment views. |
+| **Team and role structure** | Team workspace, admin/profile pages, permission-aware UI hooks, client portal, buyers, and suppliers. |
+| **AI-assisted surfaces** | Document extraction, validator, compliance copilot, OCR page, scan results, and delay prediction components. |
 
 <!-- PROJECT_DOCS_HUB_START -->
 
@@ -209,25 +229,23 @@ Before shipping or presenting this project, run the checks that match the stack:
 
 ## Professional Review Checklist
 
-- [ ] Clear project purpose and audience
-- [ ] Feature list aligned with real user workflows
-- [ ] Architecture documented with diagrams
+- [x] Clear project purpose and audience
+- [x] Feature list aligned with real user workflows
+- [x] Architecture documented with diagrams
+- [x] Screenshots added for quick recruiter review
 - [ ] Setup steps tested on a clean machine
-- [ ] Screenshots or demo GIFs added where possible
 - [ ] Environment variables documented without exposing secrets
 - [ ] Tests/lint commands documented
 - [ ] Roadmap shows practical next steps
 
-## Screenshots / Demo Suggestions
+## Screenshots / Demo Notes
 
-Add these assets when available to make the repository even stronger:
-
-| Asset | Recommended content |
+| Asset | Status |
 | --- | --- |
-| Hero screenshot | Main dashboard, home screen, or landing page |
-| Workflow GIF | 10-20 second walkthrough of the core feature |
-| Architecture image | Exported version of the Mermaid diagram |
-| Before/after | Show how the project improves an existing workflow |
+| Hero/product preview | Added at `docs/assets/screenshots/exportrack-hero.png` |
+| Dashboard preview | Added at `docs/assets/screenshots/exportrack-dashboard.png` |
+| Workflow GIF | Future improvement: 10-20 second walkthrough from demo login to shipment verification |
+| Architecture image | Future improvement: exported visual version of the Mermaid architecture diagram |
 
 ## Contribution Notes
 
